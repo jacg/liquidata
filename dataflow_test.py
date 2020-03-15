@@ -48,6 +48,7 @@ def test_fork():
     assert left == right == the_source
 
 
+
 def test_map():
 
     # The pipelines start to become interesting when the data are
@@ -109,6 +110,24 @@ def test_longer_pipeline():
                              the_sink))
 
     assert result == [ (((n+1)*2)-3)/4 for n in the_source ]
+
+
+def test_fork_implicit_pipes():
+
+    # Arguments can be pipes or tuples.
+    # Tuples get implicitly converted into pipes
+
+    the_source = list(range(10, 20))
+    add_1      = df.map(lambda x: 1 + x)
+
+    implicit_pipe_collector = []; implicit_pipe_sink = df.sink(implicit_pipe_collector.append)
+    explicit_pipe_collector = []; explicit_pipe_sink = df.sink(explicit_pipe_collector.append)
+
+    df.push(source = the_source,
+            pipe   = df.fork(       (add_1, implicit_pipe_sink),
+                             df.pipe(add_1, explicit_pipe_sink)))
+
+    assert implicit_pipe_collector == explicit_pipe_collector == [1 + x for x in the_source]
 
 
 def test_filter():
