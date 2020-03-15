@@ -162,7 +162,7 @@ def branch(*pieces):
     sideways = pipe(*pieces)
     @coroutine
     def branch_loop(downstream):
-        with closing(downstream):
+        with closing(sideways), closing(downstream):
             while True:
                 val = yield
                 sideways  .send(val)
