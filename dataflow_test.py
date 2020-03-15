@@ -449,3 +449,27 @@ def test_slice_raises_ValueError(args):
 @mark.xfail
 def test_pipes_must_end_in_a_sink():
     raise NotImplementedError
+
+
+def test_count_filter():
+
+    # count_filter provides a future/filter pair.
+    # This is a simple interface to keep track of
+    # how many entries satisfy the predicate and
+    # how many are filtered out.
+
+    the_source  = list(range(21))
+    predicate   = lambda n: n % 2
+
+    odd      = df.count_filter(predicate)
+    filtered = []; the_sink = df.sink(filtered.append)
+
+    result = df.push(source = the_source,
+                     pipe   = df.pipe(odd.filter, the_sink),
+                     result = odd.future)
+
+    expected_result = list(filter(predicate, the_source))
+
+    assert filtered        ==                       expected_result
+    assert result.n_passed ==                   len(expected_result)
+    assert result.n_failed == len(the_source) - len(expected_result)
