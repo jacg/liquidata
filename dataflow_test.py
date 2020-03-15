@@ -494,9 +494,13 @@ def test_slice_raises_ValueError(args):
         df.slice(*args)
 
 
-@mark.xfail
 def test_pipes_must_end_in_a_sink():
-    raise NotImplementedError
+    the_source    = range(10)
+    sinkless_pipe = df.map(abs)
+
+    with raises(df.IncompletePipe):
+        df.push(source = the_source,
+                pipe   = sinkless_pipe)
 
 
 def test_count_filter():
