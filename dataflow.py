@@ -265,7 +265,7 @@ def push(source, pipe, result=()):
 
 def pipe(*pieces):
 
-    pieces = tuple(builtins.map(string_to_pick, pieces))
+    pieces = tuple(builtins.map(_string_to_pick, pieces))
 
     def apply(arg, fn):
         return fn(arg)
@@ -278,7 +278,7 @@ def pipe(*pieces):
         return pipe_awaiting_sink
 
 
-def string_to_pick(component):
+def _string_to_pick(component):
     if isinstance(component, str):
         return map(itemgetter(component))
     return component
