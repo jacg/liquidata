@@ -277,6 +277,28 @@ def test_spy():
     assert spied == result == the_source
 
 
+def test_spy_count():
+
+    # count is a component that can be needed in the middle
+    # of a pipeline. However, because it is a sink it needs
+    # to be plugged into a spy. Thus, the component spy_count
+    # provides a comfortable interface to access the future
+    # and spy objects in a single line.
+
+    the_source = list(range(20))
+
+    count     = df.count()
+    spy_count = df.spy_count()
+
+    result = df.push(source = the_source,
+                     pipe   = df.pipe(spy_count.spy ,
+                                          count.sink),
+                     result = dict(from_count     =     count.future,
+                                   from_spy_count = spy_count.future))
+
+    assert result.from_count == result.from_spy_count == len(the_source)
+
+
 def test_branch():
 
     # 'branch', like 'spy', allows you to insert operations on a copy
