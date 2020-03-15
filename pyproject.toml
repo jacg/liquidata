@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "dataflow"
+version = "0.1.0"
+description = ""
+authors = ["Jacek Generowicz <github@my-post-office.net>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.4.1"
+hypothesis = "^5.6.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
