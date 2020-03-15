@@ -165,17 +165,26 @@ def test_count():
 
     assert count.future.result() == len(the_source)
 
-
-def test_push_futures():
-
-    # 'push' provides a higher-level interface to using such futures:
-    # it optionally accepts a tuple of futures, and returns a tuple of
-    # their results
-
-    count_all = df.count()
-    count_odd = df.count()
-
+# 'push' provides a higher-level interface to using such futures:
+# it optionally accepts a future, a tuple of futures or a mapping
+# of futures. It returns the result of the future, a tuple of
+# their results or a namespace with the results, respectively.
+def test_push_futures_single():
     the_source = list(range(100))
+    count      = df.count()
+
+    result = df.push(source = the_source,
+                     pipe   = df.pipe(count.sink),
+                     result = count.future)
+
+    assert result == len(the_source)
+
+
+def test_push_futures_tuple():
+    the_source = list(range(100))
+    count_all  = df.count()
+    count_odd  = df.count()
+
 
     result = df.push(source = the_source,
                      pipe   = df.fork(                                 count_all.sink,
@@ -185,6 +194,23 @@ def test_push_futures():
     all_count = len(the_source)
     odd_count = all_count // 2
     assert result == (odd_count, all_count)
+
+
+def test_push_futures_mapping():
+    count_all = df.count()
+    count_odd = df.count()
+
+    the_source = list(range(100))
+
+    result = df.push(source = the_source,
+                     pipe   = df.fork(                                 count_all.sink,
+                                      df.pipe(df.filter(lambda n:n%2), count_odd.sink)),
+                     result = dict(odd = count_odd.future,
+                                   all = count_all.future))
+
+    all_count = len(the_source)
+    assert result.odd == all_count // 2
+    assert result.all == all_count
 
 
 def test_reduce():
