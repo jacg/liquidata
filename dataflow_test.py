@@ -521,3 +521,47 @@ def test_count_filter():
     assert filtered        ==                       expected_result
     assert result.n_passed ==                   len(expected_result)
     assert result.n_failed == len(the_source) - len(expected_result)
+
+
+# When the first element of a pipe is a string, it
+# is interpreted as a component that takes an item
+# from the common namespace and pushes it through
+# the pipe. This also works with forks and branches.
+
+def test_implicit_element_picking_in_pipe():
+    the_source_elements = list(range(10))
+    the_source          = (dict(x=i, y=-i) for i in the_source_elements)
+
+    result = []; the_sink = df.sink(result.append)
+    df.push(source = the_source,
+            pipe   = df.pipe("x", the_sink))
+
+    assert result == the_source_elements
+
+
+def test_implicit_element_picking_in_fork():
+    the_source_elements = list(range(10))
+    the_source          = (dict(x=i, y=-i) for i in the_source_elements)
+
+    left  = [];  left_sink = df.sink( left.append)
+    right = []; right_sink = df.sink(right.append)
+
+    df.push(source = the_source,
+            pipe   = df.fork(("x",  left_sink),
+                             ("y", right_sink)))
+
+    assert left == [-i for i in right] == the_source_elements
+
+
+def test_implicit_element_picking_in_branch():
+    the_source_elements = list(range(10))
+    the_source          = (dict(x=i, y=-i) for i in the_source_elements)
+
+    left  = [];  left_sink = df.sink( left.append)
+    right = []; right_sink = df.sink(right.append)
+
+    df.push(source = the_source,
+            pipe   = df.pipe(df.branch("x",  left_sink),
+                             right_sink))
+
+    assert left == [-i["y"] for i in right] == the_source_elements
