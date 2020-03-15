@@ -306,6 +306,9 @@ def slice(*args, close_all=False):
             for _ in stopper:
                 target.send((yield))
                 for _ in range(step - 1)      : yield
+
+            yield
+
             if close_all: raise StopPipeline
             while True:
                 yield
