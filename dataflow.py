@@ -247,9 +247,13 @@ def stop_when(predicate):
     return stop_when_loop
 
 
-class StopPipeline(Exception): pass
+class StopPipeline  (Exception): pass
+class IncompletePipe(Exception): pass
 
 def push(source, pipe, result=()):
+    if not hasattr(pipe, "close"):
+        raise IncompletePipe("Pipe does not finished in a sink")
+
     for item in source:
         try:
             pipe.send(item)
