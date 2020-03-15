@@ -495,7 +495,32 @@ def test_slice_downstream(spec):
     assert result == the_source[specslice.start : specslice.stop : specslice.step]
 
 
-#TODO: Write test slice_close_all
+# slice takes an optional argument close_all. If this argument
+# is False (default), slice will close the innermost branch in
+# which the component is plugged in after the component iterates
+# over all its entries. However, when set to True, the behaviour
+# is to close the outermost pipeline, resulting in a full stop of
+# the data flow.
+@parametrize("close_all", (False, True))
+def test_slice_close_all(close_all):
+    the_source = list(range(20))
+    n_elements = 5
+    slice      = df.slice(n_elements, close_all=close_all)
+
+    result_branch = []; sink_branch = df.sink(result_branch.append)
+    result_main   = []; sink_main   = df.sink(result_main  .append)
+
+    df.push(source = the_source,
+            pipe   = df.pipe(df.branch(slice, sink_branch),
+                             sink_main))
+
+    if close_all:
+        assert result_branch == the_source[:n_elements]
+        assert result_main   == the_source[:n_elements]
+    else:
+        assert result_branch == the_source[:n_elements]
+        assert result_main   == the_source
+
 
 @parametrize('args',
              ((      -1,),
