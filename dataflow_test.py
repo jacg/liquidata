@@ -1,3 +1,5 @@
+import string
+
 import dataflow as df
 
 from pytest import raises
@@ -538,6 +540,70 @@ def test_count_filter():
     assert filtered        ==                       expected_result
     assert result.n_passed ==                   len(expected_result)
     assert result.n_failed == len(the_source) - len(expected_result)
+
+
+# In dataflow, the source can also generate more complex
+# data structures. Hence, the same entry can gather
+# different types of data in a single object.
+# A useful manner of organizing the data is using some
+# kind of namespace that labels each node of information.
+# In order to work more comfortably in this scenario,
+# most of the basic components in dataflow take optional
+# arguments that allow the user to specify which node of
+# information the component should use. The output of
+# the component can be put back under the same or a
+# different label.
+def test_sink_with_namespace():
+    letters         = string.ascii_lowercase
+    the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
+    result = []; the_sink = df.sink(result.append, args="x")
+
+    df.push(source = the_source,
+            pipe   = the_sink  )
+
+    assert result == list(letters)
+
+
+def test_map_with_namespace_args_out():
+    letters         = string.ascii_lowercase
+    the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
+    make_upper_case = df.map(str.upper, args="x", out="upper_x")
+
+    result = []; the_sink = df.sink(result.append, args="upper_x")
+
+    df.push(source = the_source,
+            pipe   = df.pipe(make_upper_case, the_sink))
+
+    assert result == list(letters.upper())
+
+
+def test_map_with_namespace_item():
+
+    # item replaces the input with the output
+
+    letters         = string.ascii_lowercase
+    the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
+    make_upper_case = df.map(str.upper, item="x")
+
+    result = []; the_sink = df.sink(result.append, args="x")
+
+    df.push(source = the_source,
+            pipe   = df.pipe(make_upper_case, the_sink))
+
+    assert result == list(letters.upper())
+
+
+def test_filter_with_namespace():
+    vowels     = "aeiou"
+    the_source = (dict(i=i, x=x) for i, x in enumerate(string.ascii_lowercase))
+    vowel      = df.filter(lambda s: s in vowels, args="x")
+
+    result = []; the_sink = df.sink(result.append, args="x")
+
+    df.push(source = the_source,
+            pipe   = df.pipe(vowel, the_sink))
+
+    assert result == list(vowels)
 
 
 # When the first element of a pipe is a string, it
