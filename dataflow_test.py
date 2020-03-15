@@ -361,6 +361,19 @@ def test_branch():
     assert e1 == e2
 
 
+def test_branch_closes_sideways():
+    the_source = range(10)
+    branch_result = []; the_branch_sink = df.sink(branch_result.append)
+    main_result   = []; the_main_sink   = df.sink(  main_result.append)
+
+    df.push(source = the_source,
+            pipe   = df.pipe(df.branch(the_branch_sink),
+                             the_main_sink))
+
+    with raises(StopIteration):
+        the_branch_sink.send(99)
+
+
 def test_chain_pipes():
 
     # Pipelines must end in sinks. If the last component of a pipe is
