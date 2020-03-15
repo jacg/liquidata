@@ -1,12 +1,25 @@
-language: python
-python:
-  - 3.8
-  - 3.7
-  - 3.6
-before_install:
-  - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-  - source $HOME/.poetry/env
-install:
-  - poetry install
+language: rust
+sudo: false
+
+cache:
+  - cargo
+
+rust:
+  - stable
+
+before_script:
+  - (test -x $HOME/.cargo/bin/cargo-install-update || cargo install cargo-update)
+  - (test -x $HOME/.cargo/bin/mdbook || cargo install --vers "^0.3" mdbook)
+  - cargo install-update -a
+
 script:
-  - pytest -v
+  - mdbook build doc/mdbook && mdbook test doc/mdbook
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  local-dir: doc/mdbook/book
+  keep-history: false
+  on:
+    branch: gh-pages
