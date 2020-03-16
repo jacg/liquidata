@@ -15,24 +15,22 @@ from hypothesis.strategies import one_of
 
 
 def test_simplest_pipeline():
-
-    # The simplest possible pipeline has one source directly connected
-    # to one sink.
-
-    # We avoid using a lazy source so that we can compare the result
-    # with the input
+# ANCHOR: simplest
+    # Some dummy data
     the_source = list(range(20))
 
     # In this example the sink will simply collect the data it
     # receives, into a list.
     result = []
+
+    # df.sink makes a sink out of a plain Python function.
     the_sink = df.sink(result.append)
 
-    # Use 'push' to feed the source into the pipe.
+    # Use df.push to feed the source into the pipe.
     df.push(source=the_source, pipe=the_sink)
 
     assert result == the_source
-
+# ANCHOR_END: simplest
 
 def test_fork():
 

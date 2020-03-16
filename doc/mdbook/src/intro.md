@@ -100,16 +100,75 @@ TODO: note that pipe and stream are almost synonymous
 + Zero or more elements which
 + Exactly one sink, which consume
 
+## The simplest graph: `push` and `sink`
+
+Throughout the examples that follow, it is assumed that `dataflow` has been
+imported thus (TODO: when implement executable examples, these imports might
+have to be made explicit in each example)
 
 ```python
 import dataflow as df
-
 ```
 
-A pipe needs a source of data at one end, and a sink at the other. These three
-fundamental components are combined with `push`
+The `push` function is used to connect sources of data to pipes which can
+accept, process and consume the data. In its simplest form it looks like this:
+
+```python
+df.push(source=the_source, pipe=the_pipe)
+```
+
++ The source can be any Python iterable.
++ Pipes can be made using utilities provided by `dataflow`. [Pipes are
+  implemented as coroutines, but most users can safely ignore this detail.]
+
+[Aside: In real life we would usually choose to push lazy sources into the
+pipeline, but in the examples that follow we avoid lazy sources so that we can
+verify the results more easily.]
+
+The simplest possible pipeline has the source directly connected to a single
+sink. This is not particularly useful: it merely serves the purpose of showing
+how the basic components fit together.
 
 ```python
 {{#include ../../../dataflow_test.py:simplest}}
+```
 
+Points to note:
+
++ In this example, the source is connected directly to the sink.
+
+  - There are no pipeline elements between the source and sink. This is unusual,
+    but perfectly ok, because ...
+
+  - **Sinks have exactly the same interface as pipes at the upstream end**.
+
++ `sink` turns a plain Python function into a sink. The function should accept
+  one argument, and not return anything.
+
+  - TODO: What happens if it *does* return something?
+
+  - The most obvious sinks perform some side-effect using the data they receive,
+    such as writing it out to persistent storage, or, as in the example above,
+    collecting them into a list that was created earlier.
+
+  - Rather than producing side-effects, sinks can produce return values for
+    `push`. TODO: refer to `push(result = )` and future-sinks later on in the
+    manual.
+
++ This is a trivial example which does nothing beyond showing how the
+  fundamental components fit together.
+
+It is worth repeating that **sinks have exactly the same interface as pipes at
+the upstream end**.
+
++ Sinks consume data: no data flow out of the downstream end of a sink.
+
++ Pipes transform (or filter) data: data do flow out of the downstream end of a
+  pipe.
+
++ The data sent downstream out of a pipe have to end up somewhere: they have to
+  be collected by a sink!
+
++ Consequently, an *uncapped* pipe (one not connected to a sink) cannot have any
+  data `push`ed into it.
 ```
