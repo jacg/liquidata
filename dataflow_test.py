@@ -48,7 +48,6 @@ def test_fork():
     assert left == right == the_source
 
 
-
 def test_map_and_pipe():
     # The pipelines start to become interesting when the data are
     # transformed in some way. 'map' transforms every item passing
@@ -116,21 +115,28 @@ def test_fork_implicit_pipes():
 
 
 def test_filter():
+# ANCHOR: filter
+    # A predicate expressed as a plain function
+    def the_predicate(n):
+        return n % 2
 
-    # 'filter' can be used to eliminate data
-
-    def the_predicate(n): return n % 2
+    # Turn the predicate into a pipeline component with df.filter
     odd = df.filter(the_predicate)
 
-    the_source = list(range(20, 30))
+    # Some dummy data ...
+    the_data = list(range(20, 30))
 
+    # ... and a sink for collecting the filtered data
     result = []
     the_sink = df.sink(result.append)
 
-    df.push(source = the_source,
+    # df.filter's result can be used in pipes
+    df.push(source = the_data,
             pipe   = df.pipe(odd, the_sink))
 
-    assert result == list(filter(the_predicate, the_source))
+    # df.filter is the dataflow equivalent of Python's builtin filter
+    assert result == list(filter(the_predicate, the_data))
+# ANCHOR_END: filter
 
 
 def test_count():

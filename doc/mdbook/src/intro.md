@@ -190,9 +190,17 @@ accept pipes, know how to create them implicitly out of a tuple of pipe
 components. TODO: once mmkekic's implicit-pipe-in-push PR has been merged,
 demonstrate this with an example right here.
 
-
-
 TODO: refer to the `args` etc. features of map which should be discussed later on.
+
+## `filter`
+
+`df.filter` is the `dataflow` equivalent of Python's built-in `filter`, used to
+discard data according to some criterion.
+
+```python
+{{#include ../../../dataflow_test.py:filter}}
+```
+
 
 ## TODO Tests not used here so far
 
