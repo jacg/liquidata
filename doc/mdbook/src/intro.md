@@ -171,4 +171,29 @@ the upstream end**.
 
 + Consequently, an *uncapped* pipe (one not connected to a sink) cannot have any
   data `push`ed into it.
+
+## Creating and connecting pipeline components: `map` and `pipe`
+
+The most convenient way to create pipeline components, is to use utilities
+provided by `dataflow`. `df.map` is probably the most obvious one of these. Just
+like `df.sink` makes sinks out of plain functions, so `df.map` makes pipeline
+components out of plain functions.
+
+`df.pipe` is used to chain together a number of pipeline components.
+
+```python
+{{#include ../../../dataflow_test.py:map}}
 ```
+
+Using `df.pipe` explicitly is usually not necessary, as most utilities which
+accept pipes, know how to create them implicitly out of a tuple of pipe
+components. TODO: once mmkekic's implicit-pipe-in-push PR has been merged,
+demonstrate this with an example right here.
+
+
+
+TODO: refer to the `args` etc. features of map which should be discussed later on.
+
+## TODO Tests not used here so far
+
++ `test_fork`

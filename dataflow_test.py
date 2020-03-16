@@ -49,48 +49,33 @@ def test_fork():
 
 
 
-def test_map():
-
+def test_map_and_pipe():
     # The pipelines start to become interesting when the data are
     # transformed in some way. 'map' transforms every item passing
     # through the pipe by applying the supplied operation.
+# ANCHOR: map
+    # Some data transformation, expressed as a plain Python function, which we
+    # would like to use in a pipe
+    def the_operation(n):
+        return n*n
 
-    def the_operation(n): return n*n
+    # df.map turns the function into a pipe component
     square = df.map(the_operation)
 
-    the_source = list(range(1,11))
+    # Some dummy data ...
+    the_data = list(range(1,11))
 
+    # ... and a sink for collecting the transformed data
     result = []
     the_sink = df.sink(result.append)
 
-    df.push(source = the_source,
-            pipe   = square(the_sink))
-
-    assert result == list(map(the_operation, the_source))
-
-
-def test_pipe():
-
-    # The basic syntax requires any element of a pipeline to be passed
-    # as argument to the one that precedes it. This looks strange to
-    # the human reader, especially when using parametrized
-    # components. 'pipe' allows construction of pipes from a sequence
-    # of components.
-
-    # Using 'pipe', 'test_map' could have been written like this:
-
-    def the_operation(n): return n*n
-    square = df.map(the_operation)
-
-    the_source = list(range(1,11))
-
-    result = []
-    the_sink = df.sink(result.append)
-
-    df.push(source = the_source,
+    # Use df.pipe to connect the square component to the sink, and feed the
+    # data into the pipe with df.push
+    df.push(source = the_data,
             pipe   = df.pipe(square, the_sink))
 
-    assert result == list(map(the_operation, the_source))
+    assert result == list(map(the_operation, the_data))
+# ANCHOR_END: map
 
 
 def test_longer_pipeline():
