@@ -690,3 +690,11 @@ def test_implicit_pipe():
             pipe   = (square, the_sink))
 
     assert result == list(map(the_operation, the_source))
+
+
+def test_push_keywords_only():
+    # The push arguments must be given as keyword arguments
+    the_source = list(range(20))
+    the_sink = df.sink(print)
+    with raises(TypeError):
+        df.push(the_source, the_sink)
