@@ -274,8 +274,19 @@ They fall into two distinct categories. All three consume iterables, but
 
 This dichotomy hints at the different roles their equivalents play in `dataflow`:
 
-+ `map` and `filter` make pipe components
-+ `reduce` makes sinks.
++ `df.map` and `df.filter` make pipe components
++ `df.reduce` makes sinks.
+
+ `df.reduce` provides a high-level means of creating future-sinks such as
+ `df.count` (which we saw earlier) or `df.sum` (which sums all the values
+ receives). Here is how you would use `df.reduce` to make the latter
+
+ TODO: `df.sum` is not implemented yet, is it?
+
+```python
+{{#include ../../../dataflow_test.py:reduce}}
+```
+
 
 
 ## TODO Tests not used here so far
