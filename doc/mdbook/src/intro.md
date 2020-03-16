@@ -201,6 +201,65 @@ discard data according to some criterion.
 {{#include ../../../dataflow_test.py:filter}}
 ```
 
+## Sinks without side-effects: `push(result = ...)`
+
+The sinks we have seen so far, have all worked by side-effect: before pushing
+some data through a pipeline, we created a list along with a sink which pushes
+data into that list. In some situations, particularly when the sink writes data
+to a file, side-effects are fine. But eschewing side-effects TODO bla bla wax
+lyrical.
+
+Consider that
+
+1. The sink must be placed at the end of a pipe.
+
+2. `df.push` must be used to push data through the pipe.
+
+3. `df.push` must stop pushing any more data through the pipe.
+
+4. Only *then* will the sink have enough information to produce the final
+   result.
+
+How can you retrieve the value returned by the sink, if the sink is wrapped
+inside a pipe inside a call to `df.push`? The solution is to create, alongside
+the sink itself, another object which will allow you to access the final result,
+once it becomes available.
+
+For this purpose `dataflow` uses the `Future` found in Python's standard
+`asyncio` module, but this is an implementation detail which most users can
+forget, because `dataflow` provides a higher-level interface for retrieving sink
+results via the value returned by `df.push`.
+
+```python
+{{#include ../../../dataflow_test.py:push-result-single}}
+```
+
+Later we will see that a single network may contain multiple sinks, at which
+point we will look at how `pipe` can be instructed to return the values
+created by an arbitrary subset of these sinks.
+
+## DIY side-effect-free sinks: `reduce`
+
+`map`, `filter` and `reduce` (sometimes known under different names, such as
+`transform`, `accumulate` and `fold`) are three of the most common higher-order
+loop-abstraction functions, ubiquitous in functional programming, and finding
+their way into most programming languages these days.
+
+They fall into two distinct categories. All three consume iterables, but
+
++ `map` and `filter` return iterables
++ `reduce` returns a single[*] value
+
+<!-- [Aside: This is not strictly true. `reduce` is the most fundamental -->
+<!-- loop-abstraction function, in the sense that, in theory, **any** loop (including -->
+<!-- those which produce non-scalar results) can be expressed in terms of `reduce`; -->
+<!-- in practice it is often more trouble than it is worth!] -->
+
+This dichotomy hints at the different roles their equivalents play in `dataflow`:
+
++ `map` and `filter` make pipe components
++ `reduce` makes sinks.
+
 
 ## TODO Tests not used here so far
 

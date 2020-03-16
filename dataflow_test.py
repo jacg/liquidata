@@ -160,15 +160,35 @@ def test_count():
 # it optionally accepts a future, a tuple of futures or a mapping
 # of futures. It returns the result of the future, a tuple of
 # their results or a namespace with the results, respectively.
-def test_push_futures_single():
+def test_push_result_single():
+# ANCHOR: push-result-single
+    # Some dummy data
     the_source = list(range(100))
-    count      = df.count()
+
+    # df.count is a sink factory. It creates a sink which counts how many
+    # values it is fed. Once the stream has been closed, it places the final
+    # result in its corresponding future.
+    count = df.count()
+
+    # df.count returns a namedtuple ...
+    assert isinstance(count, tuple)
+
+    # ... which contains a future as its first element ...
+    assert count.future is count[0]
+
+    # ... and a sink as the second element.
+    assert count.sink is count[1]
 
     result = df.push(source = the_source,
-                     pipe   = df.pipe(count.sink),
+                     # The sink can be used to cap a pipe
+                     pipe   = count.sink,
+                     # The future can be used to specify the return value of df.push
                      result = count.future)
 
+    # When push finishes streaming data into its pipe, it will extract the
+    # value it is supposed to return from the future it was given.
     assert result == len(the_source)
+# ANCHOR_END: push-result-single
 
 
 def test_push_futures_tuple():
