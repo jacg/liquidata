@@ -234,9 +234,26 @@ results via the value returned by `df.push`.
 {{#include ../../../dataflow_test.py:push-result-single}}
 ```
 
+### Returning more than one value using `push(result = ...)`
+
 Later we will see that a single network may contain multiple sinks, at which
-point we will look at how `pipe` can be instructed to return the values
+point it becomes interesting to instruct `pipe` to return the values
 created by an arbitrary subset of these sinks.
+
+Consequently, `push(result = ...)` can accept
+
++ a single future
++ a tuple of futures
++ a dictionary of futures
+
+In each case, `push` will return a similarly shaped object containing the
+values extracted from the futures:
+
+```python
+push(..., result =        a.future             ) # ->        <value a>
+push(..., result =     (  a.future,   b.future)) # ->     (  <value a>,     <value b>)
+push(..., result = dict(a=a.future, b=b.future)) # -> dict(a=<value a>, b = <value b>)
+```
 
 ## DIY side-effect-free sinks: `reduce`
 
