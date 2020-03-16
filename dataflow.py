@@ -1,10 +1,3 @@
-# TODO: test implicit pipes in fork
-# TODO: test count_filter
-# TODO: test spy_count
-# TODO: test polymorphic result of pipe
-# TODO: Add test for failure to close sideways in branch
-# TODO: test string_to_pick and its usage
-
 import builtins
 import functools
 import itertools as it
@@ -46,7 +39,6 @@ def   _exactly_one(spec): return not isinstance(spec, (tuple, list, NoneType))
 def _more_than_one(spec): return     isinstance(spec, (tuple, list)          )
 
 
-# TODO: improve ValueError message
 def map(op=None, *, args=None, out=None, item=None):
     if item is not None:
         if args is not None or out is not None:
@@ -247,9 +239,13 @@ def stop_when(predicate):
     return stop_when_loop
 
 
-class StopPipeline(Exception): pass
+class StopPipeline  (Exception): pass
+class IncompletePipe(Exception): pass
 
 def push(source, pipe, result=()):
+    if not hasattr(pipe, "close"):
+        raise IncompletePipe("Pipe does not finished in a sink")
+
     for item in source:
         try:
             pipe.send(item)
@@ -265,7 +261,7 @@ def push(source, pipe, result=()):
 
 def pipe(*pieces):
 
-    pieces = tuple(builtins.map(string_to_pick, pieces))
+    pieces = tuple(builtins.map(_string_to_pick, pieces))
 
     def apply(arg, fn):
         return fn(arg)
@@ -278,7 +274,7 @@ def pipe(*pieces):
         return pipe_awaiting_sink
 
 
-def string_to_pick(component):
+def _string_to_pick(component):
     if isinstance(component, str):
         return map(itemgetter(component))
     return component
@@ -302,6 +298,9 @@ def slice(*args, close_all=False):
             for _ in stopper:
                 target.send((yield))
                 for _ in range(step - 1)      : yield
+
+            yield
+
             if close_all: raise StopPipeline
             while True:
                 yield
@@ -315,17 +314,6 @@ def implicit_pipes(seq):
 def if_tuple_make_pipe(thing):
     return pipe(*thing) if type(thing) is tuple else thing
 
-
-# TODO:
-# + sum
-# + dispatch
-# + merge
-# + eliminate finally-boilerplate from RESULT (with contextlib.contextmanager?)
-# + graph structure DSL (mostly done: pipe, fork, branch (dispatch))
-# + network visualization
-
-
-######################################################################
 
 if __name__ == '__main__':
 

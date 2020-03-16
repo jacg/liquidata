@@ -1,3 +1,5 @@
+import string
+
 import dataflow as df
 
 from pytest import raises
@@ -46,6 +48,7 @@ def test_fork():
                              right_sink))
 
     assert left == right == the_source
+
 
 
 def test_map():
@@ -111,6 +114,24 @@ def test_longer_pipeline():
     assert result == [ (((n+1)*2)-3)/4 for n in the_source ]
 
 
+def test_fork_implicit_pipes():
+
+    # Arguments can be pipes or tuples.
+    # Tuples get implicitly converted into pipes
+
+    the_source = list(range(10, 20))
+    add_1      = df.map(lambda x: 1 + x)
+
+    implicit_pipe_collector = []; implicit_pipe_sink = df.sink(implicit_pipe_collector.append)
+    explicit_pipe_collector = []; explicit_pipe_sink = df.sink(explicit_pipe_collector.append)
+
+    df.push(source = the_source,
+            pipe   = df.fork(       (add_1, implicit_pipe_sink),
+                             df.pipe(add_1, explicit_pipe_sink)))
+
+    assert implicit_pipe_collector == explicit_pipe_collector == [1 + x for x in the_source]
+
+
 def test_filter():
 
     # 'filter' can be used to eliminate data
@@ -146,17 +167,26 @@ def test_count():
 
     assert count.future.result() == len(the_source)
 
-
-def test_push_futures():
-
-    # 'push' provides a higher-level interface to using such futures:
-    # it optionally accepts a tuple of futures, and returns a tuple of
-    # their results
-
-    count_all = df.count()
-    count_odd = df.count()
-
+# 'push' provides a higher-level interface to using such futures:
+# it optionally accepts a future, a tuple of futures or a mapping
+# of futures. It returns the result of the future, a tuple of
+# their results or a namespace with the results, respectively.
+def test_push_futures_single():
     the_source = list(range(100))
+    count      = df.count()
+
+    result = df.push(source = the_source,
+                     pipe   = df.pipe(count.sink),
+                     result = count.future)
+
+    assert result == len(the_source)
+
+
+def test_push_futures_tuple():
+    the_source = list(range(100))
+    count_all  = df.count()
+    count_odd  = df.count()
+
 
     result = df.push(source = the_source,
                      pipe   = df.fork(                                 count_all.sink,
@@ -166,6 +196,23 @@ def test_push_futures():
     all_count = len(the_source)
     odd_count = all_count // 2
     assert result == (odd_count, all_count)
+
+
+def test_push_futures_mapping():
+    count_all = df.count()
+    count_odd = df.count()
+
+    the_source = list(range(100))
+
+    result = df.push(source = the_source,
+                     pipe   = df.fork(                                 count_all.sink,
+                                      df.pipe(df.filter(lambda n:n%2), count_odd.sink)),
+                     result = dict(odd = count_odd.future,
+                                   all = count_all.future))
+
+    all_count = len(the_source)
+    assert result.odd == all_count // 2
+    assert result.all == all_count
 
 
 def test_reduce():
@@ -258,6 +305,28 @@ def test_spy():
     assert spied == result == the_source
 
 
+def test_spy_count():
+
+    # count is a component that can be needed in the middle
+    # of a pipeline. However, because it is a sink it needs
+    # to be plugged into a spy. Thus, the component spy_count
+    # provides a comfortable interface to access the future
+    # and spy objects in a single line.
+
+    the_source = list(range(20))
+
+    count     = df.count()
+    spy_count = df.spy_count()
+
+    result = df.push(source = the_source,
+                     pipe   = df.pipe(spy_count.spy ,
+                                          count.sink),
+                     result = dict(from_count     =     count.future,
+                                   from_spy_count = spy_count.future))
+
+    assert result.from_count == result.from_spy_count == len(the_source)
+
+
 def test_branch():
 
     # 'branch', like 'spy', allows you to insert operations on a copy
@@ -292,6 +361,19 @@ def test_branch():
     # Confirm that both networks produce the same results.
     assert c1 == c2
     assert e1 == e2
+
+
+def test_branch_closes_sideways():
+    the_source = range(10)
+    branch_result = []; the_branch_sink = df.sink(branch_result.append)
+    main_result   = []; the_main_sink   = df.sink(  main_result.append)
+
+    df.push(source = the_source,
+            pipe   = df.pipe(df.branch(the_branch_sink),
+                             the_main_sink))
+
+    with raises(StopIteration):
+        the_branch_sink.send(99)
 
 
 def test_chain_pipes():
@@ -413,7 +495,32 @@ def test_slice_downstream(spec):
     assert result == the_source[specslice.start : specslice.stop : specslice.step]
 
 
-#TODO: Write test slice_close_all
+# slice takes an optional argument close_all. If this argument
+# is False (default), slice will close the innermost branch in
+# which the component is plugged in after the component iterates
+# over all its entries. However, when set to True, the behaviour
+# is to close the outermost pipeline, resulting in a full stop of
+# the data flow.
+@parametrize("close_all", (False, True))
+def test_slice_close_all(close_all):
+    the_source = list(range(20))
+    n_elements = 5
+    slice      = df.slice(n_elements, close_all=close_all)
+
+    result_branch = []; sink_branch = df.sink(result_branch.append)
+    result_main   = []; sink_main   = df.sink(result_main  .append)
+
+    df.push(source = the_source,
+            pipe   = df.pipe(df.branch(slice, sink_branch),
+                             sink_main))
+
+    if close_all:
+        assert result_branch == the_source[:n_elements]
+        assert result_main   == the_source[:n_elements]
+    else:
+        assert result_branch == the_source[:n_elements]
+        assert result_main   == the_source
+
 
 @parametrize('args',
              ((      -1,),
@@ -427,6 +534,142 @@ def test_slice_raises_ValueError(args):
         df.slice(*args)
 
 
-@mark.xfail
 def test_pipes_must_end_in_a_sink():
-    raise NotImplementedError
+    the_source    = range(10)
+    sinkless_pipe = df.map(abs)
+
+    with raises(df.IncompletePipe):
+        df.push(source = the_source,
+                pipe   = sinkless_pipe)
+
+
+def test_count_filter():
+
+    # count_filter provides a future/filter pair.
+    # This is a simple interface to keep track of
+    # how many entries satisfy the predicate and
+    # how many are filtered out.
+
+    the_source  = list(range(21))
+    predicate   = lambda n: n % 2
+
+    odd      = df.count_filter(predicate)
+    filtered = []; the_sink = df.sink(filtered.append)
+
+    result = df.push(source = the_source,
+                     pipe   = df.pipe(odd.filter, the_sink),
+                     result = odd.future)
+
+    expected_result = list(filter(predicate, the_source))
+
+    assert filtered        ==                       expected_result
+    assert result.n_passed ==                   len(expected_result)
+    assert result.n_failed == len(the_source) - len(expected_result)
+
+
+# In dataflow, the source can also generate more complex
+# data structures. Hence, the same entry can gather
+# different types of data in a single object.
+# A useful manner of organizing the data is using some
+# kind of namespace that labels each node of information.
+# In order to work more comfortably in this scenario,
+# most of the basic components in dataflow take optional
+# arguments that allow the user to specify which node of
+# information the component should use. The output of
+# the component can be put back under the same or a
+# different label.
+def test_sink_with_namespace():
+    letters         = string.ascii_lowercase
+    the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
+    result = []; the_sink = df.sink(result.append, args="x")
+
+    df.push(source = the_source,
+            pipe   = the_sink  )
+
+    assert result == list(letters)
+
+
+def test_map_with_namespace_args_out():
+    letters         = string.ascii_lowercase
+    the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
+    make_upper_case = df.map(str.upper, args="x", out="upper_x")
+
+    result = []; the_sink = df.sink(result.append, args="upper_x")
+
+    df.push(source = the_source,
+            pipe   = df.pipe(make_upper_case, the_sink))
+
+    assert result == list(letters.upper())
+
+
+def test_map_with_namespace_item():
+
+    # item replaces the input with the output
+
+    letters         = string.ascii_lowercase
+    the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
+    make_upper_case = df.map(str.upper, item="x")
+
+    result = []; the_sink = df.sink(result.append, args="x")
+
+    df.push(source = the_source,
+            pipe   = df.pipe(make_upper_case, the_sink))
+
+    assert result == list(letters.upper())
+
+
+def test_filter_with_namespace():
+    vowels     = "aeiou"
+    the_source = (dict(i=i, x=x) for i, x in enumerate(string.ascii_lowercase))
+    vowel      = df.filter(lambda s: s in vowels, args="x")
+
+    result = []; the_sink = df.sink(result.append, args="x")
+
+    df.push(source = the_source,
+            pipe   = df.pipe(vowel, the_sink))
+
+    assert result == list(vowels)
+
+
+# When the first element of a pipe is a string, it
+# is interpreted as a component that takes an item
+# from the common namespace and pushes it through
+# the pipe. This also works with forks and branches.
+
+def test_implicit_element_picking_in_pipe():
+    the_source_elements = list(range(10))
+    the_source          = (dict(x=i, y=-i) for i in the_source_elements)
+
+    result = []; the_sink = df.sink(result.append)
+    df.push(source = the_source,
+            pipe   = df.pipe("x", the_sink))
+
+    assert result == the_source_elements
+
+
+def test_implicit_element_picking_in_fork():
+    the_source_elements = list(range(10))
+    the_source          = (dict(x=i, y=-i) for i in the_source_elements)
+
+    left  = [];  left_sink = df.sink( left.append)
+    right = []; right_sink = df.sink(right.append)
+
+    df.push(source = the_source,
+            pipe   = df.fork(("x",  left_sink),
+                             ("y", right_sink)))
+
+    assert left == [-i for i in right] == the_source_elements
+
+
+def test_implicit_element_picking_in_branch():
+    the_source_elements = list(range(10))
+    the_source          = (dict(x=i, y=-i) for i in the_source_elements)
+
+    left  = [];  left_sink = df.sink( left.append)
+    right = []; right_sink = df.sink(right.append)
+
+    df.push(source = the_source,
+            pipe   = df.pipe(df.branch("x",  left_sink),
+                             right_sink))
+
+    assert left == [-i["y"] for i in right] == the_source_elements
