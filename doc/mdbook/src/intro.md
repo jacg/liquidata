@@ -48,7 +48,58 @@ Pitfalls:
 
 # Manual
 
-Throughout the following examples it is assumed that `dataflow` has been imported thus
+## Fundamental concepts
+
+`dataflow` is an Embedded Domain Specific Language (EDSL) for expressing
+computations on streams of data, built out of three fundamental kinds of
+component
+
++ sources
++ pipes
++ sinks
+
+Conceptually these may be connected like this
+
+TODO: decide on a pretty graphical way of presenting these network diagrams
+
+```
+source -> pipe element 1 -> pipe element 2 -> ... -> sink
+```
++ sources produce data
++ pipes transform and filter data
++ sinks consume data
+
+Pipes are *composable* and *reusable*: a pipe can be made out of smaller pipes
+joined end-to-end.
+
+More complex data flows, including bifurcations
+
+```
+source -> pipe 1 ---> pipe X -> pipe Y -> sink Z
+                \
+                 pipe A -> pipe B -> pipe C -> sink D
+
+```
+
+and even joins
+
+```
+source -> pipe 1 ---> pipe X -> pipe Y ---> sink Z
+                \                      /
+                 pipe A -> pipe B ____/
+
+```
+
+can also me made, but we will put off discussing these until later.
+
+TODO: note that graph, network and data flow are synonyms
+
+TODO: note that pipe and stream are almost synonymous
+
+
++ Zero or more elements which
++ Exactly one sink, which consume
+
 
 ```python
 import dataflow as df
