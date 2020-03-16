@@ -1,10 +1,3 @@
-# TODO: test implicit pipes in fork
-# TODO: test count_filter
-# TODO: test spy_count
-# TODO: test polymorphic result of pipe
-# TODO: Add test for failure to close sideways in branch
-# TODO: test string_to_pick and its usage
-
 import builtins
 import functools
 import itertools as it
@@ -46,7 +39,6 @@ def   _exactly_one(spec): return not isinstance(spec, (tuple, list, NoneType))
 def _more_than_one(spec): return     isinstance(spec, (tuple, list)          )
 
 
-# TODO: improve ValueError message
 def map(op=None, *, args=None, out=None, item=None):
     if item is not None:
         if args is not None or out is not None:
@@ -322,17 +314,6 @@ def implicit_pipes(seq):
 def if_tuple_make_pipe(thing):
     return pipe(*thing) if type(thing) is tuple else thing
 
-
-# TODO:
-# + sum
-# + dispatch
-# + merge
-# + eliminate finally-boilerplate from RESULT (with contextlib.contextmanager?)
-# + graph structure DSL (mostly done: pipe, fork, branch (dispatch))
-# + network visualization
-
-
-######################################################################
 
 if __name__ == '__main__':
 
