@@ -21,7 +21,6 @@ deploy:
   github-token: $GITHUB_TOKEN
   local-dir: doc/mdbook/book
   keep-history: false
-  target-branch: gh-pages-deploy
   on:
     branch: gh-pages
 
