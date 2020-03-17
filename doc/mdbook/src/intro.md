@@ -339,6 +339,21 @@ The main differences are:
   ...
 + ... in other words, `branch` creates uncapped pipes; `fork` creates capped
   pipes.
+
+### Use `branch` to make spies out of sinks
+
+`branch`, like `spy`, allows you to insert operations on a copy of the stream at
+any point in a network, without affecting what flows downstream. In contrast to
+`spy` (which accepts a single plain function), `branch` accepts an arbitrary
+number of pipeline components ending in a sink, which it combines into a
+pipeline. Consequently `branch` can be thought of as a way of making spies out
+of capped pipes or sinks.
+
+TODO: create the following example
+```python
+{{#include ../../../dataflow_test.py:branch_as_spy}}
+```
+
 ## TODO Tests not used here so far
 
 + `test_fork`
