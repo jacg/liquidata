@@ -299,21 +299,24 @@ def test_stateful_stop_when():
 
 
 def test_spy():
+# ANCHOR: spy
+    # Some data for testing
+    the_data = list(range(50, 60))
 
-    # 'spy' performs an operation on the data streaming through the
-    # pipeline, without changing what is seen downstream. An obvious
-    # use of this would be to insert a 'spy(print)' at some point in
-    # the pipeline to observe the data flow through that point.
+    # A sink to collect everything that reaches the end of the pipe
+    reached_the_end = []; the_sink = df.sink(reached_the_end.append)
+    # A spy to observe (and collect) everything mid-pipe
+    spied           = []; the_spy  = df.spy (          spied.append)
 
-    the_source = list(range(50, 60))
-
-    result = []; the_sink = df.sink(result.append)
-    spied  = []; the_spy  = df.spy ( spied.append)
-
-    df.push(source = the_source,
+    df.push(source = the_data,
+            # Insert the spy into the pipe before the sink
             pipe   = df.pipe(the_spy, the_sink))
 
-    assert spied == result == the_source
+    # The spy saw all the data flowing through the pipe ...
+    assert           spied == the_data
+    # ... but didn't affect what was seen downstream
+    assert reached_the_end == the_data
+# ANCHOR_END: spy
 
 
 def test_spy_count():

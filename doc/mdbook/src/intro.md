@@ -287,7 +287,21 @@ This dichotomy hints at the different roles their equivalents play in `dataflow`
 {{#include ../../../dataflow_test.py:reduce}}
 ```
 
+## `spy`: side-effects in the middle of a pipe
 
+`spy` is used to create pipe components which do not modify the data flowing
+through the pipe in any way: inserting a spy into a pipe should not affect what
+flows downstream. Instead, they can perform arbitrary side-effects on the data.
+An obvious use would be to insert `spy(print)` into a pipe in order to observe
+what is flowing through the pipe at that point.
+
+```python
+{{#include ../../../dataflow_test.py:spy}}
+```
+
+If the data flowing through the pipe are mutable, the spy could mutate them, and
+thus modify what gets sent downstream, but this is *not* the intended use of
+spies: don't do that!
 
 ## TODO Tests not used here so far
 
