@@ -32,21 +32,6 @@ def test_simplest_pipeline():
     assert result == the_source
 # ANCHOR_END: simplest
 
-def test_fork():
-
-    # Dataflows can be split with 'fork'
-
-    the_source = list(range(10, 20))
-
-    left  = [];  left_sink = df.sink( left.append)
-    right = []; right_sink = df.sink(right.append)
-
-    df.push(source = the_source,
-            pipe   = df.fork( left_sink,
-                             right_sink))
-
-    assert left == right == the_source
-
 
 def test_map_and_pipe():
     # The pipelines start to become interesting when the data are
@@ -341,15 +326,8 @@ def test_spy_count():
     assert result.from_count == result.from_spy_count == len(the_source)
 
 
-def test_branch():
-
-    # 'branch', like 'spy', allows you to insert operations on a copy
-    # of the stream at any point in a network. In contrast to 'spy'
-    # (which accepts a single plain operation), 'branch' accepts an
-    # arbitrary number of pipeline components, which it combines into
-    # a pipeline. It provides a more convenient way of constructing
-    # some graphs that would otherwise be constructed with 'fork'.
-
+def test_fork_and_branch():
+# ANCHOR: fork_and_branch
     # Some pipeline components
     c1 = []; C1 = df.sink(c1.append)
     c2 = []; C2 = df.sink(c2.append)
@@ -360,21 +338,22 @@ def test_branch():
     B = df.map(lambda n:n*2)
     D = df.map(lambda n:n*3)
 
-    # Two eqivalent networks, one constructed with 'fork' the other
-    # with 'branch'.
-    graph1 = df.pipe(A, df.fork(df.pipe(B,C1),
-                                df.pipe(D,E1)))
-
+    # graph1 and graph2 are eqivalent networks. graph1 is constructed with
+    # fork ...
+    graph1 = df.pipe(A, df.fork((B,C1),
+                                (D,E1)))
+    # ... while graph2 is built with branch.
     graph2 = df.pipe(A, df.branch(B,C2), D,E2)
 
     # Feed the same data into the two networks.
-    the_source = list(range(10, 50, 4))
-    df.push(source=the_source, pipe=graph1)
-    df.push(source=the_source, pipe=graph2)
+    the_data = list(range(10, 50, 4))
+    df.push(source=the_data, pipe=graph1)
+    df.push(source=the_data, pipe=graph2)
 
     # Confirm that both networks produce the same results.
     assert c1 == c2
     assert e1 == e2
+# ANCHOR_END: fork_and_branch
 
 
 def test_branch_closes_sideways():

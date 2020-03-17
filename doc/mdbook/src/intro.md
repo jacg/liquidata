@@ -303,6 +303,42 @@ If the data flowing through the pipe are mutable, the spy could mutate them, and
 thus modify what gets sent downstream, but this is *not* the intended use of
 spies: don't do that!
 
+## Splitting streams: `fork` and `branch`
+
+`dataflow` provides two utilities for bifurcating a data stream: that is to say,
+sending the same data into more than one pipeline: `fork` and `branch`.
+
+They are equivalent in power but some ideas may be more naturally expressed in
+terms of one or the other.
+
+```python
+{{#include ../../../dataflow_test.py:fork_and_branch}}
+```
+Visually, the `fork` version suggests a layout like this
+```
+              B -> C
+             /
+the_data -> A
+             \
+              D -> E
+```
+while the `branch` version looks more like this
+```
+                   B -> C
+                  /
+the_data -> A -> o -> D -> E
+```
+but their topologies, and hence their behaviours, are identical.
+
+The main differences are:
+
++ `branch` accepts exactly one pipe; `fork` accepts an arbitrary number
+
++ `branch` creates components which can be inserted in the middle of a pipeline;
+  `fork` creates components which can only be placed at the end of a pipeline
+  ...
++ ... in other words, `branch` creates uncapped pipes; `fork` creates capped
+  pipes.
 ## TODO Tests not used here so far
 
 + `test_fork`
