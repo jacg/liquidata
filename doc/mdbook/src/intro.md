@@ -100,6 +100,9 @@ TODO: note that pipe and stream are almost synonymous
 + Zero or more elements which
 + Exactly one sink, which consume
 
+TODO: introduce the 'capped pipe' terminology and emphasize that a capped pipe
+is essentially a sink.
+
 ## The simplest graph: `push` and `sink`
 
 Throughout the examples that follow, it is assumed that `dataflow` has been
