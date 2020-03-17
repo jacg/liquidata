@@ -189,18 +189,27 @@ Henceforth we should consider **_capped pipe_** to be synonymous with
 | A pipe can be attached to the downstream end of | <span style="color:green;font-size:200%">✓</span> | <span style="color:red">❌</span> |
 
 
-## Creating and connecting pipeline components: `map` and `pipe`
+## Creating and connecting pipes: `map` and `pipe`
 
-The most convenient way to create pipeline components, is to use utilities
-provided by `dataflow`. `df.map` is probably the most obvious one of these. Just
-like `df.sink` makes sinks out of plain functions, so `df.map` makes pipeline
-components out of plain functions.
+The most convenient way to create pipes, is to use utilities provided by
+`dataflow`. Just like `df.sink` makes sinks (capped pipes) out of plain
+functions, so `df.map` makes open (uncapped) pipes out of plain functions.
 
-`df.pipe` is used to chain together a number of pipeline components.
+`df.pipe` is used to chain together a number of pipes.
 
 ```python
 {{#include ../../../dataflow_test.py:map}}
 ```
+
+`df.pipe` accepts an arbitrary number of arguments. All of these must be open
+pipes, with two exceptions:
+
++ The last one may be a sink.
++ The first one may be a component selector, which we will discuss later on.
+
+If its last argument is a sink, `df.pipe` will return a sink; if its last
+argument is an open pipe, `df.pipe` will return and open pipe.
+
 
 Using `df.pipe` explicitly is usually not necessary, as most utilities which
 accept pipes, know how to create them implicitly out of a tuple of pipe
@@ -263,7 +272,7 @@ Consequently, `push(result = ...)` can accept
 + a tuple of futures
 + a dictionary of futures
 
-In each case, `push` will return a similarly shaped object containing the
+In each case, `push` will return a similarly-shaped object containing the
 values extracted from the futures:
 
 ```python
@@ -291,8 +300,8 @@ They fall into two distinct categories. All three consume iterables, but
 
 This dichotomy hints at the different roles their equivalents play in `dataflow`:
 
-+ `df.map` and `df.filter` make pipe components
-+ `df.reduce` makes sinks.
++ `df.map` and `df.filter` make uncapped (open) pipes,
++ `df.reduce` makes capped pipes (sinks).
 
  `df.reduce` provides a high-level means of creating future-sinks such as
  `df.count` (which we saw earlier) or `df.sum` (which sums all the values
@@ -306,11 +315,11 @@ This dichotomy hints at the different roles their equivalents play in `dataflow`
 
 ## `spy`: side-effects in the middle of a pipe
 
-`spy` is used to create pipe components which do not modify the data flowing
-through the pipe in any way: inserting a spy into a pipe should not affect what
-flows downstream. Instead, they can perform arbitrary side-effects on the data.
-An obvious use would be to insert `spy(print)` into a pipe in order to observe
-what is flowing through the pipe at that point.
+`spy` is used to create uncapped pipes which do not modify the data flowing
+through them in any way: inserting a spy into a pipe should not affect what
+flows downstream. Instead, they can use the data to perform arbitrary
+side-effects. An obvious application would be to insert `spy(print)` into a pipe
+in order to observe what is flowing through the pipe at that point.
 
 ```python
 {{#include ../../../dataflow_test.py:spy}}
@@ -323,10 +332,10 @@ spies: don't do that!
 ## Splitting streams: `fork` and `branch`
 
 `dataflow` provides two utilities for bifurcating a data stream: that is to say,
-sending the same data into more than one pipeline: `fork` and `branch`.
+sending the data arriving at some point into more than one downstream pipe.
 
-They are equivalent in power but some ideas may be more naturally expressed in
-terms of one or the other.
+They are called `fork` and `branch`, and are equivalent in power but some ideas
+ may be more naturally expressed in terms of one or the other.
 
 ```python
 {{#include ../../../dataflow_test.py:fork_and_branch}}
@@ -351,20 +360,17 @@ The main differences are:
 
 + `branch` accepts exactly one pipe; `fork` accepts an arbitrary number
 
-+ `branch` creates components which can be inserted in the middle of a pipeline;
-  `fork` creates components which can only be placed at the end of a pipeline
-  ...
-+ ... in other words, `branch` creates uncapped pipes; `fork` creates capped
-  pipes.
++ `branch` returns an uncapped (open) pipe; `fork` returns a capped pipe (sink).
 
 ### Use `branch` to make spies out of sinks
 
-`branch`, like `spy`, allows you to insert operations on a copy of the stream at
-any point in a network, without affecting what flows downstream. In contrast to
-`spy` (which accepts a single plain function), `branch` accepts an arbitrary
-number of pipeline components ending in a sink, which it combines into a
-pipeline. Consequently `branch` can be thought of as a way of making spies out
-of capped pipes or sinks.
+`branch`, like `spy`, allows you to insert operations on the stream of data
+flowing through any point in a network, without affecting what flows downstream.
+In contrast to `spy` (which accepts a single plain function), `branch` accepts
+an arbitrary number (maybe zero) of open pipes followed by exactly one sink. It
+combines these to make a capped pipe into which it sends all data it sees, in
+addition to allowing the same data to flow downstream. Consequently `branch` can
+be thought of as a way of making spies out of capped pipes or sinks.
 
 TODO: create the following example
 ```python
