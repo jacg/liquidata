@@ -161,19 +161,33 @@ Points to note:
 + This is a trivial example which does nothing beyond showing how the
   fundamental components fit together.
 
+## Sinks vs. pipes
+
 It is worth repeating that **sinks have exactly the same interface as pipes at
 the upstream end**.
 
-+ Sinks consume data: no data flow out of the downstream end of a sink.
++ Pipes transform (or filter) data: they receive data at their upstream end, and
+  send data out of their downstream end.
 
-+ Pipes transform (or filter) data: data do flow out of the downstream end of a
-  pipe.
++ Sinks consume data: no data flow out of a sink: they receive data at their
+  upstream end, but have no downstream end at all.
 
 + The data sent downstream out of a pipe have to end up somewhere: they have to
   be collected by a sink!
 
-+ Consequently, an *uncapped* pipe (one not connected to a sink) cannot have any
-  data `push`ed into it.
++ Consequently, an *uncapped* pipe (one not connected to a sink at its
+  downstream end) cannot have any data `push`ed into it.
+
++ Conversely, a *capped* pipe is indistinguishable from a sink.
+
+Henceforth we should consider **_capped pipe_** to be synonymous with
+**_sink_**, and remember these fundamental properties:
+
+|                       | *uncapped* or *open* pipe | *capped* pipe or *sink* |
+|-----------------------|:-------------------------------------------------:|:-------------------------------------------------:|
+| Can `push` data into  | <span style="color:red">❌</span>| <span style="color:green;font-size:200%">✓</span> |
+| A pipe can be attached to the downstream end of | <span style="color:green;font-size:200%">✓</span> | <span style="color:red">❌</span> |
+
 
 ## Creating and connecting pipeline components: `map` and `pipe`
 
