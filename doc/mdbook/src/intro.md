@@ -105,14 +105,6 @@ is essentially a sink.
 
 ## The simplest graph: `push` and `sink`
 
-Throughout the examples that follow, it is assumed that `dataflow` has been
-imported thus (TODO: when implement executable examples, these imports might
-have to be made explicit in each example)
-
-```python
-import dataflow as df
-```
-
 The `push` function is used to connect sources of data to pipes which can
 accept, process and consume the data. In its simplest form it looks like this:
 

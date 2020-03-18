@@ -1,7 +1,5 @@
 import string
 
-import dataflow as df
-
 from pytest import raises
 from pytest import mark
 parametrize = mark.parametrize
@@ -16,6 +14,8 @@ from hypothesis.strategies import one_of
 
 def test_simplest_pipeline():
 # ANCHOR: simplest
+    from dataflow import sink, push
+
     # Some dummy data
     the_source = list(range(20))
 
@@ -23,11 +23,11 @@ def test_simplest_pipeline():
     # receives, into a list.
     result = []
 
-    # df.sink makes a sink out of a plain Python function.
-    the_sink = df.sink(result.append)
+    # sink makes a sink out of a plain Python function.
+    the_sink = sink(result.append)
 
     # Use df.push to feed the source into the pipe.
-    df.push(source=the_source, pipe=the_sink)
+    push(source=the_source, pipe=the_sink)
 
     assert result == the_source
 # ANCHOR_END: simplest
@@ -38,86 +38,92 @@ def test_map_and_pipe():
     # transformed in some way. 'map' transforms every item passing
     # through the pipe by applying the supplied operation.
 # ANCHOR: map
+    from dataflow import map as dmap, sink, push, pipe
+
     # Some data transformation, expressed as a plain Python function, which we
     # would like to use in a pipe
     def the_operation(n):
         return n*n
 
     # df.map turns the function into a pipe component
-    square = df.map(the_operation)
+    square = dmap(the_operation)
 
     # Some dummy data ...
     the_data = list(range(1,11))
 
     # ... and a sink for collecting the transformed data
     result = []
-    the_sink = df.sink(result.append)
+    the_sink = sink(result.append)
 
     # Use df.pipe to connect the square component to the sink, and feed the
     # data into the pipe with df.push
-    df.push(source = the_data,
-            pipe   = df.pipe(square, the_sink))
+    push(source = the_data,
+         pipe   = pipe(square, the_sink))
 
     assert result == list(map(the_operation, the_data))
 # ANCHOR_END: map
 
 
 def test_longer_pipeline():
+    from dataflow import sink, push, pipe, map as dmap
 
     # Pipelines can have arbitrary lengths
 
     the_source = list(range(1,11))
 
     result = []
-    the_sink = df.sink(result.append)
+    the_sink = sink(result.append)
 
-    df.push(source = the_source,
-            pipe   = df.pipe(df.map(lambda n:n+1),
-                             df.map(lambda n:n*2),
-                             df.map(lambda n:n-3),
-                             df.map(lambda n:n/4),
-                             the_sink))
+    push(source = the_source,
+         pipe   = pipe(dmap(lambda n:n+1),
+                       dmap(lambda n:n*2),
+                       dmap(lambda n:n-3),
+                       dmap(lambda n:n/4),
+                       the_sink))
 
     assert result == [ (((n+1)*2)-3)/4 for n in the_source ]
 
 
 def test_fork_implicit_pipes():
+    from dataflow import map as dmap, sink, push, fork, pipe
 
     # Arguments can be pipes or tuples.
     # Tuples get implicitly converted into pipes
 
     the_source = list(range(10, 20))
-    add_1      = df.map(lambda x: 1 + x)
+    add_1      = dmap(lambda x: 1 + x)
 
-    implicit_pipe_collector = []; implicit_pipe_sink = df.sink(implicit_pipe_collector.append)
-    explicit_pipe_collector = []; explicit_pipe_sink = df.sink(explicit_pipe_collector.append)
+    implicit_pipe_collector = []; implicit_pipe_sink = sink(implicit_pipe_collector.append)
+    explicit_pipe_collector = []; explicit_pipe_sink = sink(explicit_pipe_collector.append)
 
-    df.push(source = the_source,
-            pipe   = df.fork(       (add_1, implicit_pipe_sink),
-                             df.pipe(add_1, explicit_pipe_sink)))
+    push(source = the_source,
+         pipe   = fork(     (add_1, implicit_pipe_sink),
+                        pipe(add_1, explicit_pipe_sink)))
 
     assert implicit_pipe_collector == explicit_pipe_collector == [1 + x for x in the_source]
 
 
 def test_filter():
 # ANCHOR: filter
+    from dataflow import filter as dfilter, sink, push, pipe
+
     # A predicate expressed as a plain function
     def the_predicate(n):
         return n % 2
 
     # Turn the predicate into a pipeline component with df.filter
-    odd = df.filter(the_predicate)
+    odd = dfilter(the_predicate)
 
     # Some dummy data ...
     the_data = list(range(20, 30))
 
     # ... and a sink for collecting the filtered data
     result = []
-    the_sink = df.sink(result.append)
+    the_sink = sink(result.append)
 
     # df.filter's result can be used in pipes
-    df.push(source = the_data,
-            pipe   = df.pipe(odd, the_sink))
+    push(source = the_data,
+         pipe   = pipe(odd, the_sink))
 
     # df.filter is the dataflow equivalent of Python's builtin filter
     assert result == list(filter(the_predicate, the_data))
@@ -126,18 +132,20 @@ def test_filter():
 
 def test_count():
 
+    from dataflow import count, push
+
     # 'count' is an example of a sink which only produces a result
     # once the stream of data flowing into the pipeline has been
     # closed. Such results are retrieved from futures which are
     # created at the time a 'count' instance is created: a namedtuple
     # containing the sink and its corresponding future is returned.
 
-    count = df.count()
+    count = count()
 
     the_source = list(range(30,40))
 
-    df.push(source = the_source,
-            pipe   = count.sink)
+    push(source = the_source,
+         pipe   = count.sink)
 
     assert count.future.result() == len(the_source)
 
@@ -147,13 +155,15 @@ def test_count():
 # their results or a namespace with the results, respectively.
 def test_push_result_single():
 # ANCHOR: push-result-single
+    from dataflow import count, push
+
     # Some dummy data
     the_source = list(range(100))
 
     # df.count is a sink factory. It creates a sink which counts how many
     # values it is fed. Once the stream has been closed, it places the final
     # result in its corresponding future.
-    count = df.count()
+    count = count()
 
     # df.count returns a namedtuple ...
     assert isinstance(count, tuple)
@@ -164,11 +174,11 @@ def test_push_result_single():
     # ... and a sink as the second element.
     assert count.sink is count[1]
 
-    result = df.push(source = the_source,
-                     # The sink can be used to cap a pipe
-                     pipe   = count.sink,
-                     # The future can be used to specify the return value of df.push
-                     result = count.future)
+    result = push(source = the_source,
+                  # The sink can be used to cap a pipe
+                  pipe   = count.sink,
+                  # The future can be used to specify the return value of df.push
+                  result = count.future)
 
     # When push finishes streaming data into its pipe, it will extract the
     # value it is supposed to return from the future it was given.
@@ -177,15 +187,17 @@ def test_push_result_single():
 
 
 def test_push_futures_tuple():
+    from dataflow import count, push, fork, pipe, filter as dfilter
+
     the_source = list(range(100))
-    count_all  = df.count()
-    count_odd  = df.count()
+    count_all  = count()
+    count_odd  = count()
 
 
-    result = df.push(source = the_source,
-                     pipe   = df.fork(                                 count_all.sink,
-                                      df.pipe(df.filter(lambda n:n%2), count_odd.sink)),
-                     result = (count_odd.future, count_all.future))
+    result = push(source = the_source,
+                  pipe   = fork(                            count_all.sink,
+                                pipe(dfilter(lambda n:n%2), count_odd.sink)),
+                  result = (count_odd.future, count_all.future))
 
     all_count = len(the_source)
     odd_count = all_count // 2
@@ -193,16 +205,18 @@ def test_push_futures_tuple():
 
 
 def test_push_futures_mapping():
-    count_all = df.count()
-    count_odd = df.count()
+    from dataflow import count, push, fork, pipe, filter as dfilter
+
+    count_all = count()
+    count_odd = count()
 
     the_source = list(range(100))
 
-    result = df.push(source = the_source,
-                     pipe   = df.fork(                                 count_all.sink,
-                                      df.pipe(df.filter(lambda n:n%2), count_odd.sink)),
-                     result = dict(odd = count_odd.future,
-                                   all = count_all.future))
+    result = push(source = the_source,
+                  pipe   = fork(                            count_all.sink,
+                                pipe(dfilter(lambda n:n%2), count_odd.sink)),
+                  result = dict(odd = count_odd.future,
+                                all = count_all.future))
 
     all_count = len(the_source)
     assert result.odd == all_count // 2
@@ -211,6 +225,8 @@ def test_push_futures_mapping():
 
 def test_reduce():
 # ANCHOR: reduce
+    from dataflow import reduce as dreduce, push
+
     # Some dummy data, for testing
     the_data = list(range(15))
 
@@ -221,16 +237,16 @@ def test_reduce():
     #     return a + b
 
     # df.reduce can be used to turn a binary function into a sink factory
-    df_sum = df.reduce(add, initial=0)
+    df_sum = dreduce(add, initial=0)
 
     # The factory returns a namedtuple containing a future and sink
     ssum = df_sum()
 
-    result = df.push(source = the_data,
-                     # The sink can be used to cap a pipe
-                     pipe   = ssum.sink,
-                     # The future can be used to specify the return value of push
-                     result = ssum.future)
+    result = push(source = the_data,
+                  # The sink can be used to cap a pipe
+                  pipe   = ssum.sink,
+                  # The future can be used to specify the return value of push
+                  result = ssum.future)
     # The component we created is the dataflow equivalent of Python's builtin
     # sum
     assert result == sum(the_data)
@@ -243,59 +259,63 @@ def test_sum():
 
 
 def test_stop_when():
+    from dataflow import count, push, fork, stop_when
 
     # 'stop_when' can be used to stop all branches of the network
     # immediately.
 
-    countfuture, count = df.count()
+    countfuture, count = count()
 
     limit, step = 10, 2
 
     import itertools
 
-    result = df.push(source = itertools.count(start=0, step=step),
-                     pipe   = df.fork(df.stop_when(lambda n:n==limit),
-                                      count),
-                     result = (countfuture,))
+    result = push(source = itertools.count(start=0, step=step),
+                  pipe   = fork(stop_when(lambda n:n==limit),
+                                count),
+                     result = countfuture)
 
-    assert result == (limit // step,)
+    assert result == limit // step
 
 
 def test_stateful_stop_when():
+    from dataflow import coroutine_send, count, push, fork, stop_when
 
-    @df.coroutine_send
+    @coroutine_send
     def n_items_seen(n):
         yield # Will stop here on construction
         for _ in range(n):
             yield False
         yield True
 
-    countfuture, count = df.count()
+    countfuture, count = count()
 
     import itertools
     limit, step = 10, 2
 
-    result = df.push(source = itertools.count(start=0, step=step),
-                     pipe   = df.fork(df.stop_when(n_items_seen(limit)),
-                                      count),
-                     result = (countfuture,))
+    result = push(source = itertools.count(start=0, step=step),
+                  pipe   = fork(stop_when(n_items_seen(limit)),
+                                count),
+                  result = countfuture)
 
-    assert result == (limit,)
+    assert result == limit
 
 
 def test_spy():
 # ANCHOR: spy
+    from dataflow import sink, spy, push, pipe
+
     # Some data for testing
     the_data = list(range(50, 60))
 
     # A sink to collect everything that reaches the end of the pipe
-    reached_the_end = []; the_sink = df.sink(reached_the_end.append)
+    reached_the_end = []; the_sink = sink(reached_the_end.append)
     # A spy to observe (and collect) everything mid-pipe
-    spied           = []; the_spy  = df.spy (          spied.append)
+    spied           = []; the_spy  = spy (          spied.append)
 
-    df.push(source = the_data,
-            # Insert the spy into the pipe before the sink
-            pipe   = df.pipe(the_spy, the_sink))
+    push(source = the_data,
+         # Insert the spy into the pipe before the sink
+         pipe   = pipe(the_spy, the_sink))
 
     # The spy saw all the data flowing through the pipe ...
     assert           spied == the_data
@@ -305,6 +325,7 @@ def test_spy():
 
 
 def test_spy_count():
+    from dataflow import count, spy_count, push, pipe
 
     # count is a component that can be needed in the middle
     # of a pipeline. However, because it is a sink it needs
@@ -314,41 +335,43 @@ def test_spy_count():
 
     the_source = list(range(20))
 
-    count     = df.count()
-    spy_count = df.spy_count()
+    count     = count()
+    spy_count = spy_count()
 
-    result = df.push(source = the_source,
-                     pipe   = df.pipe(spy_count.spy ,
-                                          count.sink),
-                     result = dict(from_count     =     count.future,
-                                   from_spy_count = spy_count.future))
+    result = push(source = the_source,
+                  pipe   = pipe(spy_count.spy ,
+                                count.sink),
+                  result = dict(from_count     =     count.future,
+                                from_spy_count = spy_count.future))
 
     assert result.from_count == result.from_spy_count == len(the_source)
 
 
 def test_fork_and_branch():
 # ANCHOR: fork_and_branch
-    # Some pipeline components
-    c1 = []; C1 = df.sink(c1.append)
-    c2 = []; C2 = df.sink(c2.append)
-    e1 = []; E1 = df.sink(e1.append)
-    e2 = []; E2 = df.sink(e2.append)
+    from dataflow import sink, map as dmap, pipe, fork, branch, push
 
-    A = df.map(lambda n:n+1)
-    B = df.map(lambda n:n*2)
-    D = df.map(lambda n:n*3)
+    # Some pipeline components
+    c1 = []; C1 = sink(c1.append)
+    c2 = []; C2 = sink(c2.append)
+    e1 = []; E1 = sink(e1.append)
+    e2 = []; E2 = sink(e2.append)
+
+    A = dmap(lambda n:n+1)
+    B = dmap(lambda n:n*2)
+    D = dmap(lambda n:n*3)
 
     # graph1 and graph2 are eqivalent networks. graph1 is constructed with
     # fork ...
-    graph1 = df.pipe(A, df.fork((B,C1),
-                                (D,E1)))
+    graph1 = pipe(A, fork((B,C1),
+                          (D,E1)))
     # ... while graph2 is built with branch.
-    graph2 = df.pipe(A, df.branch(B,C2), D,E2)
+    graph2 = pipe(A, branch(B,C2), D,E2)
 
     # Feed the same data into the two networks.
     the_data = list(range(10, 50, 4))
-    df.push(source=the_data, pipe=graph1)
-    df.push(source=the_data, pipe=graph2)
+    push(source=the_data, pipe=graph1)
+    push(source=the_data, pipe=graph2)
 
     # Confirm that both networks produce the same results.
     assert c1 == c2
@@ -357,19 +380,22 @@ def test_fork_and_branch():
 
 
 def test_branch_closes_sideways():
-    the_source = range(10)
-    branch_result = []; the_branch_sink = df.sink(branch_result.append)
-    main_result   = []; the_main_sink   = df.sink(  main_result.append)
+    from dataflow import sink, push, pipe, branch
 
-    df.push(source = the_source,
-            pipe   = df.pipe(df.branch(the_branch_sink),
-                             the_main_sink))
+    the_source = range(10)
+    branch_result = []; the_branch_sink = sink(branch_result.append)
+    main_result   = []; the_main_sink   = sink(  main_result.append)
+
+    push(source = the_source,
+         pipe   = pipe(branch(the_branch_sink),
+                                the_main_sink))
 
     with raises(StopIteration):
         the_branch_sink.send(99)
 
 
 def test_chain_pipes():
+    from dataflow import sink, map as dmap, push, pipe
 
     # Pipelines must end in sinks. If the last component of a pipe is
     # not a sink, the pipe may be used as a component in a bigger
@@ -378,29 +404,30 @@ def test_chain_pipes():
     # sink.
 
     # Some basic pipeline components
-    s1 = []; sink1 = df.sink(s1.append)
-    s2 = []; sink2 = df.sink(s2.append)
+    s1 = []; sink1 = sink(s1.append)
+    s2 = []; sink2 = sink(s2.append)
 
-    A = df.map(lambda n:n+1)
-    B = df.map(lambda n:n*2)
-    C = df.map(lambda n:n-3)
+    A = dmap(lambda n:n+1)
+    B = dmap(lambda n:n*2)
+    C = dmap(lambda n:n-3)
 
     # Two different ways of creating equivalent networks: one of them
     # groups the basic components into sub-pipes
-    graph1 = df.pipe(        A, B,          C, sink1)
-    graph2 = df.pipe(df.pipe(A, B), df.pipe(C, sink2))
+    graph1 = pipe(     A, B,       C, sink1)
+    graph2 = pipe(pipe(A, B), pipe(C, sink2))
 
     # Feed the same data into the two networks
     the_source = list(range(40))
 
-    df.push(source=the_source, pipe=graph1)
-    df.push(source=the_source, pipe=graph2)
+    push(source=the_source, pipe=graph1)
+    push(source=the_source, pipe=graph2)
 
     # Confirm that both networks produce the same results.
     assert s1 == s2
 
 
 def test_reuse_unterminated_pipes():
+    from dataflow import map as dmap, pipe, sink, branch, push
 
     # Open-ended pipes must be connected to a sink before they can
     # receive any input. Open-ended pipes are reusable components: any
@@ -408,30 +435,31 @@ def test_reuse_unterminated_pipes():
     # different networks. They are completely independent.
 
     def add(n):
-        return df.map(lambda x:x+n)
+        return dmap(lambda x:x+n)
 
     A,B,C,D,E,X,Y,Z = 1,2,3,4,5,6,7,8
 
-    component = df.pipe(add(X),
-                        add(Y),
-                        add(Z))
+    component = pipe(add(X),
+                     add(Y),
+                     add(Z))
 
-    s1 = []; sink1 = df.sink(s1.append)
-    s2 = []; sink2 = df.sink(s2.append)
+    s1 = []; sink1 = sink(s1.append)
+    s2 = []; sink2 = sink(s2.append)
 
     # copmonent is being reused twice in this network
-    graph = df.pipe(add(A),
-                    df.branch(add(B), component, add(C), sink1),
-                    add(D), component, add(E), sink2)
+    graph = pipe(add(A),
+                 branch(add(B), component, add(C), sink1),
+                 add(D), component, add(E), sink2)
 
     the_source = list(range(10,20))
-    df.push(source=the_source, pipe=graph)
+    push(source=the_source, pipe=graph)
 
     assert s1 == [ n + A + B + X + Y + Z + C for n in the_source ]
     assert s2 == [ n + A + D + X + Y + Z + E for n in the_source ]
 
 
 def test_reuse_terminated_pipes():
+    from dataflow import map as dmap, sink, pipe, branch, push
 
     # Sink-terminated pipes are also reusable, but do note that if
     # such components are reused in the same graph, the sink at the
@@ -439,23 +467,23 @@ def test_reuse_terminated_pipes():
     # branch: they share the sink; the branches are joined.
 
     def add(n):
-        return df.map(lambda x:x+n)
+        return dmap(lambda x:x+n)
 
     A,B,C,X,Y,Z = 1,2,3,4,5,6
 
-    collected_by_sinks = []; sink1 = df.sink(collected_by_sinks.append)
+    collected_by_sinks = []; sink1 = sink(collected_by_sinks.append)
 
-    component = df.pipe(add(X),
-                        add(Y),
-                        add(Z),
-                        sink1)
+    component = pipe(add(X),
+                     add(Y),
+                     add(Z),
+                     sink1)
 
-    graph = df.pipe(add(A),
-                    df.branch(add(B), component),
-                              add(C), component)
+    graph = pipe(add(A),
+                 branch(add(B), component),
+                        add(C), component)
 
     the_source = list(range(10,20))
-    df.push(source=the_source, pipe=graph)
+    push(source=the_source, pipe=graph)
 
     route1 = [ n + A + B + X + Y + Z for n in the_source ]
     route2 = [ n + A + C + X + Y + Z for n in the_source ]
@@ -475,6 +503,7 @@ slice_arg_nonzero  = one_of(none(), small_ints_nonzero)
               tuples(small_ints, small_ints),
               tuples(slice_arg,  slice_arg, slice_arg_nonzero)))
 def test_slice_downstream(spec):
+    import dataflow as df
 
     the_source = list('abcdefghij')
     result = []
@@ -496,6 +525,8 @@ def test_slice_downstream(spec):
 # the data flow.
 @parametrize("close_all", (False, True))
 def test_slice_close_all(close_all):
+    import dataflow as df
+
     the_source = list(range(20))
     n_elements = 5
     slice      = df.slice(n_elements, close_all=close_all)
@@ -523,11 +554,14 @@ def test_slice_close_all(close_all):
               (None, None,  0),
              ))
 def test_slice_raises_ValueError(args):
+    import dataflow as df
     with raises(ValueError):
         df.slice(*args)
 
 
 def test_pipes_must_end_in_a_sink():
+    import dataflow as df
+
     the_source    = range(10)
     sinkless_pipe = df.map(abs)
 
@@ -537,6 +571,7 @@ def test_pipes_must_end_in_a_sink():
 
 
 def test_count_filter():
+    from dataflow import count_filter, sink, push, pipe
 
     # count_filter provides a future/filter pair.
     # This is a simple interface to keep track of
@@ -546,12 +581,12 @@ def test_count_filter():
     the_source  = list(range(21))
     predicate   = lambda n: n % 2
 
-    odd      = df.count_filter(predicate)
-    filtered = []; the_sink = df.sink(filtered.append)
+    odd      = count_filter(predicate)
+    filtered = []; the_sink = sink(filtered.append)
 
-    result = df.push(source = the_source,
-                     pipe   = df.pipe(odd.filter, the_sink),
-                     result = odd.future)
+    result = push(source = the_source,
+                  pipe   = pipe(odd.filter, the_sink),
+                  result = odd.future)
 
     expected_result = list(filter(predicate, the_source))
 
@@ -572,6 +607,7 @@ def test_count_filter():
 # the component can be put back under the same or a
 # different label.
 def test_sink_with_namespace():
+    import dataflow as df
     letters         = string.ascii_lowercase
     the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
     result = []; the_sink = df.sink(result.append, args="x")
@@ -583,6 +619,7 @@ def test_sink_with_namespace():
 
 
 def test_map_with_namespace_args_out():
+    import dataflow as df
     letters         = string.ascii_lowercase
     the_source      = (dict(i=i, x=x) for i, x in enumerate(letters))
     make_upper_case = df.map(str.upper, args="x", out="upper_x")
@@ -596,6 +633,7 @@ def test_map_with_namespace_args_out():
 
 
 def test_map_with_namespace_item():
+    import dataflow as df
 
     # item replaces the input with the output
 
@@ -612,6 +650,7 @@ def test_map_with_namespace_item():
 
 
 def test_filter_with_namespace():
+    import dataflow as df
     vowels     = "aeiou"
     the_source = (dict(i=i, x=x) for i, x in enumerate(string.ascii_lowercase))
     vowel      = df.filter(lambda s: s in vowels, args="x")
@@ -630,6 +669,7 @@ def test_filter_with_namespace():
 # the pipe. This also works with forks and branches.
 
 def test_implicit_element_picking_in_pipe():
+    import dataflow as df
     the_source_elements = list(range(10))
     the_source          = (dict(x=i, y=-i) for i in the_source_elements)
 
@@ -641,6 +681,7 @@ def test_implicit_element_picking_in_pipe():
 
 
 def test_implicit_element_picking_in_fork():
+    import dataflow as df
     the_source_elements = list(range(10))
     the_source          = (dict(x=i, y=-i) for i in the_source_elements)
 
@@ -655,6 +696,7 @@ def test_implicit_element_picking_in_fork():
 
 
 def test_implicit_element_picking_in_branch():
+    import dataflow as df
     the_source_elements = list(range(10))
     the_source          = (dict(x=i, y=-i) for i in the_source_elements)
 
