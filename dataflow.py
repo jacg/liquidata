@@ -242,7 +242,9 @@ def stop_when(predicate):
 class StopPipeline  (Exception): pass
 class IncompletePipe(Exception): pass
 
-def push(source, pipe, result=()):
+def push(*, source, pipe, result=()):
+    pipe = if_tuple_make_pipe(pipe)
+
     if not hasattr(pipe, "close"):
         raise IncompletePipe("Pipe does not finished in a sink")
 

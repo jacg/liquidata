@@ -673,3 +673,28 @@ def test_implicit_element_picking_in_branch():
                              right_sink))
 
     assert left == [-i["y"] for i in right] == the_source_elements
+
+
+def test_implicit_pipe():
+    # The push argument pipe can be given implicitly
+    # (ie as a tuple of operations)
+    def the_operation(n): return n*n
+    square = df.map(the_operation)
+
+    the_source = list(range(1,11))
+
+    result = []
+    the_sink = df.sink(result.append)
+
+    df.push(source = the_source,
+            pipe   = (square, the_sink))
+
+    assert result == list(map(the_operation, the_source))
+
+
+def test_push_keywords_only():
+    # The push arguments must be given as keyword arguments
+    the_source = list(range(20))
+    the_sink = df.sink(print)
+    with raises(TypeError):
+        df.push(the_source, the_sink)
