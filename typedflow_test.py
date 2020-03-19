@@ -95,6 +95,16 @@ def test_chain_filters_and_maps_on_source():
     assert result == list(filter(ltN(1000), map(square, filter(gtN(3), map(square, the_data)))))
 
 
+def test_source_pipe_sink():
+
+    def square(n): return n * n
+    def add(N): return lambda x: x + N
+
+    the_data = list(range(10))
+    result = []
+
+    (tf.source(the_data) - tf.pipe(square) >> result.append)()
+    assert result == list(map(square, the_data))
 # TODO:
 #
 # Check that source construction argument is iterable

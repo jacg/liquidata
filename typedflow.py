@@ -13,26 +13,30 @@ class source:
     # TODO: reimplement all of these operators with multimethods
     def __sub__(self, other):
         if isinstance(other, pipe):
-            return self
+            return self._extend_pipe_with_pipe(other)
         if isinstance(other, sink):
             return ready(source=self, sink=other)
         if isinstance(other, source):
             raise TypeError
-        return self._extend_pipe(_fn_to_map_pipe(other))
+        return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other))
 
     def __add__(self, other):
         if isinstance(other, (source, pipe, sink)):
             raise TypeError
-        return self._extend_pipe(_fn_to_filter_pipe(other))
+        return self._extend_pipe_with_coroutine(_fn_to_filter_pipe(other))
 
     def __rshift__(self, other):
         if isinstance(other, (source, pipe)):
             raise TypeError
         return ready(source=self, sink=sink(other))
 
-    def _extend_pipe(self, pipe):
+    def _extend_pipe_with_coroutine(self, coroutine):
         extended_pipe = self._pipe.copy()
-        extended_pipe.appendleft(pipe)
+        extended_pipe.appendleft(coroutine)
+        return source(iterable=self._source, pipe=extended_pipe)
+
+    def _extend_pipe_with_pipe(self, the_pipe):
+        extended_pipe = the_pipe._pipe + self._pipe
         return source(iterable=self._source, pipe=extended_pipe)
 
 
@@ -41,7 +45,7 @@ class pipe:
     def __init__(self, fn=None):
         self._pipe = deque()
         if fn:
-            self._pipe.appendleft(fn)
+            self._pipe.appendleft(_fn_to_map_pipe(fn))
 
     def __sub__(self, other):
         if isinstance(other, source):
