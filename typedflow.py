@@ -18,23 +18,23 @@ class source:
             return ready(source=self, sink=other)
         if isinstance(other, source):
             raise TypeError
-        fn = other
-        extended_pipe = self._pipe.copy()
-        extended_pipe.appendleft(_fn_to_map_pipe(fn))
-        return source(iterable=self._source, pipe=extended_pipe)
+        return self._extend_pipe(_fn_to_map_pipe(other))
 
     def __add__(self, other):
         if isinstance(other, (source, pipe, sink)):
             raise TypeError
-        fn = other
-        extended_pipe = self._pipe.copy()
-        extended_pipe.appendleft(_fn_to_filter_pipe(fn))
-        return source(iterable=self._source, pipe=extended_pipe)
+        return self._extend_pipe(_fn_to_filter_pipe(other))
 
     def __rshift__(self, other):
         if isinstance(other, (source, pipe)):
             raise TypeError
         return ready(source=self, sink=sink(other))
+
+    def _extend_pipe(self, pipe):
+        extended_pipe = self._pipe.copy()
+        extended_pipe.appendleft(pipe)
+        return source(iterable=self._source, pipe=extended_pipe)
+
 
 class pipe:
 
