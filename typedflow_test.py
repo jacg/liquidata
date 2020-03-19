@@ -113,6 +113,13 @@ def test_map_func_pipe():
     assert result == list(map(add(3), map(square, the_data)))
 
 
+def test_source_pipe_sub_sink():
+    the_data = list(range(10))
+    result = []
+    (tf.source(the_data) - tf.pipe(add(4)) - tf.sink(result.append))()
+    assert result == list(map(add(4), the_data))
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
