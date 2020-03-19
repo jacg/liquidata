@@ -121,13 +121,40 @@ def test_source_pipe_sub_sink():
 
 
 def test_combine_longer_pipes_from_pipe_and_sink():
-    f,g,h,i = map(symbolic_apply, 'fghi')
+    a,b,c, f,g,h, u,v,w = map(symbolic_apply, 'abcfghuvw')
     the_data = 'xyz'
     result = []
-    the_pipe = tf.pipe(f) - g
-    the_sink = h - (i - tf.sink(result.append))
+    the_src  = tf.source(the_data)
+    the_pipe = tf.pipe(f) - g - h
+    the_sink = u - (v - (w - tf.sink(result.append)))
     (tf.source(the_data) - the_pipe - the_sink)()
-    assert result == list(map(i, map(h, map(g, map(f, the_data)))))
+    ff = map(f, the_data)
+    gg = map(g, ff)
+    hh = map(h, gg)
+    uu = map(u, hh)
+    vv = map(v, uu)
+    ww = map(w, vv)
+    assert result == list(ww)
+
+
+def test_combine_longer_pipes_from_source_pipe_and_sink():
+    a,b,c, f,g,h, u,v,w = map(symbolic_apply, 'abcfghuvw')
+    the_data = 'xyz'
+    result = []
+    the_src  = tf.source(the_data) - a - b - c
+    the_pipe = tf.pipe(f) - g - h
+    the_sink = u - (v - (w - tf.sink(result.append)))
+    (the_src - the_pipe - the_sink)()
+    aa = map(a, the_data)
+    bb = map(b, aa)
+    cc = map(c, bb)
+    ff = map(f, cc)
+    gg = map(g, ff)
+    hh = map(h, gg)
+    uu = map(u, hh)
+    vv = map(v, uu)
+    ww = map(w, vv)
+    assert result == list(ww)
 
 
 ###################################################################
