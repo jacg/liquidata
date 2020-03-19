@@ -31,7 +31,9 @@ class source:
         return ready(source=self, sink=sink(other))
 
     def __truediv__(self, other):
-        return self._extend_pipe_with_coroutine(_sink_to_branch(_fn_to_sink(other))) # Only dealing with func for now
+        sink_function  = other._fn if isinstance(other, sink) else other
+        sink_coroutine = _fn_to_sink_coroutine(sink_function)
+        return self._extend_pipe_with_coroutine(_coroutine_to_branch_coroutine(sink_coroutine))
 
     def _extend_pipe_with_coroutine(self, coroutine):
         extended_pipe = self._pipe.copy()
@@ -76,7 +78,7 @@ class pipe:
         return self
 
     def __truediv__(self, other):
-        return self._extend_pipe_with_coroutine(_sink_to_branch(_fn_to_sink(other))) # Only dealing with func for now
+        return self._extend_pipe_with_coroutine(_coroutine_to_branch_coroutine(_fn_to_sink_coroutine(other))) # Only dealing with func for now
 
     def _extend_pipe_with_coroutine(self, coroutine, *, upstream=False):
         extended_pipe = self._pipe.copy()
@@ -122,7 +124,7 @@ class ready:
     def __init__(self, source, sink):
         self._source = source._source
         all_pipe_coroutines = sink._pipe + source._pipe
-        all_pipe_coroutines.appendleft(_fn_to_sink(sink._fn))
+        all_pipe_coroutines.appendleft(_fn_to_sink_coroutine(sink._fn))
         self._pipe   = reduce(_apply, all_pipe_coroutines)
 
     def __call__(self):
@@ -152,14 +154,14 @@ def _fn_to_filter_pipe(predicate):
     return coroutine(filter_loop)
 
 
-def _fn_to_sink(effect):
+def _fn_to_sink_coroutine(effect) -> 'coroutine':
     def sink_loop():
         while True:
             effect((yield))
     return coroutine(sink_loop)()
 
 
-def _sink_to_branch(sideways : sink):
+def _coroutine_to_branch_coroutine(sideways : 'coroutine') -> 'coroutine':
     @coroutine
     def branch_loop(downstream):
         with closing(sideways), closing(downstream):

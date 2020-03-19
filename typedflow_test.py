@@ -172,6 +172,17 @@ def test_pipe_branch_func():
     (tf.source(the_data) - the_pipe + odd >> B.append)()
     assert A ==              list(map(addN(1), the_data))
     assert B == list(filter(odd, (map(addN(1), the_data))))
+
+
+def test_src_branch_sink():
+    the_data = list(range(10))
+    A, B = [], []
+    sink_A = tf.sink(A.append)
+    (tf.source(the_data) / sink_A + odd >> B.append)()
+    assert A ==                  the_data
+    assert B == list(filter(odd, the_data))
+
+
 # TODO: add `/` to the type test matrices
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
