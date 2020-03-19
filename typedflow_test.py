@@ -92,9 +92,9 @@ def test_source_pipe_sink():
 def test_pipe_map_func():
     the_data = list(range(10))
     result = []
-    square_then_add_3 = tf.pipe(square) - add(3)
+    square_then_add_3 = tf.pipe(square) - addN(3)
     (tf.source(the_data) - square_then_add_3 >> result.append)()
-    assert result == list(map(add(3), map(square, the_data)))
+    assert result == list(map(addN(3), map(square, the_data)))
 
 
 def test_pipe_filter_func():
@@ -108,16 +108,16 @@ def test_pipe_filter_func():
 def test_map_func_pipe():
     the_data = list(range(10))
     result = []
-    square_then_add_3 = square - tf.pipe(add(3))
+    square_then_add_3 = square - tf.pipe(addN(3))
     (tf.source(the_data) - square_then_add_3 >> result.append)()
-    assert result == list(map(add(3), map(square, the_data)))
+    assert result == list(map(addN(3), map(square, the_data)))
 
 
 def test_source_pipe_sub_sink():
     the_data = list(range(10))
     result = []
-    (tf.source(the_data) - tf.pipe(add(4)) - tf.sink(result.append))()
-    assert result == list(map(add(4), the_data))
+    (tf.source(the_data) - tf.pipe(addN(4)) - tf.sink(result.append))()
+    assert result == list(map(addN(4), the_data))
 
 
 def test_combine_longer_pipes_from_pipe_and_sink():
@@ -162,10 +162,10 @@ def test_combine_longer_pipes_from_source_pipe_and_sink():
 ###################################################################
 
 def square(n): return n * n
-def mul(N): return lambda x: x * N
-def add(N): return lambda x: x + N
-def gtN(N): return lambda x: x > N
-def ltN(N): return lambda x: x < N
+def mulN(N): return lambda x: x * N
+def addN(N): return lambda x: x + N
+def  gtN(N): return lambda x: x > N
+def  ltN(N): return lambda x: x < N
 def symbolic_apply(f): return lambda x: f'{f}({x})'
 
 def odd (n): return n % 2 != 0
