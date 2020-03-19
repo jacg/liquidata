@@ -61,7 +61,7 @@ def test_source_to_sink_side_effect():
     assert result == the_data
 
 
-def test_source_map_sink_side_effect():
+def test_source_with_map_to_sink_side_effect():
 
     def square(n):
         return n*n
@@ -72,7 +72,7 @@ def test_source_map_sink_side_effect():
     assert result == list(map(square, the_data))
 
 
-def test_source_filter_sink_side_effect():
+def test_source_with_filter_to_sink_side_effect():
 
     def odd(n):
         return n % 2 != 0
