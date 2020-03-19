@@ -21,7 +21,7 @@ table = {'-'  : { tf.source : (    X    , tf.source, tf.ready , tf.source),
          '+'  : { tf.source : (    X    ,     X    ,     X    , tf.source),
                   tf.pipe   : (    X    ,     X    ,     X    , tf.pipe  ),
                   tf.sink   : (    X    ,     X    ,     X    ,     X    ),
-                  func      : (    X    ,     X    ,     X    ,     X    )},
+                  func      : (    X    , tf.pipe  , tf.sink  ,     X    )},
 
          '>>' : { tf.source : (    X    ,     X    , tf.ready , tf.ready ),
                   tf.pipe   : (    X    ,     X    ,     X    , tf.sink  ),

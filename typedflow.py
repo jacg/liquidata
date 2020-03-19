@@ -42,6 +42,11 @@ class pipe:
             raise TypeError
         return self
 
+    def __radd__(self, other):
+        if isinstance(other, sink):
+            raise TypeError
+        return self
+
 class sink:
 
     def __sub__(self, _):
@@ -50,10 +55,15 @@ class sink:
     def __rsub__(self, other):
         return self
 
+    def __radd__(self, other):
+        if isinstance(other, (source, pipe, sink)):
+            raise TypeError
+        return self
+
     def __rrshift__(self, other):
         if isinstance(other, (pipe, sink)):
             raise TypeError
-        return sink()
+        return self
 
 class ready:
     pass
