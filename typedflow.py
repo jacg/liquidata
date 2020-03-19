@@ -75,6 +75,9 @@ class pipe:
             raise TypeError
         return self
 
+    def __truediv__(self, other):
+        return self._extend_pipe_with_coroutine(_sink_to_branch(_fn_to_sink(other))) # Only dealing with func for now
+
     def _extend_pipe_with_coroutine(self, coroutine, *, upstream=False):
         extended_pipe = self._pipe.copy()
         if upstream: extended_pipe.append    (coroutine)
