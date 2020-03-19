@@ -47,19 +47,15 @@ class pipe:
         if fn:
             self._pipe.appendleft(_fn_to_map_pipe(fn))
 
-    def __sub__(self, other):
+    def __sub__(self, other, *, upstream=False):
         if isinstance(other, source):
             raise TypeError
         if isinstance(other, sink):
             return other
-        return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other))
+        return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other), upstream=upstream)
 
     def __rsub__(self, other):
-        if isinstance(other, source):
-            raise TypeError
-        if isinstance(other, sink):
-            return other
-        return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other), upstream=True)
+        return self.__sub__(other, upstream=True)
 
     def __rshift__(self, other):
         if isinstance(other, (source, pipe, sink)):
@@ -76,7 +72,7 @@ class pipe:
             raise TypeError
         return self
 
-    def _extend_pipe_with_coroutine(self, coroutine, upstream=False):
+    def _extend_pipe_with_coroutine(self, coroutine, *, upstream=False):
         extended_pipe = self._pipe.copy()
         if upstream: extended_pipe.append    (coroutine)
         else       : extended_pipe.appendleft(coroutine)
