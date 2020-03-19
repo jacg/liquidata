@@ -5,10 +5,10 @@ from functools   import wraps
 
 class source:
 
-    def __init__(self, iterable=None):
+    def __init__(self, iterable=None, pipe=None):
         self._source = iterable
         # appended to the source by operators `-` and `+`
-        self._pipe   = deque()
+        self._pipe   = deque() if pipe is None else pipe
 
     # TODO: reimplement all of these operators with multimethods
     def __sub__(self, other):
@@ -18,7 +18,11 @@ class source:
             return ready(source=self, sink=other)
         if isinstance(other, source):
             raise TypeError
-        return self
+        fn = other
+        extended_pipe = self._pipe.copy()
+        extended_pipe.appendleft(_fn_to_map_pipe(fn))
+        return source(iterable=self._source, pipe=extended_pipe)
+
 
     def __add__(self, other):
         if isinstance(other, (source, pipe, sink)):

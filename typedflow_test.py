@@ -60,6 +60,19 @@ def test_source_to_sink_side_effect():
     (tf.source(the_data) >> result.append)()
     assert result == the_data
 
+
+def test_source_map_sink_side_effect():
+
+    def square(n):
+        return n*n
+
+    the_data = list(range(10))
+    result = []
+    (tf.source(the_data) - square >> result.append)()
+    assert result == list(map(square, the_data))
+
+
+
 # TODO:
 #
 # Check that source construction argument is iterable
