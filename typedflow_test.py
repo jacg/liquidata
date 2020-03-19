@@ -134,7 +134,7 @@ def test_combine_longer_pipes_from_pipe_and_sink():
     uu = map(u, hh)
     vv = map(v, uu)
     ww = map(w, vv)
-    assert result == list(ww)
+    assert list(ww) == result
 
 
 def test_combine_longer_pipes_from_source_pipe_and_sink():
@@ -154,7 +154,7 @@ def test_combine_longer_pipes_from_source_pipe_and_sink():
     uu = map(u, hh)
     vv = map(v, uu)
     ww = map(w, vv)
-    assert result == list(ww)
+    assert list(ww) == result
 
 
 ###################################################################
