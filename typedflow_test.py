@@ -105,6 +105,14 @@ def test_pipe_filter_func():
     assert result == list(filter(odd, map(square, the_data)))
 
 
+def test_map_func_pipe():
+    the_data = list(range(10))
+    result = []
+    square_then_add_3 = square - tf.pipe(add(3))
+    (tf.source(the_data) - square_then_add_3 >> result.append)()
+    assert result == list(map(add(3), map(square, the_data)))
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
