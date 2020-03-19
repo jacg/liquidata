@@ -64,7 +64,7 @@ class pipe:
     def __add__(self, other):
         if isinstance(other, (source, pipe, sink)):
             raise TypeError
-        return self
+        return self._extend_pipe_with_coroutine(_fn_to_filter_pipe(other))
 
     def __radd__(self, other):
         if isinstance(other, sink):
