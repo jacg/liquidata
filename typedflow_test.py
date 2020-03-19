@@ -62,10 +62,6 @@ def test_source_to_sink_side_effect():
 
 
 def test_source_with_map_to_sink_side_effect():
-
-    def square(n):
-        return n*n
-
     the_data = list(range(10))
     result = []
     (tf.source(the_data) - square >> result.append)()
@@ -73,10 +69,6 @@ def test_source_with_map_to_sink_side_effect():
 
 
 def test_source_with_filter_to_sink_side_effect():
-
-    def odd(n):
-        return n % 2 != 0
-
     the_data = list(range(10))
     result = []
     (tf.source(the_data) + odd >> result.append)()
@@ -84,11 +76,6 @@ def test_source_with_filter_to_sink_side_effect():
 
 
 def test_chain_filters_and_maps_on_source():
-
-    def square(n): return n * n
-    def gtN(N): return lambda x: x > N
-    def ltN(N): return lambda x: x < N
-
     the_data = list(range(10))
     result = []
     (tf.source(the_data) - square + gtN(3) - square + ltN(1000) >> result.append)()
@@ -96,28 +83,30 @@ def test_chain_filters_and_maps_on_source():
 
 
 def test_source_pipe_sink():
-
-    def square(n): return n * n
-    def add(N): return lambda x: x + N
-
     the_data = list(range(10))
     result = []
-
     (tf.source(the_data) - tf.pipe(square) >> result.append)()
     assert result == list(map(square, the_data))
 
 
 def test_pipe_map_func():
-
-    def square(n): return n * n
-    def add(N): return lambda x: x + N
-
     the_data = list(range(10))
     result = []
-
     square_then_add_3 = tf.pipe(square) - add(3)
     (tf.source(the_data) - square_then_add_3 >> result.append)()
     assert result == list(map(add(3), map(square, the_data)))
+
+###################################################################
+# Guinea pig functions for use in graphs constructed in the tests #
+###################################################################
+
+def square(n): return n * n
+def add(N): return lambda x: x + N
+def gtN(N): return lambda x: x > N
+def ltN(N): return lambda x: x < N
+
+def odd (n): return n % 2 != 0
+def even(n): return n % 2 == 0
 
 
 # TODO:
