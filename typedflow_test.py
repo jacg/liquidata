@@ -72,6 +72,16 @@ def test_source_map_sink_side_effect():
     assert result == list(map(square, the_data))
 
 
+def test_source_filter_sink_side_effect():
+
+    def odd(n):
+        return n % 2 != 0
+
+    the_data = list(range(10))
+    result = []
+    (tf.source(the_data) + odd >> result.append)()
+    assert result == list(filter(odd, the_data))
+
 
 # TODO:
 #

@@ -23,11 +23,13 @@ class source:
         extended_pipe.appendleft(_fn_to_map_pipe(fn))
         return source(iterable=self._source, pipe=extended_pipe)
 
-
     def __add__(self, other):
         if isinstance(other, (source, pipe, sink)):
             raise TypeError
-        return self
+        fn = other
+        extended_pipe = self._pipe.copy()
+        extended_pipe.appendleft(_fn_to_filter_pipe(fn))
+        return source(iterable=self._source, pipe=extended_pipe)
 
     def __rshift__(self, other):
         if isinstance(other, (source, pipe)):
@@ -108,12 +110,23 @@ def _apply(arg, fn):
     return fn(arg)
 
 
-def _fn_to_map_pipe(op=None):
+def _fn_to_map_pipe(op):
     def map_loop(target):
         with closing(target):
             while True:
                 target.send(op((yield)))
     return coroutine(map_loop)
+
+
+def _fn_to_filter_pipe(predicate):
+    def filter_loop(target):
+        with closing(target):
+            while True:
+                val = yield
+                if predicate(val):
+                    target.send(val)
+    return coroutine(filter_loop)
+
 
 def _fn_to_sink(effect):
     def sink_loop():
