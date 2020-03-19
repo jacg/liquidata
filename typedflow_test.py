@@ -36,9 +36,9 @@ table = {'-'  : { tf.source : (    X    , tf.source, tf.ready , tf.source),
                for (lhs, results)  in sub_table.items()
                for (rhs, result)   in zip(RHS, results) ])
 def test_operator_type_matrices(LHS_type, op_symbol, RHS_type, result):
-    sample_instance = { tf.source : tf.source(),
+    sample_instance = { tf.source : tf.source(1),
                         tf.pipe   : tf.pipe()  ,
-                        tf.sink   : tf.sink()  ,
+                        tf.sink   : tf.sink(1)  ,
                         func      : lambda: 1  }
 
     lhs = sample_instance[LHS_type]
@@ -52,3 +52,14 @@ def test_operator_type_matrices(LHS_type, op_symbol, RHS_type, result):
 
     else:
         assert isinstance(op(lhs, rhs), result)
+
+
+def test_source_to_sink_side_effect():
+    the_data = list(range(10))
+    result = []
+    (tf.source(the_data) >> result.append)()
+    assert result == the_data
+
+# TODO:
+#
+# Check that source construction argument is iterable
