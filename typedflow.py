@@ -78,7 +78,9 @@ class pipe:
         return self
 
     def __truediv__(self, other):
-        return self._extend_pipe_with_coroutine(_coroutine_to_branch_coroutine(_fn_to_sink_coroutine(other))) # Only dealing with func for now
+        sink_function  = other._fn if isinstance(other, sink) else other
+        sink_coroutine = _fn_to_sink_coroutine(sink_function)
+        return self._extend_pipe_with_coroutine(_coroutine_to_branch_coroutine(sink_coroutine))
 
     def _extend_pipe_with_coroutine(self, coroutine, *, upstream=False):
         extended_pipe = self._pipe.copy()
