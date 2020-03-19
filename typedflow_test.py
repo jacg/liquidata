@@ -120,14 +120,26 @@ def test_source_pipe_sub_sink():
     assert result == list(map(add(4), the_data))
 
 
+def test_combine_longer_pipes_from_pipe_and_sink():
+    f,g,h,i = map(symbolic_apply, 'fghi')
+    the_data = 'xyz'
+    result = []
+    the_pipe = tf.pipe(f) - g
+    the_sink = h - (i - tf.sink(result.append))
+    (tf.source(the_data) - the_pipe - the_sink)()
+    assert result == list(map(i, map(h, map(g, map(f, the_data)))))
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
 
 def square(n): return n * n
+def mul(N): return lambda x: x * N
 def add(N): return lambda x: x + N
 def gtN(N): return lambda x: x > N
 def ltN(N): return lambda x: x < N
+def symbolic_apply(f): return lambda x: f'{f}({x})'
 
 def odd (n): return n % 2 != 0
 def even(n): return n % 2 == 0

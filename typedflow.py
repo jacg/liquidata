@@ -5,7 +5,7 @@ from functools   import wraps
 
 class source:
 
-    def __init__(self, iterable=None, pipe=None):
+    def __init__(self, iterable=None, *, pipe=None):
         self._source = iterable
         # appended to the source by operators `-` and `+`
         self._pipe   = deque() if pipe is None else pipe
@@ -51,7 +51,7 @@ class pipe:
         if isinstance(other, source):
             raise TypeError
         if isinstance(other, sink):
-            return other
+            return other._extend_pipe_with_pipe(self)
         return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other), upstream=upstream)
 
     def __rsub__(self, other):
@@ -81,15 +81,15 @@ class pipe:
 
 class sink:
 
-    def __init__(self, fn):
-        self._pipe = deque()
-        self._sink = _fn_to_sink(fn)
+    def __init__(self, fn, *, pipe=None):
+        self._pipe = deque() if pipe is None else pipe
+        self._fn   = fn
 
     def __sub__(self, _):
         raise TypeError
 
     def __rsub__(self, other):
-        return self
+        return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other))
 
     def __radd__(self, other):
         if isinstance(other, (source, pipe, sink)):
@@ -101,16 +101,23 @@ class sink:
             raise TypeError
         return self
 
+    def _extend_pipe_with_pipe(self, the_pipe):
+        extended_pipe = the_pipe._pipe + self._pipe
+        return sink(self._fn, pipe=extended_pipe)
+
+    def _extend_pipe_with_coroutine(self, coroutine):
+        extended_pipe = self._pipe.copy()
+        extended_pipe.append(coroutine)
+        return sink(self._fn, pipe=extended_pipe)
+
 
 class ready:
 
-    def __init__(self, source=None, sink=None):
+    def __init__(self, source, sink):
         self._source = source._source
-        xxx = source._pipe
-        yyy = sink._pipe
-        zzz = yyy + xxx
-        zzz.appendleft(sink._sink)
-        self._pipe   = reduce(_apply, zzz)
+        all_pipe_coroutines = sink._pipe + source._pipe
+        all_pipe_coroutines.appendleft(_fn_to_sink(sink._fn))
+        self._pipe   = reduce(_apply, all_pipe_coroutines)
 
     def __call__(self):
         for item in self._source:
