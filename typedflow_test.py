@@ -83,6 +83,18 @@ def test_source_with_filter_to_sink_side_effect():
     assert result == list(filter(odd, the_data))
 
 
+def test_chain_filters_and_maps_on_source():
+
+    def square(n): return n * n
+    def gtN(N): return lambda x: x > N
+    def ltN(N): return lambda x: x < N
+
+    the_data = list(range(10))
+    result = []
+    (tf.source(the_data) - square + gtN(3) - square + ltN(1000) >> result.append)()
+    assert result == list(filter(ltN(1000), map(square, filter(gtN(3), map(square, the_data)))))
+
+
 # TODO:
 #
 # Check that source construction argument is iterable
