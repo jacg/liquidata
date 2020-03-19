@@ -42,8 +42,8 @@ class source:
 
 class pipe:
 
-    def __init__(self, fn=None):
-        self._pipe = deque()
+    def __init__(self, fn=None, *, pipe=None):
+        self._pipe = deque() if pipe is None else pipe
         if fn:
             self._pipe.appendleft(_fn_to_map_pipe(fn))
 
@@ -52,7 +52,7 @@ class pipe:
             raise TypeError
         if isinstance(other, sink):
             return other
-        return self
+        return self._extend_pipe_with_coroutine(_fn_to_map_pipe(other))
 
     __rsub__ = __sub__
 
@@ -70,6 +70,11 @@ class pipe:
         if isinstance(other, sink):
             raise TypeError
         return self
+
+    def _extend_pipe_with_coroutine(self, coroutine):
+        extended_pipe = self._pipe.copy()
+        extended_pipe.appendleft(coroutine)
+        return pipe(pipe=extended_pipe)
 
 
 class sink:

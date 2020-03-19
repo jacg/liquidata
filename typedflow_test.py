@@ -105,6 +105,21 @@ def test_source_pipe_sink():
 
     (tf.source(the_data) - tf.pipe(square) >> result.append)()
     assert result == list(map(square, the_data))
+
+
+def test_pipe_map_func():
+
+    def square(n): return n * n
+    def add(N): return lambda x: x + N
+
+    the_data = list(range(10))
+    result = []
+
+    square_then_add_3 = tf.pipe(square) - add(3)
+    (tf.source(the_data) - square_then_add_3 >> result.append)()
+    assert result == list(map(add(3), map(square, the_data)))
+
+
 # TODO:
 #
 # Check that source construction argument is iterable
