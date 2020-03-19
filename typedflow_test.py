@@ -157,6 +157,15 @@ def test_combine_longer_pipes_from_source_pipe_and_sink():
     assert list(ww) == result
 
 
+def test_src_branch():
+    the_data = list(range(10))
+    A, B = [], []
+    (tf.source(the_data) / A.append + odd >> B.append)()
+    assert A ==                  the_data
+    assert B == list(filter(odd, the_data))
+
+
+# TODO: add `/` to the type test matrices
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

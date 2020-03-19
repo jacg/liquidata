@@ -30,6 +30,9 @@ class source:
             raise TypeError
         return ready(source=self, sink=sink(other))
 
+    def __truediv__(self, other):
+        return self._extend_pipe_with_coroutine(_sink_to_branch(_fn_to_sink(other))) # Only dealing with func for now
+
     def _extend_pipe_with_coroutine(self, coroutine):
         extended_pipe = self._pipe.copy()
         extended_pipe.appendleft(coroutine)
@@ -153,10 +156,22 @@ def _fn_to_sink(effect):
     return coroutine(sink_loop)()
 
 
+def _sink_to_branch(sideways : sink):
+    @coroutine
+    def branch_loop(downstream):
+        with closing(sideways), closing(downstream):
+            while True:
+                val = yield
+                sideways  .send(val)
+                downstream.send(val)
+    return branch_loop
+
+
 @contextmanager
 def closing(target):
     try:     yield
     finally: target.close()
+
 
 def coroutine(generator_function):
     @wraps(generator_function)
