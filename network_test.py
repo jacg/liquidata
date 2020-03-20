@@ -34,3 +34,10 @@ def test_trivial_network():
     net.add_source(the_data)
     net.add_reduce_wi_sink(add)
     assert net() == sum(the_data)
+
+
+def test_set_variable_at_run_time():
+    the_data = list(range(10))
+    net = nw.network()
+    net.add_source(the_data)
+    assert net(OUT=nw.fold(add)) == sum(the_data)

@@ -10,7 +10,9 @@ class network:
         self.  _bound_variables = {}
         self._unbound_variables = {'IN', 'OUT'}
 
-    def __call__(self):
+    def __call__(self, **kwargs):
+        for name, value in kwargs.items():
+            self.set_variable(name, value)
         if self._unbound_variables:
             raise NetworkIncomplete(self._unbound_variables)
         the_coroutine, future = self._bound_variables['OUT']()
@@ -23,7 +25,7 @@ class network:
         self.set_variable('IN', iterable)
 
     def add_reduce_wi_sink(self, binary_function):
-        self.set_variable('OUT', reduce_wi_factory(binary_function))
+        self.set_variable('OUT', reduce_factory(binary_function))
 
     def set_variable(self, name, value):
         # TODO: this should create a new instance rather than mutating the old
@@ -53,12 +55,14 @@ def _variable_sort_key(name):
 
 
 
+# def fold()
 
-def sink(unary_function):
-    def sink_loop():
-        while True:
-            unary_function((yield))
-    return coroutine(sink_loop)()
+
+# def sink(unary_function):
+#     def sink_loop():
+#         while True:
+#             unary_function((yield))
+#     return coroutine(sink_loop)()
 
 
 def coroutine(generator_function):
@@ -103,15 +107,16 @@ def absorb(absorbing_side_effect_unary_function):
 #     return reduce_loop
 
 
-def reduce_wi_factory(binary_function):
+def reduce_factory(binary_function, initial=None):
     @coroutine_with_future
     def reduce_loop(future):
-        try:
-            accumulator = (yield)
-        except StopIteration:
-            # TODO: message about not being able to run on an empty stream. Try
-            # to link it to variable names in the network?
-            pass
+        if initial is None:
+            try:
+                accumulator = (yield)
+            except StopIteration:
+                # TODO: message about not being able to run on an empty stream.
+                # Try to link it to variable names in the network?
+                pass
         try:
             while True:
                 accumulator = binary_function(accumulator, (yield))
@@ -119,5 +124,6 @@ def reduce_wi_factory(binary_function):
             future.set_result(accumulator)
     return reduce_loop
 
+fold = reduce_factory
 
 CoroutineWithFuture = namedtuple('CoroutineWithFuture', 'coroutine future')
