@@ -20,16 +20,16 @@ class network:
         return future.result()
 
     def add_source(self, iterable):
-        # TODO: this should create a new instance rather than mutating the old
-        # one. Instances should be persistent.
-        self.  _bound_variables        ['IN'] = iterable
-        self._unbound_variables.discard('IN')
+        self.set_variable('IN', iterable)
 
     def add_reduce_wi_sink(self, binary_function):
+        self.set_variable('OUT', reduce_wi_factory(binary_function))
+
+    def set_variable(self, name, value):
         # TODO: this should create a new instance rather than mutating the old
         # one. Instances should be persistent.
-        self.  _bound_variables        ['OUT'] = reduce_wi_factory(binary_function)
-        self._unbound_variables.discard('OUT')
+        self.  _bound_variables        [name] = value
+        self._unbound_variables.discard(name)
 
 
 
