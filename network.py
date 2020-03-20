@@ -10,6 +10,13 @@ class network:
     def __call__(self):
         raise NetworkIncomplete(self._unbound_variables)
 
+    def add_source(self, iterable):
+        # TODO: this should create a new instance rather than mutating the old
+        # one. Instances should be persistent.
+        self._src = iterable
+        self._unbound_variables.discard('IN')
+
+
 
 class NetworkIncomplete(Exception):
 

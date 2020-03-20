@@ -8,3 +8,11 @@ def test_cannot_run_empty_network():
     with raises(nw.NetworkIncomplete) as e:
         net()
     assert e.value.unbound_variables == {"IN", "OUT"}
+
+
+def test_cannot_run_network_without_sink():
+    net = nw.network()
+    net.add_source([])
+    with raises(nw.NetworkIncomplete) as e:
+        net()
+    assert e.value.unbound_variables == {"OUT",}
