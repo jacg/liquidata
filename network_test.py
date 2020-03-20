@@ -1,4 +1,5 @@
-from operator import add
+from operator  import add, mul
+from functools import reduce
 
 import network as nw
 
@@ -37,7 +38,8 @@ def test_trivial_network():
 
 
 def test_set_variable_at_run_time():
-    the_data = list(range(10))
+    the_data = list(range(1, 10))
     net = nw.network()
     net.add_source(the_data)
-    assert net(OUT=nw.fold(add)) == sum(the_data)
+    assert net(OUT=nw.fold(add)) == reduce(add, the_data)
+    assert net(OUT=nw.fold(mul)) == reduce(mul, the_data)
