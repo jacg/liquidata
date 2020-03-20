@@ -16,6 +16,12 @@ class network:
         self._src = iterable
         self._unbound_variables.discard('IN')
 
+    def add_sink(self, unary_function):
+        # TODO: this should create a new instance rather than mutating the old
+        # one. Instances should be persistent.
+        self._sink = unary_function
+        self._unbound_variables.discard('OUT')
+
 
 
 class NetworkIncomplete(Exception):

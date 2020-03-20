@@ -16,3 +16,11 @@ def test_cannot_run_network_without_sink():
     with raises(nw.NetworkIncomplete) as e:
         net()
     assert e.value.unbound_variables == {"OUT",}
+
+
+def test_cannot_run_network_without_source():
+    net = nw.network()
+    net.add_sink(lambda _: None)
+    with raises(nw.NetworkIncomplete) as e:
+        net()
+    assert e.value.unbound_variables == {"IN",}
