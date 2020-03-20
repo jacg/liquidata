@@ -1,5 +1,50 @@
 # Thoughts on design and implementation in terms of types and operators
 
+## Change of emphasis
+
+After having implemented some of the ideas described in the next section, I have
+come to the conclusion that the operators are more trouble than they are worth.
+Other approaches are likely to be more fruitful. Above all, the surface syntax
+is not what matters: the structure of the implementation is more important.
+
+Here are the ideas that I now think are the most important:
+
++ The `source`, `pipe`, `sink` and `ready` types, and maybe some more. They
+  should help with earlier error detection and making error messages more
+  informative.
+
++ Making true reusable callables, with the value store / internal namespace.
+
++ Decouple namespace manipulation from specific components. This is the one that
+  seems most difficult to me at the moment.
+
++ Implicit conversion of functions into maps, lightweight syntax for filters and
+  reduces.
+
+  No need to say `map` explicitly: if it's a function, and you're putting it
+  into a pipe, of course you're going to use it to map! The old framework did
+  this for strings: we should apply this idea of implicitly converting items in
+  the pipe specification to their most common use, more widely. Another obvious
+  choice is: any tuple is a branch, but see below.
+
+  Well, you might want to use it as a filter, rather than a map. So this next
+  most common case should have a very lightweight syntax. Maybe wrap it in `[]`
+  or `{}`? But maybe we can find better use for these.
+
+  A function might also be used to reduce, so let's make that as lightweight as
+  possible. Maybe whichever brackets weren't used for filter? `[]` might be
+  better, because they preserve order, so `[fn]` might be `reduce(fn)` and `[fn,
+  val]` could be `reduce(fn, initial=val)`.
+
++ Implicitly convert tuples to branches. The trouble is one-item-tuples, which
+  need the trailing comma, which is so easy to forget or overlook. Could provide
+  some named to make reading this easier, but when writing it's just as easy to
+  forget to turn `(sink)` into `branch(sink)` as into `(sink,)`. This problem
+  would be avoided by using `[]` for branches, in which case it can't be used
+  for filter or reduce.
+
+## Original ideas, many of which will be abandoned
+
 + Introduce 4 primary types: `source`, `pipe`, `sink` and `ready`.
 
 + Think of `-` as a line connecting two elements in a network: forget all
