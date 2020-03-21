@@ -14,9 +14,8 @@ def test_cannot_run_empty_network():
 
 
 def test_cannot_run_network_without_sink():
-    net = nw.network()
-    net.add_source([])
-    with raises(nw.NetworkIncomplete) as e:
+    net = nw.network(nw.src([]))
+    with raises(nw.NetworkIncomplete) as e: # TODO: message text match
         net()
     assert e.value.unbound_variables == {"OUT", }
 
