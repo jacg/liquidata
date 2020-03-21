@@ -10,42 +10,53 @@ def test_cannot_run_empty_network():
     net = nw.network()
     with raises(nw.NetworkIncomplete) as e:
         net()
-    assert e.value.unbound_variables == {"IN", "OUT"}
 
 
 def test_cannot_run_network_without_sink():
     net = nw.network(nw.src([]))
-    with raises(nw.NetworkIncomplete) as e: # TODO: message text match
+    with raises(nw.NetworkIncomplete): # TODO: message text match
         net()
-    assert e.value.unbound_variables == {"OUT", }
 
 
 def test_cannot_run_network_without_source():
     net = nw.network(nw.sink(lambda _:None))
-    with raises(nw.NetworkIncomplete) as e: # TODO: message text match
+    with raises(nw.NetworkIncomplete): # TODO: message text match
         net()
-    assert e.value.unbound_variables == {"IN", }
 
 
 def test_trivial_network():
     the_data = 'xyz'
-    net = nw.network(nw.src(the_data), nw.fold(sym_add))
-    assert net() == reduce(sym_add, the_data)
+    net = nw.network(nw.src(the_data), nw.out.X(nw.fold(sym_add)))
+    assert net().X == reduce(sym_add, the_data)
 
 
 def test_set_sink_at_run_time():
     the_data = 'xyz'
-    net = nw.network(nw.src(the_data))
-    assert net(OUT=nw.fold(sym_add)) == reduce(sym_add, the_data)
-    assert net(OUT=nw.fold(sym_mul)) == reduce(sym_mul, the_data)
+    net = nw.network(nw.src(the_data), nw.out.X(nw.get.OUT))
+    assert net(OUT=nw.fold(sym_add)).X == reduce(sym_add, the_data)
+    assert net(OUT=nw.fold(sym_mul)).X == reduce(sym_mul, the_data)
 
 
-def test_set_source_at_run_time():
+def test_set_source_at_run_time_source_in_get():
     data1 = 'xyz'
     data2 = 'abcd'
-    net = nw.network(nw.fold(sym_add))
+    net = nw.network(nw.get.IN, nw.out.X(nw.fold(sym_add)))
+    assert net(IN=nw.src(data1)).X == reduce(sym_add, data1)
+    assert net(IN=nw.src(data2)).X == reduce(sym_add, data2)
+
+def test_set_source_at_run_time_get_in_source():
+    data1 = 'xyz'
+    data2 = 'abcd'
+    net = nw.network(nw.src(nw.get.IN), nw.fold(sym_add))
     assert net(IN=data1) == reduce(sym_add, data1)
     assert net(IN=data2) == reduce(sym_add, data2)
+
+
+def test_implicit_map():
+    data = 'xyz'
+    f, = symbolic_functions('f')
+    net = nw.network(nw.src(data), f, nw.out.X(nw.fold(sym_add)))
+    assert net().X == reduce(sym_add, map(f, data))
 
 
 ###################################################################
