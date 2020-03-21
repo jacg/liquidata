@@ -12,21 +12,19 @@ class network:
 
     def __call__(self, **kwargs):
 
-        # Set variables provided by caller # TODO: use new set_variables method
-        for name, value in kwargs.items():
-            self.set_variable(name, value)
+        self.set_variables(**kwargs)
 
         # Set IN variable if source present
         if self._pipe:
             first = self._pipe[0]
             if isinstance(first, source):
-                self.set_variable('IN', first._source)
+                self.set_variables(IN=first._source)
 
         # Set OUT variable is sink present
         if self._pipe:
             last = self._pipe[-1]
             if isinstance(last, sink):
-                self.set_variable('OUT', last)
+                self.set_variables(OUT=last)
 
         # Detect and report missing variables
         if self._unbound_variables:
@@ -42,11 +40,12 @@ class network:
         the_coroutine.close()
         return future.result()
 
-    def set_variable(self, name, value): # TODO: make this accept multiple settings via **kwds
+    def set_variables(self, **kwargs):
         # TODO: this should create a new instance rather than mutating the old
         # one. Instances should be persistent.
-        self.  _bound_variables        [name] = value
-        self._unbound_variables.discard(name)
+        for name, value in kwargs.items():
+            self.  _bound_variables        [name] = value
+            self._unbound_variables.discard(name)
 
 
 class source:
