@@ -29,15 +29,20 @@ def test_cannot_run_network_without_source():
 
 def test_trivial_network():
     the_data = list(range(10))
-    net = nw.network()
-    net.add_source(the_data)
-    net.add_reduce_wi_sink(add)
+    net = nw.network(nw.src(the_data), nw.fold(add))
     assert net() == sum(the_data)
 
 
-def test_set_variable_at_run_time():
+def test_set_sink_at_run_time():
     the_data = list(range(1, 10))
-    net = nw.network()
-    net.add_source(the_data)
+    net = nw.network(nw.src(the_data))
     assert net(OUT=nw.fold(add)) == reduce(add, the_data)
     assert net(OUT=nw.fold(mul)) == reduce(mul, the_data)
+
+
+def test_set_source_at_run_time():
+    data1 = range(10)
+    data2 = range(2, 40, 3)
+    net = nw.network(nw.fold(add))
+    assert net(IN=data1) == reduce(add, data1)
+    assert net(IN=data2) == reduce(add, data2)

@@ -26,7 +26,7 @@ class network:
         if self._pipe:
             last = self._pipe[-1]
             if isinstance(last, sink):
-                self.set_variable('OUT', side_effect_sink(last._fn))
+                self.set_variable('OUT', last)
 
         # Detect and report missing variables
         if self._unbound_variables:
@@ -34,19 +34,13 @@ class network:
 
         # Compile the network: turn reusable specifications into single-use
         # coroutines.
-        the_coroutine, future = self._bound_variables['OUT']()
+        the_coroutine, future = self._bound_variables['OUT'].make_coroutine()
 
         # Run the network
         for item in self._bound_variables['IN']:
             the_coroutine.send(item)
         the_coroutine.close()
         return future.result()
-
-    def add_source(self, iterable):
-        self.set_variable('IN', iterable)
-
-    def add_reduce_wi_sink(self, binary_function):
-        self.set_variable('OUT', reduce_factory(binary_function))
 
     def set_variable(self, name, value): # TODO: make this accept multiple settings via **kwds
         # TODO: this should create a new instance rather than mutating the old
@@ -68,6 +62,18 @@ class sink:
     def __init__(self, unary_function):
         self._fn = unary_function
 
+    def make_coroutine(self):
+        return side_effect_sink(self._fn)
+
+
+class fold(sink):
+
+    def __init__(self, binary_function, initial=None):
+        self._fn = binary_function
+
+    def make_coroutine(self): # TODO this returns (cor, fut); sink returns just cor: how to unify?
+        return reduce_factory(self._fn)()
+
 class NetworkIncomplete(Exception):
 
     def __init__(self, unbound_variables):
@@ -86,8 +92,6 @@ def _variable_sort_key(name):
     return tuple(map(ord, name))
 
 
-
-# def fold()
 
 
 def side_effect_sink(unary_function):
@@ -156,6 +160,5 @@ def reduce_factory(binary_function, initial=None):
             future.set_result(accumulator)
     return reduce_loop
 
-fold = reduce_factory
 
 CoroutineWithFuture = namedtuple('CoroutineWithFuture', 'coroutine future')
