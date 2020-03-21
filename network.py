@@ -13,18 +13,8 @@ class network:
     def __call__(self, **kwargs):
 
         self.set_variables(**kwargs)
-
-        # Set IN variable if source present
-        if self._pipe:
-            first = self._pipe[0]
-            if isinstance(first, source):
-                self.set_variables(IN=first._source)
-
-        # Set OUT variable is sink present
-        if self._pipe:
-            last = self._pipe[-1]
-            if isinstance(last, sink):
-                self.set_variables(OUT=last)
+        self.set_IN_if_source_at_front()
+        self.set_OUT_if_sink_at_end()
 
         # Detect and report missing variables
         if self._unbound_variables:
@@ -47,6 +37,18 @@ class network:
             self.  _bound_variables        [name] = value
             self._unbound_variables.discard(name)
 
+    def set_IN_if_source_at_front(self):
+        # Set IN variable if source present
+        if self._pipe:
+            first = self._pipe[0]
+            if isinstance(first, source):
+                self.set_variables(IN=first._source)
+
+    def set_OUT_if_sink_at_end(self):
+        if self._pipe:
+            last = self._pipe[-1]
+            if isinstance(last, sink):
+                self.set_variables(OUT=last)
 
 class source:
 
