@@ -22,6 +22,12 @@ class network:
             if isinstance(first, source):
                 self.set_variable('IN', first._source)
 
+        # Set OUT variable is sink present
+        if self._pipe:
+            last = self._pipe[-1]
+            if isinstance(last, sink):
+                self.set_variable('OUT', side_effect_sink(last._fn))
+
         # Detect and report missing variables
         if self._unbound_variables:
             raise NetworkIncomplete(self._unbound_variables)
@@ -57,6 +63,11 @@ class source:
 src = source
 
 
+class sink:
+
+    def __init__(self, unary_function):
+        self._fn = unary_function
+
 class NetworkIncomplete(Exception):
 
     def __init__(self, unbound_variables):
@@ -79,11 +90,11 @@ def _variable_sort_key(name):
 # def fold()
 
 
-# def sink(unary_function):
-#     def sink_loop():
-#         while True:
-#             unary_function((yield))
-#     return coroutine(sink_loop)()
+def side_effect_sink(unary_function):
+    def sink_loop():
+        while True:
+            unary_function((yield))
+    return coroutine(sink_loop)()
 
 
 def coroutine(generator_function):

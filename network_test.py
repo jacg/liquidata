@@ -21,9 +21,8 @@ def test_cannot_run_network_without_sink():
 
 
 def test_cannot_run_network_without_source():
-    net = nw.network()
-    net.add_reduce_wi_sink(lambda _: None)
-    with raises(nw.NetworkIncomplete) as e:
+    net = nw.network(nw.sink(lambda _:None))
+    with raises(nw.NetworkIncomplete) as e: # TODO: message text match
         net()
     assert e.value.unbound_variables == {"IN", }
 
