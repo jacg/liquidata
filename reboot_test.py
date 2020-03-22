@@ -75,6 +75,23 @@ def test_implicit_branch():
     assert main   == data
     assert branch == data
 
+def test_integration_1():
+    from reboot import Network
+    data = range(20)
+    f, g, h = square, addN(1), addN(2)
+    a, b, c = odd   , gtN(50), ltN(100)
+    s, t    = [], []
+    net = Network(data,
+                  f,
+                  {a},
+                  [g, {b}, (s.append,)],
+                  h,
+                  {c},
+                  (t.append,))
+    net()
+    assert s == list(filter(b, map(g, filter(a, map(f, data)))))
+    assert t == list(filter(c, map(h, filter(a, map(f, data)))))
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
