@@ -143,11 +143,13 @@ class sink(component):
 
     coroutine_factory = None
 
-    def __init__(self, binary_function):
+    def __init__(self, binary_function, **kwds):
         self._fn = binary_function
+        self._kwds = kwds # so far only used to provide 'initial=' to fold
 
     def accept_future(self, future):
-        return sink_and_future(self.coroutine_factory(self._fn)(future))
+        coroutine_factory = self.coroutine_factory(self._fn, **self._kwds)
+        return sink_and_future(coroutine_factory(future))
 
 
 class sink_and_future(sink):
@@ -187,11 +189,11 @@ class output(component):
     def __init__(self, name):
         self.name = name
 
-    def __call__(self, worker):
+    def __call__(self, worker, initial=None):
         if isinstance(worker, sink):
             self.worker = worker
         else:
-            self.worker = fold(worker)
+            self.worker = fold(worker, initial=initial)
         return self
 
 
@@ -290,6 +292,8 @@ def reduce_factory(binary_function, initial=None):
                 # TODO: message about not being able to run on an empty stream.
                 # Try to link it to variable names in the network?
                 pass
+        else:
+            accumulator = initial
         try:
             while True:
                 accumulator = binary_function(accumulator, (yield))

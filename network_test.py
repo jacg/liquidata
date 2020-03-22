@@ -39,6 +39,14 @@ def test_implicit_fold():
     assert net().X == reduce(sym_add, the_data)
 
 
+def test_fold_with_initial_value():
+    from network import network, src, out
+    the_data = 'xyz'
+    initial = "initial"
+    net = network(src(the_data), out.X(sym_add, initial))
+    assert net().X == reduce(sym_add, the_data, initial)
+
+
 def test_set_out_name_externally():
     from network import network, src, out
     the_data = 'xyz'
