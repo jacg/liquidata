@@ -188,7 +188,10 @@ class output(component):
         self.name = name
 
     def __call__(self, worker):
-        self.worker = worker
+        if isinstance(worker, sink):
+            self.worker = worker
+        else:
+            self.worker = fold(worker)
         return self
 
 

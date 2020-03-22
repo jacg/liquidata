@@ -3,8 +3,9 @@ from functools import reduce
 
 import network as nw
 
-from pytest import raises
+from pytest import raises, mark
 
+xfail=mark.xfail
 
 def test_cannot_run_empty_network():
     net = nw.network()
@@ -25,37 +26,59 @@ def test_cannot_run_network_without_source():
 
 
 def test_trivial_network():
+    from network import network, src, out, fold
     the_data = 'xyz'
-    net = nw.network(nw.src(the_data), nw.out.X(nw.fold(sym_add)))
+    net = network(src(the_data), out.X(fold(sym_add)))
     assert net().X == reduce(sym_add, the_data)
 
 
-def test_set_sink_at_run_time():
+def test_implicit_fold():
+    from network import network, src, out
     the_data = 'xyz'
-    net = nw.network(nw.src(the_data), nw.out.X(nw.get.OUT))
-    assert net(OUT=nw.fold(sym_add)).X == reduce(sym_add, the_data)
-    assert net(OUT=nw.fold(sym_mul)).X == reduce(sym_mul, the_data)
+    net = network(src(the_data), out.X(sym_add))
+    assert net().X == reduce(sym_add, the_data)
 
 
-def test_set_source_at_run_time_source_in_get():
+def test_get_sink_get_in_out():
+    from network import network, src, out, get, fold
+    the_data = 'xyz'
+    net = network(src(the_data), out.X(get.OUT))
+    assert net(OUT=fold(sym_add)).X == reduce(sym_add, the_data)
+    assert net(OUT=fold(sym_mul)).X == reduce(sym_mul, the_data)
+
+
+def test_get_sink_out_in_get():
+    from network import network, src, out, get, fold
+    the_data = 'xyz'
+    net = network(src(the_data), out.X(get.OUT))
+    assert net(OUT=fold(sym_add)).X == reduce(sym_add, the_data)
+    assert net(OUT=fold(sym_mul)).X == reduce(sym_mul, the_data)
+
+
+def test_get_source():
+    from network import network, out, get, src
     data1 = 'xyz'
     data2 = 'abcd'
-    net = nw.network(nw.get.IN, nw.out.X(nw.fold(sym_add)))
-    assert net(IN=nw.src(data1)).X == reduce(sym_add, data1)
-    assert net(IN=nw.src(data2)).X == reduce(sym_add, data2)
+    net = network(get.IN, out.X(sym_add))
+    assert net(IN=src(data1)).X == reduce(sym_add, data1)
+    assert net(IN=src(data2)).X == reduce(sym_add, data2)
 
-def test_set_source_at_run_time_get_in_source():
+
+@xfail(reason='Needs more thought')
+def test_get_source_argument():
+    from network import network, src, get, out
     data1 = 'xyz'
     data2 = 'abcd'
-    net = nw.network(nw.src(nw.get.IN), nw.fold(sym_add))
-    assert net(IN=data1) == reduce(sym_add, data1)
-    assert net(IN=data2) == reduce(sym_add, data2)
+    net = network(src(get.IN), out.X(sym_add))
+    assert net(IN=data1).X == reduce(sym_add, data1)
+    assert net(IN=data2).X == reduce(sym_add, data2)
 
 
 def test_implicit_map():
+    from network import network, src, out
     data = 'xyz'
     f, = symbolic_functions('f')
-    net = nw.network(nw.src(data), f, nw.out.X(nw.fold(sym_add)))
+    net = network(src(data), f, out.X(sym_add))
     assert net().X == reduce(sym_add, map(f, data))
 
 
