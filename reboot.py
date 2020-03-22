@@ -8,11 +8,10 @@ from asyncio    import Future
 class Network:
 
     def __init__(self, *components):
-        self._components = components
+        self._components = tuple(map(decode_implicits, components))
 
     def __call__(self, source):
-        raw_components = self._components
-        pipe, outputs = raw_components_to_single_coroutine_and_outputs(raw_components)
+        pipe, outputs = components_to_single_coroutine_and_outputs(self._components)
         push(source, pipe)
         return Namespace(**{name: future.result() for name, future in outputs.items()})
 
@@ -22,9 +21,8 @@ DEBUG = True
 def debug(*args, **kwds):
     if DEBUG: print(*args, **kwds)
 
-def raw_components_to_single_coroutine_and_outputs(items):
-    pass                                                                                ; debug(f'items         {items}')
-    components              = tuple(map(     raw_to_component, items))                  ; debug(f'components    {components}')
+def components_to_single_coroutine_and_outputs(components):
+    pass                                                                                ; debug(f'components    {components}')
     components_with_futures = tuple(map(meth.inject_futures  , components))             ; debug(f'with_futures  {components_with_futures}')
     outputs                 = tuple(map(meth.get_outputs     , components_with_futures)); debug(f'outputs       {outputs}')
     coroutines              = tuple(map(meth.fresh_coroutine , components_with_futures)); debug(f'coroutines    {coroutines}')
@@ -109,10 +107,10 @@ class Filter(Component):
 class Branch(Component):
 
     def __init__(self, *components):
-        self._components = components
+        self._components = tuple(map(decode_implicits, components))
 
     def fresh_coroutine(self):
-        sideways, _ = raw_components_to_single_coroutine_and_outputs(self._components)
+        sideways = combine_coroutines(tuple(map(meth.fresh_coroutine, self._components)))
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -121,6 +119,9 @@ class Branch(Component):
                     sideways  .send(val)
                     downstream.send(val)
         return branch_loop
+
+    def inject_futures(self): return Branch(*map(meth.inject_futures, self._components))
+    def get_outputs   (self): return  chain(*map(meth.get_outputs   , self._components))
 
 
 class Output(Component):
@@ -193,7 +194,7 @@ class Fold(Component):
     def TODO(self):
         # Future sinks should not appear at the top level. Come up with a name
         # for this method and hook into it somewhere, probably before
-        # raw_to_component
+        # decode_implicits
         raise Exception('Fold must be wrapped in an out, otherwise the output will be lost')
 
 
@@ -201,7 +202,7 @@ class Fold(Component):
 
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
-def raw_to_component(it):
+def decode_implicits(it):
     if isinstance(it, Component): return it
     if isinstance(it, list     ): return Branch(*it)
     if isinstance(it, tuple    ): return Sink  (*it)
