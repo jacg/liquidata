@@ -1,5 +1,7 @@
 from functools  import reduce, wraps
 from contextlib import contextmanager
+from itertools  import chain
+from argparse   import Namespace
 
 
 class Network:
@@ -9,18 +11,23 @@ class Network:
 
     def __call__(self):
         source, *raw_components = self._components
-        pipe = raw_components_to_single_coroutine(raw_components)
+        pipe, outputs = raw_components_to_single_coroutine_and_outputs(raw_components)
 
         for item in source:
             pipe.send(item)
         pipe.close()
 
+        return Namespace(**{name: future.result() for name, future in outputs})
 
-def raw_components_to_single_coroutine(raw_components):
+
+
+def raw_components_to_single_coroutine_and_outputs(raw_components):
     pipe_components = map(implicit_to_component, raw_components)
-    pipe_coroutines = tuple(map(meth.fresh_coroutine, pipe_components))
+    components_with_futures = tuple(map(meth.inject_futures, pipe_components))
+    outputs = dict(chain(*map(meth.get_outputs, components_with_futures)))
+    pipe_coroutines = tuple(map(meth.fresh_coroutine, components_with_futures))
     pipe = combine_coroutines(pipe_coroutines)
-    return pipe
+    return pipe, outputs
 
 
 # components:
@@ -50,6 +57,11 @@ class Component:
     def unresolved_gets(self):
         pass
 
+    def inject_futures(self):
+        return self
+
+    def get_outputs(self):
+        return ()
 
 class Sink(Component):
 
@@ -98,7 +110,7 @@ class Branch(Component):
         self._components = components
 
     def fresh_coroutine(self):
-        sideways = raw_components_to_single_coroutine(self._components)
+        sideways, _ = raw_components_to_single_coroutine_and_outputs(self._components)
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -127,13 +139,15 @@ class dispatch:
         return lambda obj: getattr(obj, name)()
 meth = dispatch()
 
+
 def combine_coroutines(coroutines):
+    if not coroutines:
+        raise Exception('Need at least one coroutine')
     if not hasattr(coroutines[-1], 'close'):
         raise Exception(f'No sink at end of {coroutines}')
     def apply(arg, fn):
         return fn(arg)
     return reduce(apply, reversed(coroutines))
-
 
 
 def coroutine(generator_function):
