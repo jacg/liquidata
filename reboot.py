@@ -115,7 +115,7 @@ class Branch(Component):
 # types have implicit interpretations as components
 def implicit_to_component(it):
     if isinstance(it, Component): return it
-    # if isinstance(it, list     ): return Branch(*it)
+    if isinstance(it, list     ): return Branch(*it)
     if isinstance(it, tuple    ): return Sink  (*it)
     if isinstance(it, set      ): return Filter(next(iter(it)))
     else                        : return Map(it)

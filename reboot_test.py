@@ -66,6 +66,16 @@ def test_branch():
     assert branch == data
 
 
+def test_implicit_branch():
+    from reboot import Network
+    data = list(range(10))
+    branch, main = [], []
+    net = Network(data, [(branch.append,)], (main.append,))
+    net()
+    assert main   == data
+    assert branch == data
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
