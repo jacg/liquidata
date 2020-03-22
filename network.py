@@ -93,26 +93,6 @@ class network:
         return make_map(piece)
 
 
-    def set_variables(self, **kwargs):
-        # TODO: this should create a new instance rather than mutating the old
-        # one. Instances should be persistent.
-        for name, value in kwargs.items():
-            self.  _bound_variables        [name] = value
-            self._unbound_variables.discard(name)
-
-    def set_IN_if_source_at_front(self):
-        # Set IN variable if source present
-        if self._pipe:
-            first = self._pipe[0]
-            if isinstance(first, source):
-                self.set_variables(IN=first._source)
-
-    def set_OUT_if_sink_at_end(self):
-        if self._pipe:
-            last = self._pipe[-1]
-            if isinstance(last, sink):
-                self.set_variables(OUT=last)
-
 class component:
 
     @staticmethod
@@ -199,21 +179,6 @@ class output(component):
 
 class NetworkIncomplete(Exception):
     pass
-
-    # def __init__(self, unbound_variables):
-    #     sorted_unset_variables = ' '.join(sorted(unbound_variables, key=_variable_sort_key))
-    #     msg = f'Network cannot run because the following variables are not set: {sorted_unset_variables}'
-    #     if 'IN'  in unbound_variables: msg += "\nSet IN  by providing a source."
-    #     if 'OUT' in unbound_variables: msg += "\nSet OUT by providing a sink."
-
-    #     super().__init__(msg)
-    #     self.unbound_variables = unbound_variables
-
-
-def _variable_sort_key(name):
-    if name == "IN" : return (0,)
-    if name == "OUT": return (1,)
-    return tuple(map(ord, name))
 
 
 @contextmanager
