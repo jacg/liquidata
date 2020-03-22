@@ -38,6 +38,24 @@ def test_set_out_name_externally():
     assert net().X == reduce(sym_add, the_data)
 
 
+def test_get_source():
+    from network import network, out, get
+    data1 = 'xyz'
+    data2 = 'abcd'
+    net = network(get.IN, out.X(sym_add))
+    assert net(IN=data1).X == reduce(sym_add, data1)
+    assert net(IN=data2).X == reduce(sym_add, data2)
+
+
+def test_get_map():
+    from network import network, out, get
+    data = 'xyz'
+    f,g = symbolic_functions('fg')
+    net = network(data, get.fn, out.X(sym_add))
+    assert net(fn=f).X == reduce(sym_add, map(f, data))
+    assert net(fn=g).X == reduce(sym_add, map(g, data))
+
+
 def test_get_sink_get_in_out():
     from network import network, out, get, fold
     the_data = 'xyz'
@@ -52,15 +70,6 @@ def test_get_sink_out_in_get():
     net = network(the_data, out.X(get.OUT))
     assert net(OUT=fold(sym_add)).X == reduce(sym_add, the_data)
     assert net(OUT=fold(sym_mul)).X == reduce(sym_mul, the_data)
-
-
-def test_get_source():
-    from network import network, out, get
-    data1 = 'xyz'
-    data2 = 'abcd'
-    net = network(get.IN, out.X(sym_add))
-    assert net(IN=data1).X == reduce(sym_add, data1)
-    assert net(IN=data2).X == reduce(sym_add, data2)
 
 
 @xfail(reason='Needs more thought')
