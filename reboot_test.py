@@ -116,6 +116,14 @@ def test_return_value_from_branch():
     assert result.branch == reduce(sym_add, data)
 
 
+def test_implicit_fold():
+    from reboot import Network, out
+    data = range(3)
+    net = Network(out.total(sym_add))
+    assert net(data).total == reduce(sym_add, data)
+
+
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
