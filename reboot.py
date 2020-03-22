@@ -18,16 +18,19 @@ class Network:
         pipe.close()
 
         return Namespace(**{name: future.result() for name, future in outputs})
+DEBUG = True
 
+def debug(*args, **kwds):
+    if DEBUG: print(*args, **kwds)
 
-
-def raw_components_to_single_coroutine_and_outputs(raw_components):
-    pipe_components = map(implicit_to_component, raw_components)
-    components_with_futures = tuple(map(meth.inject_futures, pipe_components))
-    outputs = dict(chain(*map(meth.get_outputs, components_with_futures)))
-    pipe_coroutines = tuple(map(meth.fresh_coroutine, components_with_futures))
-    pipe = combine_coroutines(pipe_coroutines)
-    return pipe, outputs
+def raw_components_to_single_coroutine_and_outputs(items):
+    pass                                                                                ; debug(f'items         {items}')
+    components              = tuple(map(     raw_to_component, items))                  ; debug(f'components    {components}')
+    components_with_futures = tuple(map(meth.inject_futures  , components))             ; debug(f'with_futures  {components_with_futures}')
+    outputs                 = tuple(map(meth.get_outputs     , components_with_futures)); debug(f'outputs       {outputs}')
+    coroutines              = tuple(map(meth.fresh_coroutine , components_with_futures)); debug(f'coroutines    {coroutines}')
+    unified_coroutine       = combine_coroutines(              coroutines)              ; debug(f'unified       {unified_coroutine}')
+    return unified_coroutine, dict(chain(*outputs))
 
 
 # components:
