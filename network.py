@@ -17,7 +17,8 @@ class network:
             self.raise_unfilled_slots(slots_still_empty)
 
         # Network validity checks
-        self.error_if_sink_missing(pipe_after_slot_filling)
+        self.error_if_sink_missing  (pipe_after_slot_filling)
+        self.error_if_source_missing(pipe_after_slot_filling)
 
         # Extract outputs
         (the_source, *pipe_without_outputs), outputs = self.extract_outputs(pipe_after_slot_filling)
@@ -82,6 +83,13 @@ class network:
             raise NetworkIncomplete(pipe)
         if not isinstance(pipe[-1], (sink, output)):
             raise NoSinkAtEndOfPipe(pipe)
+
+    @staticmethod
+    def error_if_source_missing(pipe):
+        try:
+            iter(pipe[0])
+        except TypeError:
+            raise NoSourceAtFrontOfPipe(pipe)
 
     @staticmethod
     def compile_one(piece):
@@ -176,6 +184,9 @@ class output(component):
 
 
 class NetworkIncomplete(Exception):
+    pass
+
+class NoSourceAtFrontOfPipe(NetworkIncomplete):
     pass
 
 class NoSinkAtEndOfPipe(NetworkIncomplete):

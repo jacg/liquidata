@@ -7,23 +7,6 @@ from pytest import raises, mark
 
 xfail=mark.xfail
 
-def test_cannot_run_empty_network():
-    net = nw.network()
-    with raises(nw.NetworkIncomplete) as e:
-        net()
-
-
-def test_cannot_run_network_without_sink():
-    net = nw.network(nw.src([]))
-    with raises(nw.NetworkIncomplete): # TODO: message text match
-        net()
-
-
-def test_cannot_run_network_without_source():
-    net = nw.network(nw.sink(lambda _:None))
-    with raises(nw.NetworkIncomplete): # TODO: message text match
-        net()
-
 
 def test_trivial_network():
     from network import network, out, fold
@@ -98,6 +81,30 @@ def test_implicit_map():
     assert net().X == reduce(sym_add, map(f, data))
 
 
+def test_cannot_run_empty_network():
+    net = nw.network()
+    with raises(nw.NetworkIncomplete) as e:
+        net()
+
+
+def test_cannot_run_network_without_sink():
+    data = 'xyz'
+    f, = symbolic_functions('f')
+    net = nw.network(data, f)
+    with raises(nw.NoSinkAtEndOfPipe): # TODO: message text match
+        net()
+    with raises(nw.NetworkIncomplete):
+        net()
+
+
+def test_cannot_run_network_without_source():
+    data = 'xyz'
+    f, = symbolic_functions('f')
+    net = nw.network(f, nw.out.X(sym_add))
+    with raises(nw.NoSourceAtFrontOfPipe): # TODO: message text match
+        net()
+    with raises(nw.NetworkIncomplete):
+        net()
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
