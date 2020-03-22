@@ -18,7 +18,7 @@ class Network:
 
 def raw_components_to_single_coroutine(raw_components):
     pipe_components = map(implicit_to_component, raw_components)
-    pipe_coroutines = tuple(map(fresh_coroutine, pipe_components))
+    pipe_coroutines = tuple(map(meth.fresh_coroutine, pipe_components))
     pipe = combine_coroutines(pipe_coroutines)
     return pipe
 
@@ -120,8 +120,12 @@ def implicit_to_component(it):
     if isinstance(it, set      ): return Filter(next(iter(it)))
     else                        : return Map(it)
 
-def fresh_coroutine(component):
-    return component.fresh_coroutine()
+
+class dispatch:
+
+    def __getattribute__(self, name):
+        return lambda obj: getattr(obj, name)()
+meth = dispatch()
 
 def combine_coroutines(coroutines):
     if not hasattr(coroutines[-1], 'close'):
