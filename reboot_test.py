@@ -99,6 +99,13 @@ def test_fold_and_return():
     net = Network(data, out.total(Fold(sym_add)))
     assert net().total == reduce(sym_add, data)
 
+
+def test_fold_with_initial_value():
+    from reboot import Network, out, Fold
+    data = range(3)
+    net = Network(data, out.total(Fold(sym_add, 99)))
+    assert net().total == reduce(sym_add, data, 99)
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

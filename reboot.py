@@ -161,8 +161,9 @@ class OutputWithFuture(Component):
 
 class Fold(Component):
 
-    def __init__(self, fn, name=None, future=None):
+    def __init__(self, fn, initial=None):
         self._fn = fn
+        self._initial = initial
 
     def inject_futures(self):
         raise Exception("Injecting futures into a Fold should be done by the Output that wraps it")
@@ -172,16 +173,15 @@ class Fold(Component):
         binary_function = self._fn
         @coroutine
         def reduce_loop(future):
-            # if initial is None:
-            #     try:
-            #         accumulator = (yield)
-            #     except StopIteration:
-            #         # TODO: message about not being able to run on an empty stream.
-            #         # Try to link it to variable names in the network?
-            #         pass
-            # else:
-            #     accumulator = initial
-            accumulator = (yield)
+            if self._initial is None:
+                try:
+                    accumulator = (yield)
+                except StopIteration:
+                    # TODO: message about not being able to run on an empty stream.
+                    # Try to link it to variable names in the network?
+                    pass
+            else:
+                accumulator = self._initial
             try:
                 while True:
                     accumulator = binary_function(accumulator, (yield))
