@@ -47,6 +47,15 @@ def test_implicit_filter():
     assert result == list(filter(odd, data))
 
 
+def test_implicit_sink():
+    from reboot import Network
+    data = list(range(10))
+    result = []
+    net = Network(data, (result.append,))
+    net()
+    assert result == data
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
