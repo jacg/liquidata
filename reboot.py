@@ -9,13 +9,18 @@ class Network:
 
     def __call__(self):
         source, *raw_components = self._components
-        pipe_components = map(implicit_to_component, raw_components)
-        pipe_coroutines = tuple(map(fresh_coroutine, pipe_components))
-        pipe = combine_coroutines(pipe_coroutines)
+        pipe = raw_components_to_single_coroutine(raw_components)
 
         for item in source:
             pipe.send(item)
         pipe.close()
+
+
+def raw_components_to_single_coroutine(raw_components):
+    pipe_components = map(implicit_to_component, raw_components)
+    pipe_coroutines = tuple(map(fresh_coroutine, pipe_components))
+    pipe = combine_coroutines(pipe_coroutines)
+    return pipe
 
 
 # components:
