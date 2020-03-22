@@ -113,12 +113,6 @@ class component:
         return make_map(it)
 
 
-class source:
-
-    def __init__(self, iterable):
-        self._source = iterable
-src = source
-
 
 class sink(component):
 
