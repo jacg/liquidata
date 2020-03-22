@@ -88,7 +88,9 @@ def test_get_map():
     assert net(fn=g).X == reduce(sym_add, map(g, data))
 
 
-@xfail(reason='Needs more thought')
+xfail_get_as_arg = xfail(reason='Passing gets as args needs more careful thought')
+
+@xfail_get_as_arg
 def test_get_sink():
     from network import network, out, get, fold
     the_data = 'xyz'
@@ -97,14 +99,12 @@ def test_get_sink():
     assert net(SINK=fold(sym_mul)).X == reduce(sym_mul, the_data)
 
 
-@xfail(reason='Needs more thought')
+@xfail_get_as_arg
 def test_get_source_argument():
-    from network import network, get, out
-    data1 = 'xyz'
-    data2 = 'abcd'
-    net = network(get.IN, out.X(sym_add))
-    assert net(IN=data1).X == reduce(sym_add, data1)
-    assert net(IN=data2).X == reduce(sym_add, data2)
+    from network import network, call, get, out
+    net = network(call(range)(get.N), out.X(sym_add))
+    assert net(N=10).X == reduce(add, range(10))
+    assert net(N=20).X == reduce(add, range(20))
 
 
 def test_fold_without_initial():
