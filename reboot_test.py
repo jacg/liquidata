@@ -4,8 +4,8 @@ def test_trivial():
     from reboot import Network, Sink
     data = list(range(10))
     result = []
-    net = Network(data, Sink(result.append))
-    net()
+    net = Network(Sink(result.append))
+    net(data)
     assert result == data
 
 
@@ -14,8 +14,8 @@ def test_map():
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    net = Network(data, Map(f), Sink(result.append))
-    net()
+    net = Network(Map(f), Sink(result.append))
+    net(data)
     assert result == list(map(f, data))
 
 
@@ -24,8 +24,8 @@ def test_implicit_map():
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    net = Network(data, f, Sink(result.append))
-    net()
+    net = Network(f, Sink(result.append))
+    net(data)
     assert result == list(map(f, data))
 
 
@@ -33,8 +33,8 @@ def test_filter():
     from reboot import Network, Filter, Sink
     data = list(range(10))
     result = []
-    net = Network(data, Filter(odd), Sink(result.append))
-    net()
+    net = Network(Filter(odd), Sink(result.append))
+    net(data)
     assert result == list(filter(odd, data))
 
 
@@ -42,8 +42,8 @@ def test_implicit_filter():
     from reboot import Network, Filter, Sink
     data = list(range(10))
     result = []
-    net = Network(data, {odd}, Sink(result.append))
-    net()
+    net = Network({odd}, Sink(result.append))
+    net(data)
     assert result == list(filter(odd, data))
 
 
@@ -51,8 +51,8 @@ def test_implicit_sink():
     from reboot import Network
     data = list(range(10))
     result = []
-    net = Network(data, (result.append,))
-    net()
+    net = Network((result.append,))
+    net(data)
     assert result == data
 
 
@@ -60,8 +60,8 @@ def test_branch():
     from reboot import Network, Branch, Sink
     data = list(range(10))
     branch, main = [], []
-    net = Network(data, Branch(Sink(branch.append)), (main.append,))
-    net()
+    net = Network(Branch(Sink(branch.append)), (main.append,))
+    net(data)
     assert main   == data
     assert branch == data
 
@@ -70,8 +70,8 @@ def test_implicit_branch():
     from reboot import Network
     data = list(range(10))
     branch, main = [], []
-    net = Network(data, [(branch.append,)], (main.append,))
-    net()
+    net = Network([(branch.append,)], (main.append,))
+    net(data)
     assert main   == data
     assert branch == data
 
@@ -81,14 +81,13 @@ def test_integration_1():
     f, g, h = square, addN(1), addN(2)
     a, b, c = odd   , gtN(50), ltN(100)
     s, t    = [], []
-    net = Network(data,
-                  f,
+    net = Network(f,
                   {a},
                   [g, {b}, (s.append,)],
                   h,
                   {c},
                   (t.append,))
-    net()
+    net(data)
     assert s == list(filter(b, map(g, filter(a, map(f, data)))))
     assert t == list(filter(c, map(h, filter(a, map(f, data)))))
 
@@ -96,15 +95,15 @@ def test_integration_1():
 def test_fold_and_return():
     from reboot import Network, out, Fold
     data = range(10)
-    net = Network(data, out.total(Fold(sym_add)))
-    assert net().total == reduce(sym_add, data)
+    net = Network(out.total(Fold(sym_add)))
+    assert net(data).total == reduce(sym_add, data)
 
 
 def test_fold_with_initial_value():
     from reboot import Network, out, Fold
     data = range(3)
-    net = Network(data, out.total(Fold(sym_add, 99)))
-    assert net().total == reduce(sym_add, data, 99)
+    net = Network(out.total(Fold(sym_add, 99)))
+    assert net(data).total == reduce(sym_add, data, 99)
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

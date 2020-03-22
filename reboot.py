@@ -10,8 +10,8 @@ class Network:
     def __init__(self, *components):
         self._components = components
 
-    def __call__(self):
-        source, *raw_components = self._components
+    def __call__(self, source):
+        raw_components = self._components
         pipe, outputs = raw_components_to_single_coroutine_and_outputs(raw_components)
         push(source, pipe)
         return Namespace(**{name: future.result() for name, future in outputs.items()})
