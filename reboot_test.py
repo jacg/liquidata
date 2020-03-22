@@ -1,4 +1,4 @@
-
+from functools import reduce
 
 def test_trivial():
     from reboot import Network, Sink
@@ -92,6 +92,12 @@ def test_integration_1():
     assert s == list(filter(b, map(g, filter(a, map(f, data)))))
     assert t == list(filter(c, map(h, filter(a, map(f, data)))))
 
+
+def test_fold_and_return():
+    from reboot import Network, out, Fold
+    data = range(10)
+    net = Network(data, out.total(Fold(sym_add)))
+    assert net().total == reduce(sym_add, data)
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
