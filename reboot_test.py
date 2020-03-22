@@ -29,6 +29,14 @@ def test_implicit_map():
     assert result == list(map(f, data))
 
 
+def test_filter():
+    from reboot import Network, Filter, Sink
+    data = list(range(10))
+    result = []
+    net = Network(data, Filter(odd), Sink(result.append))
+    net()
+    assert result == list(filter(odd, data))
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

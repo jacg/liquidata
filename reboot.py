@@ -71,6 +71,21 @@ class Map(Component):
         return coroutine(map_loop)
 
 
+class Filter(Component):
+
+    def __init__(self, predicate):
+        self._predicate = predicate
+
+    def fresh_coroutine(self):
+        predicate = self._predicate
+        def filter_loop(target):
+            with closing(target):
+                while True:
+                    val = yield
+                    if predicate(val):
+                        target.send(val)
+        return coroutine(filter_loop)
+
 
 ######################################################################
 
