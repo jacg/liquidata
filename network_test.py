@@ -35,8 +35,6 @@ def test_cannot_run_network_without_sink():
     net = nw.network(data, f)
     with raises(nw.NoSinkAtEndOfPipe): # TODO: message text match
         net()
-    with raises(nw.NetworkIncomplete):
-        net()
 
 
 def test_cannot_run_network_without_source():
@@ -45,8 +43,15 @@ def test_cannot_run_network_without_source():
     net = nw.network(f, nw.out.X(sym_add))
     with raises(nw.NoSourceAtFrontOfPipe): # TODO: message text match
         net()
-    with raises(nw.NetworkIncomplete):
-        net()
+
+def test_NoSource_kind_of_NetIncomplete():
+    assert issubclass(nw.NoSourceAtFrontOfPipe,
+                       nw.NetworkIncomplete)
+
+
+def test_NoSink_kind_of_NetIncomplete():
+    assert issubclass(nw.NoSinkAtEndOfPipe,
+                       nw.NetworkIncomplete)
 
 
 def test_fold_with_initial_value():
