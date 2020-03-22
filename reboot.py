@@ -8,7 +8,8 @@ class Network:
         self._components = components
 
     def __call__(self):
-        source, *pipe_components = self._components
+        source, *raw_components = self._components
+        pipe_components = map(implicit_to_component, raw_components)
         pipe_coroutines = tuple(map(fresh_coroutine, pipe_components))
         pipe = combine_coroutines(pipe_coroutines)
 
@@ -75,12 +76,12 @@ class Map(Component):
 
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
-def convert_to_component(it):
+def implicit_to_component(it):
     if isinstance(it, Component): return it
     # if isinstance(it, list     ): return Branch(*it)
     # if isinstance(it, tuple    ): return Fold  (*it)
     # if isinstance(it, set      ): return Filter(next(iter(it)))
-    # else                        : return Map(it)
+    else                        : return Map(it)
 
 def fresh_coroutine(component):
     return component.fresh_coroutine()

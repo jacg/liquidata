@@ -19,6 +19,16 @@ def test_map():
     assert result == list(map(f, data))
 
 
+def test_implicit_map():
+    from reboot import Network, Sink
+    data = list(range(10))
+    f, = symbolic_functions('f')
+    result = []
+    net = Network(data, f, Sink(result.append))
+    net()
+    assert result == list(map(f, data))
+
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
