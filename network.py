@@ -163,7 +163,7 @@ class sink_and_future(sink):
 
 class fold(sink):
 
-    coroutine_factory = 'bound to reduce_factory after its definition'
+    coroutine_factory = 'bound to reduce_factory after its definition below'
 
 
 class Get:
