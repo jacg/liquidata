@@ -9,6 +9,17 @@ def test_trivial():
     assert result == data
 
 
+def test_map():
+    from reboot import Network, Map, Sink
+    data = list(range(10))
+    f, = symbolic_functions('f')
+    result = []
+    net = Network(data, Map(f), Sink(result.append))
+    net()
+    assert result == list(map(f, data))
+
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

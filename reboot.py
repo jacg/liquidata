@@ -1,4 +1,5 @@
-from functools import reduce, wraps
+from functools  import reduce, wraps
+from contextlib import contextmanager
 
 
 class Network:
@@ -56,6 +57,20 @@ class Sink(Component):
         return coroutine(sink_loop)()
 
 
+class Map(Component):
+
+    def __init__(self, fn):
+        self._fn = fn
+
+    def fresh_coroutine(self):
+        def map_loop(target):
+                with closing(target):
+                    while True:
+                        target.send(self._fn((yield)))
+        return coroutine(map_loop)
+
+
+
 ######################################################################
 
 # Most component names don't have to be used explicitly, because plain python
@@ -86,3 +101,9 @@ def coroutine(generator_function):
         next(the_coroutine)
         return the_coroutine
     return proxy
+
+
+@contextmanager
+def closing(target):
+    try:     yield
+    finally: target.close()
