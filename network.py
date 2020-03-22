@@ -103,9 +103,11 @@ class component:
         # for certain types that play special roles. TODO: move these
         # conversions to network construction time.
 
-        # TODO: set -> filter
-        # TODO: tuple -> sink
         # TODO: list -> branch
+        # TODO: tuple -> sink  ('out' makes this work partially)
+
+        if isinstance(it, set):
+            return  make_filter(next(iter(it)))
 
         # Otherwise we assume it's a callable and use it to map
         return make_map(it)
@@ -197,6 +199,16 @@ def make_map(op):
                 while True:
                     target.send(op((yield)))
     return coroutine(map_loop)
+
+
+def make_filter(predicate):
+    def filter_loop(target):
+        with closing(target):
+            while True:
+                val = yield
+                if predicate(val):
+                    target.send(val)
+    return coroutine(filter_loop)
 
 
 def side_effect_sink(unary_function):

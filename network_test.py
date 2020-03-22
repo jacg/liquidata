@@ -15,13 +15,28 @@ def test_trivial_network():
     assert net().X == reduce(sym_add, the_data)
 
 
-def test_use_function_to_map():
+def test_map():
     from network import network, out
     data = 'xyz'
     f, = symbolic_functions('f')
     net = network(data, f, out.X(sym_add))
     assert net().X == reduce(sym_add, map(f, data))
 
+
+def test_filter():
+    from network import network, out
+    data = range(10)
+    net = network(data, {odd}, out.X(sym_add))
+    assert net().X == reduce(sym_add, filter(odd, data))
+
+
+def test_filter_reuse():
+    from network import network, out
+    data = range(10)
+    net = network(data, {odd}, out.X(sym_add))
+    assert net().X == reduce(sym_add, filter(odd, data))
+    # Ensure implementation doesn't break the filter for reuse
+    assert net().X == reduce(sym_add, filter(odd, data))
 
 def test_cannot_run_empty_network():
     net = nw.network()
