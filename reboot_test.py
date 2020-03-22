@@ -123,6 +123,12 @@ def test_implicit_fold():
     assert net(data).total == reduce(sym_add, data)
 
 
+def test_implicit_fold_with_initial_value():
+    from reboot import Network, out
+    data = range(3)
+    net = Network(out.total(sym_add, 99))
+    assert net(data).total == reduce(sym_add, data, 99)
+
 
 
 ###################################################################

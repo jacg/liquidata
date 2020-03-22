@@ -135,9 +135,9 @@ class Output(Component):
         self._name = name
         self._sink = sink
 
-    def __call__(self, sink_with_return_value):
+    def __call__(self, sink_with_return_value, initial=None):
         if not isinstance(sink_with_return_value, Component):
-            sink_with_return_value = Fold(sink_with_return_value)
+            sink_with_return_value = Fold(sink_with_return_value, initial=initial)
         return Output(self._name, sink_with_return_value)
 
     def inject_futures(self):
