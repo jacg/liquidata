@@ -39,6 +39,14 @@ def test_implicit_fold():
     assert net().X == reduce(sym_add, the_data)
 
 
+def test_set_out_name_externally():
+    from network import network, src, out
+    the_data = 'xyz'
+    sum_into_X = out.X(sym_add)
+    net = network(src(the_data), sum_into_X)
+    assert net().X == reduce(sym_add, the_data)
+
+
 def test_get_sink_get_in_out():
     from network import network, src, out, get, fold
     the_data = 'xyz'
