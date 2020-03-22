@@ -16,8 +16,8 @@ class network:
         if slots_still_empty:
             self.raise_unfilled_slots(slots_still_empty)
 
-        # Check source and sink
-        self.error_if_source_or_sink_missing(pipe_after_slot_filling)
+        # Network validity checks
+        self.error_if_sink_missing(pipe_after_slot_filling)
 
         # Extract outputs
         (the_source, *pipe_without_outputs), outputs = self.extract_outputs(pipe_after_slot_filling)
@@ -77,13 +77,11 @@ class network:
         return tuple(updated_pipe), tuple(slots_still_empty)
 
     @staticmethod
-    def error_if_source_or_sink_missing(pipe):
+    def error_if_sink_missing(pipe):
         if not pipe:
             raise NetworkIncomplete(pipe)
-        first, last = pipe[0], pipe[-1]
-        if not (isinstance(first,  source          ) and
-                isinstance(last , (sink, output)  )):
-            raise NetworkIncomplete(pipe)
+        if not isinstance(pipe[-1], (sink, output)):
+            raise NoSinkAtEndOfPipe(pipe)
 
     @staticmethod
     def compile_one(piece):
@@ -180,6 +178,8 @@ class output(component):
 class NetworkIncomplete(Exception):
     pass
 
+class NoSinkAtEndOfPipe(NetworkIncomplete):
+    pass
 
 @contextmanager
 def closing(target):
@@ -231,7 +231,7 @@ def combine_coroutines(coroutines):
 
 
 def push_data_into_coroutine(the_source, coroutine):
-    for item in the_source._source:
+    for item in the_source:
         coroutine.send(item)
     coroutine.close()
 
