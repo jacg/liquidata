@@ -91,13 +91,6 @@ class network:
         except TypeError:
             raise NoSourceAtFrontOfPipe(pipe)
 
-    @staticmethod
-    def compile_one(piece):
-        if isinstance(piece, (source, sink)): # TODO: branch, ...
-            return piece.compile()
-        # Assume it's a callable which should be mapped
-        return make_map(piece)
-
 
 class component:
 
