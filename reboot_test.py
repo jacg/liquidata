@@ -56,6 +56,16 @@ def test_implicit_sink():
     assert result == data
 
 
+def test_branch():
+    from reboot import Network, Branch, Sink
+    data = list(range(10))
+    branch, main = [], []
+    net = Network(data, Branch(Sink(branch.append)), (main.append,))
+    net()
+    assert main   == data
+    assert branch == data
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

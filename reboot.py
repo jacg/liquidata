@@ -92,6 +92,23 @@ class Filter(Component):
         return coroutine(filter_loop)
 
 
+class Branch(Component):
+
+    def __init__(self, *components):
+        self._components = components
+
+    def fresh_coroutine(self):
+        sideways = raw_components_to_single_coroutine(self._components)
+        @coroutine
+        def branch_loop(downstream):
+            with closing(sideways), closing(downstream):
+                while True:
+                    val = yield
+                    sideways  .send(val)
+                    downstream.send(val)
+        return branch_loop
+
+
 ######################################################################
 
 # Most component names don't have to be used explicitly, because plain python
