@@ -9,17 +9,44 @@ xfail=mark.xfail
 
 
 def test_trivial_network():
-    from network import network, out, fold
-    the_data = 'xyz'
-    net = network(the_data, out.X(fold(sym_add)))
-    assert net().X == reduce(sym_add, the_data)
-
-
-def test_implicit_fold():
     from network import network, out
     the_data = 'xyz'
     net = network(the_data, out.X(sym_add))
     assert net().X == reduce(sym_add, the_data)
+
+
+def test_use_function_to_map():
+    from network import network, out
+    data = 'xyz'
+    f, = symbolic_functions('f')
+    net = network(data, f, out.X(sym_add))
+    assert net().X == reduce(sym_add, map(f, data))
+
+
+def test_cannot_run_empty_network():
+    net = nw.network()
+    with raises(nw.NetworkIncomplete) as e:
+        net()
+
+
+def test_cannot_run_network_without_sink():
+    data = 'xyz'
+    f, = symbolic_functions('f')
+    net = nw.network(data, f)
+    with raises(nw.NoSinkAtEndOfPipe): # TODO: message text match
+        net()
+    with raises(nw.NetworkIncomplete):
+        net()
+
+
+def test_cannot_run_network_without_source():
+    data = 'xyz'
+    f, = symbolic_functions('f')
+    net = nw.network(f, nw.out.X(sym_add))
+    with raises(nw.NoSourceAtFrontOfPipe): # TODO: message text match
+        net()
+    with raises(nw.NetworkIncomplete):
+        net()
 
 
 def test_fold_with_initial_value():
@@ -82,38 +109,21 @@ def test_get_source_argument():
     assert net(IN=data2).X == reduce(sym_add, data2)
 
 
-def test_implicit_map():
-    from network import network, out
-    data = 'xyz'
-    f, = symbolic_functions('f')
-    net = network(data, f, out.X(sym_add))
-    assert net().X == reduce(sym_add, map(f, data))
+def test_fold_without_initial():
+    data = range
+
+def test_fold_with_initial():
+    pass
+
+def test_side_effect_sink():
+    pass
+
+def test_side_effect_sink_with_return():
+    pass
 
 
-def test_cannot_run_empty_network():
-    net = nw.network()
-    with raises(nw.NetworkIncomplete) as e:
-        net()
 
 
-def test_cannot_run_network_without_sink():
-    data = 'xyz'
-    f, = symbolic_functions('f')
-    net = nw.network(data, f)
-    with raises(nw.NoSinkAtEndOfPipe): # TODO: message text match
-        net()
-    with raises(nw.NetworkIncomplete):
-        net()
-
-
-def test_cannot_run_network_without_source():
-    data = 'xyz'
-    f, = symbolic_functions('f')
-    net = nw.network(f, nw.out.X(sym_add))
-    with raises(nw.NoSourceAtFrontOfPipe): # TODO: message text match
-        net()
-    with raises(nw.NetworkIncomplete):
-        net()
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
