@@ -105,17 +105,23 @@ class Output(Component):
     class make:
 
         def __getattribute__(self, name):
-            return Output(name)
+            return Output.Name(name)
+
+    class Name:
+
+        def __init__(self, name):
+            self.name = name
+
+        def __call__(self, sink_with_return_value, initial=None):
+            if not isinstance(sink_with_return_value, Component):
+                sink_with_return_value = Fold(sink_with_return_value, initial=initial)
+            # TODO: set as implicit count filter?
+            return Output(self.name, sink_with_return_value)
+
 
     def __init__(self, name, sink=None):
         self._name = name
         self._sink = sink
-
-    def __call__(self, sink_with_return_value, initial=None):
-        if not isinstance(sink_with_return_value, Component):
-            sink_with_return_value = Fold(sink_with_return_value, initial=initial)
-        # TODO: set as implicit count filter?
-        return Output(self._name, sink_with_return_value)
 
     def coroutine_and_outputs(self):
         future = Future()
