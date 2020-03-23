@@ -18,7 +18,7 @@ class _Pipe:
         return combine_coroutines(coroutines), chain(*out_groups)
 
 
-class Network:
+class Flow:
 
     def __init__(self, *components):
         self._pipe = _Pipe(components)
