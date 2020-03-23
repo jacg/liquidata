@@ -6,6 +6,17 @@ from argparse   import Namespace
 from asyncio    import Future
 
 
+# TODO: fill slots in OpenPipe.fn at call time: OpenPipe.fn(not only here)(data, but also here)
+
+# TODO: count-filter: implicit {} in out: out.NAME({predicate}) -> .passed & .stopped
+
+# TODO: string as implicit pick
+
+# TODO: get inside out
+
+# TODO: call
+
+
 class _Pipe:
 
     def __init__(self, components):
