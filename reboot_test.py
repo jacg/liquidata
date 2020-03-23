@@ -165,6 +165,17 @@ def test_get_implicit_filter():
     net = Network(get.A, out.B)
     assert net(data, A={f}).B == list(filter(f, data))
 
+
+def test_get_in_branch():
+    from reboot import Network, get, out
+    data = list(range(3))
+    f, = symbolic_functions('f')
+    net = Network([get.A, out.branch], out.main)
+    r = net(data, A=f)
+    assert r.main   ==             data
+    assert r.branch == list(map(f, data))
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
