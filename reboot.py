@@ -191,6 +191,22 @@ class Fold(Component):
         return reduce_loop(future)
 
 
+class OpenPipe:
+
+    def __init__(self, *components):
+        # TODO: should disallow branches (unless we implement joins)
+        self._pipe = _Pipe(chain(components, [Sink(self.accept_result)]))
+        self._coroutine, _ = self._pipe.coroutine_and_outputs({})
+
+    def __call__(self, arg):
+        self._returns = []
+        self._coroutine.send(arg)
+        return tuple(self._returns)
+
+    def accept_result(self, item):
+        self._returns.append(item)
+
+
 ######################################################################
 
 # Most component names don't have to be used explicitly, because plain python
