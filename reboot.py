@@ -211,13 +211,13 @@ class OpenPipe:
         # TODO: should disallow branches (unless we implement joins)
         self._components = components
 
-    def fn(self): return OpenPipe.Fn(self._components)
+    def fn     (self, **bindings): return OpenPipe.Fn     (self._components, bindings)
 
     class Fn:
 
-        def __init__(self, components):
+        def __init__(self, components, bindings):
             self._pipe = _Pipe(chain(components, [Sink(self.accept_result)]))
-            self._coroutine, _ = self._pipe.coroutine_and_outputs({})
+            self._coroutine, _ = self._pipe.coroutine_and_outputs(bindings)
 
         def __call__(self, arg):
             self._returns = []

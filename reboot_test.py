@@ -215,6 +215,16 @@ def test_open_pipe_as_function():
     assert pipe_fn(6) == (g(f(6)),)
 
 
+def test_open_pipe_with_get_as_function():
+    from reboot import OpenPipe, get
+    f,g,h = symbolic_functions('fgh')
+    pipe = OpenPipe(f, get.FN)
+    pipe_g = pipe.fn(FN=g)
+    pipe_h = pipe.fn(FN=h)
+    assert pipe_g(6) == (g(f(6)),)
+    assert pipe_h(7) == (h(f(7)),)
+
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
