@@ -11,15 +11,15 @@ class Network:
     def __init__(self, *components):
         self._components = tuple(map(decode_implicits, components))
 
-    def __call__(self, source):
-        coroutine, outputs = self.coroutine_and_outputs()
+    def __call__(self, source, **bindings):
+        coroutine, outputs = self.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
         print(outputs)
         return Namespace(**{name: future.result() for name, future in outputs})
 
-    def coroutine_and_outputs(self):
-        cor_out_pairs = tuple(map(meth.coroutine_and_outputs, self._components))
+    def coroutine_and_outputs(self, bindings):
+        cor_out_pairs = tuple(c.coroutine_and_outputs(bindings) for c in self._components)
         coroutines = map(itemgetter(0), cor_out_pairs)
         out_groups = map(itemgetter(1), cor_out_pairs)
         return combine_coroutines(coroutines), chain(*out_groups)
@@ -47,7 +47,7 @@ class Sink(Component):
     def __init__(self, fn):
         self._fn = fn
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, bindings):
         def sink_loop():
             while True:
                 self._fn((yield))
@@ -59,7 +59,7 @@ class Map(Component):
     def __init__(self, fn):
         self._fn = fn
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, bindings):
         def map_loop(target):
                 with closing(target):
                     while True:
@@ -72,7 +72,7 @@ class Filter(Component):
     def __init__(self, predicate):
         self._predicate = predicate
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, bindings):
         predicate = self._predicate
         def filter_loop(target):
             with closing(target):
@@ -88,8 +88,8 @@ class Branch(Component):
     def __init__(self, *components):
         self._components = tuple(map(decode_implicits, components))
 
-    def coroutine_and_outputs(self):
-        sideways, outputs = Network.coroutine_and_outputs(self)
+    def coroutine_and_outputs(self, bindings):
+        sideways, outputs = Network.coroutine_and_outputs(self, bindings)
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -107,7 +107,7 @@ class Output(Component):
         self._name = name
         self._sink = sink
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, bindings):
         future = Future()
         coroutine = self._sink.make_coroutine(future)
         return coroutine, ((self._name, future),)
@@ -124,12 +124,12 @@ class Output(Component):
             # TODO: set as implicit count filter?
             return Output(self.name, sink)
 
-        def coroutine_and_outputs(self):
+        def coroutine_and_outputs(self, bindings):
             def append(the_list, element):
                 the_list.append(element)
                 return the_list
             collect_into_list = Fold(append, [])
-            return Output(self.name, collect_into_list).coroutine_and_outputs()
+            return Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
 class Name:
@@ -187,13 +187,6 @@ def decode_implicits(it):
     if isinstance(it, tuple    ): return Sink  (*it)
     if isinstance(it, set      ): return Filter(next(iter(it)))
     else                        : return Map(it)
-
-
-class dispatch:
-
-    def __getattribute__(self, name):
-        return lambda obj: getattr(obj, name)()
-meth = dispatch()
 
 
 def push(source, pipe):
