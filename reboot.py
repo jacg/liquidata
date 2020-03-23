@@ -6,23 +6,29 @@ from argparse   import Namespace
 from asyncio    import Future
 
 
-class Network:
+class _Pipe:
 
-    def __init__(self, *components):
+    def __init__(self, components):
         self._components = tuple(map(decode_implicits, components))
-
-    def __call__(self, source, **bindings):
-        coroutine, outputs = self.coroutine_and_outputs(bindings)
-        push(source, coroutine)
-        outputs = tuple(outputs)
-        print(outputs)
-        return Namespace(**{name: future.result() for name, future in outputs})
 
     def coroutine_and_outputs(self, bindings):
         cor_out_pairs = tuple(c.coroutine_and_outputs(bindings) for c in self._components)
         coroutines = map(itemgetter(0), cor_out_pairs)
         out_groups = map(itemgetter(1), cor_out_pairs)
         return combine_coroutines(coroutines), chain(*out_groups)
+
+
+class Network:
+
+    def __init__(self, *components):
+        self._pipe = _Pipe(components)
+
+    def __call__(self, source, **bindings):
+        coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
+        push(source, coroutine)
+        outputs = tuple(outputs)
+        print(outputs)
+        return Namespace(**{name: future.result() for name, future in outputs})
 
 
 # components:
@@ -86,10 +92,10 @@ class Filter(Component):
 class Branch(Component):
 
     def __init__(self, *components):
-        self._components = tuple(map(decode_implicits, components))
+        self._pipe = _Pipe(components)
 
     def coroutine_and_outputs(self, bindings):
-        sideways, outputs = Network.coroutine_and_outputs(self, bindings)
+        sideways, outputs = self._pipe.coroutine_and_outputs(bindings)
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -131,6 +137,7 @@ class Output(Component):
             collect_into_list = Fold(append, [])
             return Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
+
 class Input(Component):
 
     def __init__(self, name):
@@ -152,8 +159,6 @@ class Name:
 
 out = Name(Output.Name)
 get = Name(Input)
-
-
 
 
 class Fold(Component):
