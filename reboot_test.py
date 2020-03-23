@@ -172,6 +172,15 @@ def test_get_implicit_filter():
     assert net(data, A={f}).B == list(filter(f, data))
 
 
+@xfail
+def test_implicit_filter_get():
+    from reboot import Flow, get, out
+    data = list(range(6))
+    f = odd
+    net = Flow({get.A}, out.B)
+    assert net(data, A=f).B == list(filter(f, data))
+
+
 def test_get_in_branch():
     from reboot import Flow, get, out
     data = list(range(3))
