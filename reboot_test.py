@@ -197,6 +197,15 @@ def test_get_implicit_sink():
     net = Network(out.OUT(get.SINK))
     assert net(data, SINK=f).OUT == reduce(f, data)
 
+
+def test_open_pipe_as_function():
+    from reboot import OpenPipe
+    f,g = symbolic_functions('fg')
+    pipe_fn = OpenPipe(f,g).fn()
+    assert pipe_fn(6) == (g(f(6)),)
+
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

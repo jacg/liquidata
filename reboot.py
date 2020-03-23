@@ -195,16 +195,24 @@ class OpenPipe:
 
     def __init__(self, *components):
         # TODO: should disallow branches (unless we implement joins)
-        self._pipe = _Pipe(chain(components, [Sink(self.accept_result)]))
-        self._coroutine, _ = self._pipe.coroutine_and_outputs({})
+        self._components = components
 
-    def __call__(self, arg):
-        self._returns = []
-        self._coroutine.send(arg)
-        return tuple(self._returns)
+    def fn(self): return OpenPipe.Fn(self._components)
 
-    def accept_result(self, item):
-        self._returns.append(item)
+    class Fn:
+
+        def __init__(self, components):
+            self._pipe = _Pipe(chain(components, [Sink(self.accept_result)]))
+            self._coroutine, _ = self._pipe.coroutine_and_outputs({})
+
+        def __call__(self, arg):
+            self._returns = []
+            self._coroutine.send(arg)
+            return tuple(self._returns)
+
+        def accept_result(self, item):
+            self._returns.append(item)
+
 
 
 ######################################################################
