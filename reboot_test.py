@@ -1,5 +1,9 @@
 from functools import reduce
 
+from pytest import mark
+xfail = mark.xfail
+
+
 def test_trivial():
     from reboot import Network, Sink
     data = list(range(10))
@@ -185,6 +189,13 @@ def test_get_branch():
     assert r.branch == list(map(f, data))
 
 
+@xfail(reason="Needs work. Other features more important now")
+def test_get_implicit_sink():
+    from reboot import Network, get, out
+    data = list(range(3))
+    f = sym_add
+    net = Network(out.OUT(get.SINK))
+    assert net(data, SINK=f).OUT == reduce(f, data)
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
