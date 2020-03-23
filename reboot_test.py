@@ -215,6 +215,22 @@ def test_open_pipe_as_function():
     assert pipe_fn(6) == (g(f(6)),)
 
 
+def test_open_pipe_on_filter():
+    from reboot import OpenPipe, FlatMap
+    f = odd
+    pipe_fn = OpenPipe({f}).fn()
+    assert pipe_fn(3) == (3,)
+    assert pipe_fn(4) == ()
+
+
+def test_open_pipe_on_flatmap():
+    from reboot import OpenPipe, FlatMap
+    f = range
+    pipe_fn = OpenPipe(FlatMap(f)).fn()
+    assert pipe_fn(3) == (0,1,2)
+    assert pipe_fn(5) == (0,1,2,3,4)
+
+
 def test_open_pipe_with_get_as_function():
     from reboot import OpenPipe, get
     f,g,h = symbolic_functions('fgh')
