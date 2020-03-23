@@ -211,7 +211,8 @@ class OpenPipe:
         # TODO: should disallow branches (unless we implement joins)
         self._components = components
 
-    def fn     (self, **bindings): return OpenPipe.Fn     (self._components, bindings)
+    def fn  (self, **bindings): return OpenPipe.Fn(self._components, bindings)
+    def pipe(self, **bindings): return FlatMap    (self.fn(        **bindings))
 
     class Fn:
 

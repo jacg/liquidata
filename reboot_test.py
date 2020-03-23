@@ -225,6 +225,13 @@ def test_open_pipe_with_get_as_function():
     assert pipe_h(7) == (h(f(7)),)
 
 
+def test_open_pipe_as_component():
+    from reboot import OpenPipe, Network, out
+    data = range(3,6)
+    a,b,f,g = symbolic_functions('abfg')
+    pipe = OpenPipe(f, g).pipe()
+    net = Network(a, pipe, b, out.X)
+    assert net(data).X == list(map(b, map(g, map(f, map(a, data)))))
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
