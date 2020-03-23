@@ -137,6 +137,17 @@ def test_implicit_collect_into_list():
     assert net(data).everything == list(data)
 
 
+def test_nested_branches():
+    from reboot import Network, out
+    f,g,h,i = symbolic_functions('fghi')
+    data = range(3)
+    net = Network([[f, out.BB], g, out.BM],
+                   [h, out.MB], i, out.MM )
+    res = net(data)
+    assert res.BB == list(map(f, data))
+    assert res.BM == list(map(g, data))
+    assert res.MB == list(map(h, data))
+    assert res.MM == list(map(i, data))
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
