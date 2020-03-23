@@ -1,3 +1,4 @@
+from operator   import itemgetter
 from functools  import reduce, wraps
 from contextlib import contextmanager
 from itertools  import chain
@@ -11,34 +12,27 @@ class Network:
         self._components = tuple(map(decode_implicits, components))
 
     def __call__(self, source):
-        pipe, outputs = components_to_single_coroutine_and_outputs(self._components)
-        push(source, pipe)
-        return Namespace(**{name: future.result() for name, future in outputs.items()})
+        coroutine, outputs = self.coroutine_and_outputs()
+        push(source, coroutine)
+        outputs = tuple(outputs)
+        print(outputs)
+        return Namespace(**{name: future.result() for name, future in outputs})
 
-
-DEBUG = True
-
-def debug(*args, **kwds):
-    if DEBUG: print(*args, **kwds)
-
-def components_to_single_coroutine_and_outputs(components):
-    pass                                                                                ; debug(f'components    {components}')
-    components_with_futures = tuple(map(meth.inject_futures  , components))             ; debug(f'with_futures  {components_with_futures}')
-    outputs                 = tuple(map(meth.get_outputs     , components_with_futures)); debug(f'outputs       {outputs}')
-    coroutines              = tuple(map(meth.fresh_coroutine , components_with_futures)); debug(f'coroutines    {coroutines}')
-    unified_coroutine       = combine_coroutines(              coroutines)              ; debug(f'unified       {unified_coroutine}')
-    return unified_coroutine, dict(chain(*outputs))
+    def coroutine_and_outputs(self):
+        cor_out_pairs = tuple(map(meth.coroutine_and_outputs, self._components))
+        coroutines = map(itemgetter(0), cor_out_pairs)
+        out_groups = map(itemgetter(1), cor_out_pairs)
+        return combine_coroutines(coroutines), chain(*out_groups)
 
 
 # components:
 #
-# source
 # map
 # filter
 # sink:   fold, side-effect, side-effect with result
 # branch
 # get
-# put
+# out
 # call
 
 ######################################################################
@@ -46,33 +40,18 @@ def components_to_single_coroutine_and_outputs(components):
 ######################################################################
 
 class Component:
-
-    def fresh_coroutine(self):
-        raise NotImplementedError
-
-    def set_gets(self, available_names):
-        # Must not mutate self: return a modified copy, if needed
-        return self
-
-    def unresolved_gets(self):
-        pass
-
-    def inject_futures(self):
-        return self
-
-    def get_outputs(self):
-        return ()
+    pass
 
 class Sink(Component):
 
     def __init__(self, fn):
         self._fn = fn
 
-    def fresh_coroutine(self):
+    def coroutine_and_outputs(self):
         def sink_loop():
             while True:
                 self._fn((yield))
-        return coroutine(sink_loop)()
+        return coroutine(sink_loop)(), ()
 
 
 class Map(Component):
@@ -80,12 +59,12 @@ class Map(Component):
     def __init__(self, fn):
         self._fn = fn
 
-    def fresh_coroutine(self):
+    def coroutine_and_outputs(self):
         def map_loop(target):
                 with closing(target):
                     while True:
                         target.send(self._fn((yield)))
-        return coroutine(map_loop)
+        return coroutine(map_loop), ()
 
 
 class Filter(Component):
@@ -93,7 +72,7 @@ class Filter(Component):
     def __init__(self, predicate):
         self._predicate = predicate
 
-    def fresh_coroutine(self):
+    def coroutine_and_outputs(self):
         predicate = self._predicate
         def filter_loop(target):
             with closing(target):
@@ -101,7 +80,7 @@ class Filter(Component):
                     val = yield
                     if predicate(val):
                         target.send(val)
-        return coroutine(filter_loop)
+        return coroutine(filter_loop), ()
 
 
 class Branch(Component):
@@ -109,8 +88,8 @@ class Branch(Component):
     def __init__(self, *components):
         self._components = tuple(map(decode_implicits, components))
 
-    def fresh_coroutine(self):
-        sideways = combine_coroutines(tuple(map(meth.fresh_coroutine, self._components)))
+    def coroutine_and_outputs(self):
+        sideways, outputs = Network.coroutine_and_outputs(self)
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -118,10 +97,7 @@ class Branch(Component):
                     val = yield
                     sideways  .send(val)
                     downstream.send(val)
-        return branch_loop
-
-    def inject_futures(self): return Branch(*map(meth.inject_futures, self._components))
-    def get_outputs   (self): return  chain(*map(meth.get_outputs   , self._components))
+        return branch_loop, outputs
 
 
 class Output(Component):
@@ -138,41 +114,27 @@ class Output(Component):
     def __call__(self, sink_with_return_value, initial=None):
         if not isinstance(sink_with_return_value, Component):
             sink_with_return_value = Fold(sink_with_return_value, initial=initial)
+        # TODO: set as implicit count filter?
         return Output(self._name, sink_with_return_value)
 
-    def inject_futures(self):
-        return OutputWithFuture(self._name, self._sink)
+    def coroutine_and_outputs(self):
+        future = Future()
+        coroutine = self._sink.make_coroutine(future)
+        return coroutine, ((self._name, future),)
 
 out = Output.make()
 
 
-class OutputWithFuture(Component):
-
-    def __init__(self, name, sink):
-        self._name = name
-        self._sink = sink
-        self._future = Future()
-
-    def inject_futures(self):
-        raise Exception('Future already injected')
-
-    def fresh_coroutine(self):
-        return self._sink.fresh_coroutine_from_future(self._future)
-
-    def get_outputs(self):
-        return ((self._name, self._future),)
-
 class Fold(Component):
+
+    # TODO: future-sinks should not appear at toplevel, as they must be wrapped
+    # in an output. Detect and report error at conversion from implicit
 
     def __init__(self, fn, initial=None):
         self._fn = fn
         self._initial = initial
 
-    def inject_futures(self):
-        raise Exception("Injecting futures into a Fold should be done by the Output that wraps it")
-
-    def fresh_coroutine_from_future(self, future):
-    #def reduce_factory(binary_function, initial=None):
+    def make_coroutine(self, future):
         binary_function = self._fn
         @coroutine
         def reduce_loop(future):
@@ -191,13 +153,6 @@ class Fold(Component):
             finally:
                 future.set_result(accumulator)
         return reduce_loop(future)
-
-
-    def TODO(self):
-        # Future sinks should not appear at the top level. Come up with a name
-        # for this method and hook into it somewhere, probably before
-        # decode_implicits
-        raise Exception('Fold must be wrapped in an out, otherwise the output will be lost')
 
 
 ######################################################################
@@ -226,6 +181,7 @@ def push(source, pipe):
 
 
 def combine_coroutines(coroutines):
+    coroutines = tuple(coroutines)
     if not coroutines:
         raise Exception('Need at least one coroutine')
     if not hasattr(coroutines[-1], 'close'):
