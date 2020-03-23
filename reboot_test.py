@@ -175,6 +175,16 @@ def test_get_in_branch():
     assert r.main   ==             data
     assert r.branch == list(map(f, data))
 
+def test_get_branch():
+    from reboot import Network, get, out
+    data = list(range(3))
+    f, = symbolic_functions('f')
+    net = Network(get.A, out.main)
+    r = net(data, A=[f, out.branch])
+    assert r.main   ==             data
+    assert r.branch == list(map(f, data))
+
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
