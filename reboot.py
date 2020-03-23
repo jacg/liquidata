@@ -102,10 +102,6 @@ class Branch(Component):
 
 class Output(Component):
 
-    class make:
-
-        def __getattribute__(self, name):
-            return Output.Name(name)
 
     def __init__(self, name, sink=None):
         self._name = name
@@ -136,7 +132,19 @@ class Output(Component):
             return Output(self.name, collect_into_list).coroutine_and_outputs()
 
 
-out = Output.make()
+class Name:
+
+    def __init__(self, Type):
+        self.Type = Type
+
+    def __getattribute__(self, name):
+        Type = object.__getattribute__(self, 'Type')
+        return Type.Name(name)
+
+
+out = Name(Output)
+
+
 
 
 class Fold(Component):
