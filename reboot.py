@@ -131,6 +131,14 @@ class Output(Component):
             collect_into_list = Fold(append, [])
             return Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
+class Input(Component):
+
+    def __init__(self, name):
+        self.name = name
+
+    def coroutine_and_outputs(self, bindings):
+        return decode_implicits(bindings[self.name]).coroutine_and_outputs(bindings)
+
 
 class Name:
 
@@ -139,10 +147,11 @@ class Name:
 
     def __getattribute__(self, name):
         Type = object.__getattribute__(self, 'Type')
-        return Type.Name(name)
+        return Type(name)
 
 
-out = Name(Output)
+out = Name(Output.Name)
+get = Name(Input)
 
 
 

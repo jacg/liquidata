@@ -149,6 +149,14 @@ def test_nested_branches():
     assert res.MB == list(map(h, data))
     assert res.MM == list(map(i, data))
 
+
+def test_get():
+    from reboot import Network, get, out
+    data = list(range(3))
+    f, = symbolic_functions('f')
+    net = Network(get.A, out.B)
+    assert net(data, A=f).B == list(map(f, data))
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
