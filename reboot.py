@@ -73,6 +73,20 @@ class Map(Component):
         return coroutine(map_loop), ()
 
 
+class FlatMap(Component):
+
+    def __init__(self, fn):
+        self._fn = fn
+
+    def coroutine_and_outputs(self, bindings):
+        def flatmap_loop(target):
+                with closing(target):
+                    while True:
+                        for item in self._fn((yield)):
+                            target.send(item)
+        return coroutine(flatmap_loop), ()
+
+
 class Filter(Component):
 
     def __init__(self, predicate):

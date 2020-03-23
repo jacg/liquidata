@@ -1,4 +1,5 @@
 from functools import reduce
+from itertools import chain
 
 from pytest import mark
 xfail = mark.xfail
@@ -179,6 +180,7 @@ def test_get_in_branch():
     assert r.main   ==             data
     assert r.branch == list(map(f, data))
 
+
 def test_get_branch():
     from reboot import Network, get, out
     data = list(range(3))
@@ -187,6 +189,14 @@ def test_get_branch():
     r = net(data, A=[f, out.branch])
     assert r.main   ==             data
     assert r.branch == list(map(f, data))
+
+
+def test_flat_map():
+    from reboot import Network, FlatMap, out
+    data = range(4)
+    f = range
+    net = Network(FlatMap(f), out.X)
+    assert net(data).X == list(chain(*map(f, data)))
 
 
 @xfail(reason="Needs work. Other features more important now")
