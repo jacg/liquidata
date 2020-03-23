@@ -130,6 +130,13 @@ def test_implicit_fold_with_initial_value():
     assert net(data).total == reduce(sym_add, data, 99)
 
 
+def test_implicit_collect_into_list():
+    from reboot import Network, out
+    data = range(3)
+    net = Network(out.everything)
+    assert net(data).everything == list(data)
+
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

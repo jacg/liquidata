@@ -105,12 +105,7 @@ class Output(Component):
     class make:
 
         def __getattribute__(self, name):
-            def combine_sink_with_name(sink, initial=None):
-                if not isinstance(sink, Component):
-                    sink = Fold(sink, initial=initial)
-                # TODO: set as implicit count filter?
-                return Output(name, sink)
-            return combine_sink_with_name
+            return Output.Name(name)
 
     def __init__(self, name, sink=None):
         self._name = name
@@ -120,6 +115,26 @@ class Output(Component):
         future = Future()
         coroutine = self._sink.make_coroutine(future)
         return coroutine, ((self._name, future),)
+
+    class Name(Component):
+
+        def __init__(self, name):
+            self.name = name
+
+        def __call__(self, sink, initial=None):
+            if not isinstance(sink, Component):
+                # TODO: issue warning/error if initial is not None
+                sink = Fold(sink, initial=initial)
+            # TODO: set as implicit count filter?
+            return Output(self.name, sink)
+
+        def coroutine_and_outputs(self):
+            def append(the_list, element):
+                the_list.append(element)
+                return the_list
+            collect_into_list = Fold(append, [])
+            return Output(self.name, collect_into_list).coroutine_and_outputs()
+
 
 out = Output.make()
 
