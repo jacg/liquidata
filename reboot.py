@@ -105,19 +105,12 @@ class Output(Component):
     class make:
 
         def __getattribute__(self, name):
-            return Output.Name(name)
-
-    class Name:
-
-        def __init__(self, name):
-            self.name = name
-
-        def __call__(self, sink_with_return_value, initial=None):
-            if not isinstance(sink_with_return_value, Component):
-                sink_with_return_value = Fold(sink_with_return_value, initial=initial)
-            # TODO: set as implicit count filter?
-            return Output(self.name, sink_with_return_value)
-
+            def combine_sink_with_name(sink, initial=None):
+                if not isinstance(sink, Component):
+                    sink = Fold(sink, initial=initial)
+                # TODO: set as implicit count filter?
+                return Output(name, sink)
+            return combine_sink_with_name
 
     def __init__(self, name, sink=None):
         self._name = name
