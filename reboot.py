@@ -210,6 +210,33 @@ class On(Component):
         return on_loop, ()
 
 
+class Args(Component):
+
+    def __init__(self, *names):
+        self.names = names
+
+    def __getattr__(self, name):
+        return Args(*self.names, name)
+
+    def __call__(self, fn):
+        # TODO: shoudn't really mutate self
+        #self.process_one_item = OpenPipe(*components).fn()
+        self.fn = fn
+        return self
+
+    def coroutine_and_outputs(self, bindings):
+        get_args = itemgetter(*self.names)
+        @coroutine
+        def args_loop(downstream):
+            with closing(downstream):
+                while True:
+                    namespace = (yield)
+                    args = get_args(namespace)
+                    returned = self.fn(*args)
+                    downstream.send(returned)
+        return args_loop, ()
+
+
 class Name:
 
     def __init__(self, callable):
@@ -223,6 +250,7 @@ out  = Name(Output.Name)
 get  = Name(Input)
 pick = Name(Pick)
 on   = Name(On)
+args = Name(Args)
 
 
 class Fold(Component):

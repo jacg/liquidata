@@ -293,6 +293,19 @@ def test_on_item():
     net = Flow(on.a(f), out.X)
     assert net(data).X == expected
 
+
+def test_args():
+    from reboot import Flow, args, out
+    names = 'abc'
+    a,b,c = symbolic_functions(names)
+    values = range(3)
+    data = [{name:f(N) for (f, name) in zip((a,b,c), names)} for N in values]
+    print(data)
+    net = Flow(args.a.b(sym_add), out.X)
+    assert net(data).X == list(map(sym_add, map(a, values),
+                                            map(b, values)))
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
