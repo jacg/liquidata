@@ -133,7 +133,6 @@ class Branch(Component):
 
 class Output(Component):
 
-
     def __init__(self, name, sink=None):
         self._name = name
         self._sink = sink
@@ -182,8 +181,8 @@ class Name:
         return callable(name)
 
 
-out = Name(Output.Name)
-get = Name(Input)
+out  = Name(Output.Name)
+get  = Name(Input)
 pick = Name(itemgetter)
 
 
