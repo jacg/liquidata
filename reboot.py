@@ -65,10 +65,11 @@ class Sink(Component):
         self._fn = fn
 
     def coroutine_and_outputs(self, bindings):
+        @coroutine
         def sink_loop():
             while True:
                 self._fn((yield))
-        return coroutine(sink_loop)(), ()
+        return sink_loop(), ()
 
 
 class Map(Component):
@@ -77,11 +78,12 @@ class Map(Component):
         self._fn = fn
 
     def coroutine_and_outputs(self, bindings):
+        @coroutine
         def map_loop(target):
                 with closing(target):
                     while True:
                         target.send(self._fn((yield)))
-        return coroutine(map_loop), ()
+        return map_loop, ()
 
 
 class FlatMap(Component):
@@ -90,12 +92,13 @@ class FlatMap(Component):
         self._fn = fn
 
     def coroutine_and_outputs(self, bindings):
+        @coroutine
         def flatmap_loop(target):
                 with closing(target):
                     while True:
                         for item in self._fn((yield)):
                             target.send(item)
-        return coroutine(flatmap_loop), ()
+        return flatmap_loop, ()
 
 
 class Filter(Component):
@@ -105,13 +108,14 @@ class Filter(Component):
 
     def coroutine_and_outputs(self, bindings):
         predicate = self._predicate
+        @coroutine
         def filter_loop(target):
             with closing(target):
                 while True:
                     val = yield
                     if predicate(val):
                         target.send(val)
-        return coroutine(filter_loop), ()
+        return filter_loop, ()
 
 
 class Branch(Component):
