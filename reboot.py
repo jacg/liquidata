@@ -176,9 +176,8 @@ class Name:
     def __init__(self, callable):
         self.callable = callable
 
-    def __getattribute__(self, name):
-        callable = super().__getattribute__('callable')
-        return callable(name)
+    def __getattr__(self, name):
+        return self.callable(name)
 
 
 out  = Name(Output.Name)
