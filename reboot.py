@@ -177,7 +177,7 @@ class Name:
         self.callable = callable
 
     def __getattribute__(self, name):
-        callable = object.__getattribute__(self, 'callable')
+        callable = super().__getattribute__('callable')
         return callable(name)
 
 
