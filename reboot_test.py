@@ -259,6 +259,16 @@ def test_open_pipe_as_component():
     net = Flow(a, pipe, b, out.X)
     assert net(data).X == list(map(b, map(g, map(f, map(a, data)))))
 
+
+def test_pick_item():
+    from reboot import Flow, pick, out
+    names = 'abc'
+    values = range(3)
+    f, = symbolic_functions('f')
+    data = [dict((name, value) for name in names) for value in values]
+    net = Flow(pick.a, f, out.X)
+    assert net(data).X == list(map(f, values))
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

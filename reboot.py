@@ -184,6 +184,7 @@ class Name:
 
 out = Name(Output.Name)
 get = Name(Input)
+pick = Name(itemgetter)
 
 
 class Fold(Component):
