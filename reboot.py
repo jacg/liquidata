@@ -187,6 +187,29 @@ class Pick(Component):
         return Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
 
 
+class On(Component):
+
+    def __init__(self, name):
+        self.name = name
+
+    def __call__(self, *components):
+        # TODO: shoudn't really mutate self
+        self.process_one_item = OpenPipe(*components).fn()
+        return self
+
+    def coroutine_and_outputs(self, bindings):
+        @coroutine
+        def on_loop(downstream):
+            with closing(downstream):
+                while True:
+                    namespace = (yield)
+                    for returned in self.process_one_item(namespace[self.name]):
+                        updated_namespace = namespace.copy()
+                        updated_namespace[self.name] = returned
+                        downstream.send(updated_namespace)
+        return on_loop, ()
+
+
 class Name:
 
     def __init__(self, callable):

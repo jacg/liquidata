@@ -280,6 +280,19 @@ def test_pick_multiple_items():
     net = Flow(pick.a.b, out.X)
     assert net(data).X == list(map(itemgetter('a', 'b'), data))
 
+
+def test_on_item():
+    from reboot import Flow, on, out
+    names = 'abc'
+    f, = symbolic_functions('f')
+    values = range(3)
+    data = [{name:N for name in names} for N in values]
+    expected = [d.copy() for d in data]
+    for d in expected:
+        d['a'] = f(d['a'])
+    net = Flow(on.a(f), out.X)
+    assert net(data).X == expected
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
