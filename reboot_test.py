@@ -1,3 +1,4 @@
+from operator  import itemgetter
 from functools import reduce
 from itertools import chain
 
@@ -268,6 +269,16 @@ def test_pick_item():
     data = [dict((name, value) for name in names) for value in values]
     net = Flow(pick.a, f, out.X)
     assert net(data).X == list(map(f, values))
+
+
+def test_pick_multiple_items():
+    from reboot import Flow, pick, out
+    names = 'abc'
+    ops = tuple(symbolic_functions(names))
+    values = range(3)
+    data = [{name:op(N) for (name, op) in zip(names, ops)} for N in values]
+    net = Flow(pick.a.b, out.X)
+    assert net(data).X == list(map(itemgetter('a', 'b'), data))
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

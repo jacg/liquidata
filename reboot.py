@@ -171,6 +171,18 @@ class Input(Component):
         return decode_implicits(bindings[self.name]).coroutine_and_outputs(bindings)
 
 
+class Pick(Component):
+
+    def __init__(self, *names):
+        self.names = names
+
+    def __getattr__(self, name):
+        return Pick(*self.names, name)
+
+    def coroutine_and_outputs(self, bindings):
+        return Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
+
+
 class Name:
 
     def __init__(self, callable):
@@ -182,7 +194,8 @@ class Name:
 
 out  = Name(Output.Name)
 get  = Name(Input)
-pick = Name(itemgetter)
+pick = Name(Pick)
+on   = Name(On)
 
 
 class Fold(Component):
