@@ -174,12 +174,12 @@ class Input(Component):
 
 class Name:
 
-    def __init__(self, Type):
-        self.Type = Type
+    def __init__(self, callable):
+        self.callable = callable
 
     def __getattribute__(self, name):
-        Type = object.__getattribute__(self, 'Type')
-        return Type(name)
+        callable = object.__getattribute__(self, 'callable')
+        return callable(name)
 
 
 out = Name(Output.Name)
