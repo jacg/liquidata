@@ -15,58 +15,57 @@ def test_trivial():
     assert result == data
 
 
+def test_implicit_sink():
+    from reboot import Flow
+    data = list(range(10))
+    result = []
+    net = Flow(result.append)
+    net(data)
+    assert result == data
+
+
 def test_map():
-    from reboot import Flow, Map, Sink
+    from reboot import Flow, Map
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    net = Flow(Map(f), Sink(result.append))
+    net = Flow(Map(f), result.append)
     net(data)
     assert result == list(map(f, data))
 
 
 def test_implicit_map():
-    from reboot import Flow, Sink
+    from reboot import Flow
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    net = Flow(f, Sink(result.append))
+    net = Flow(f, result.append)
     net(data)
     assert result == list(map(f, data))
 
 
 def test_filter():
-    from reboot import Flow, Filter, Sink
+    from reboot import Flow, Filter
     data = list(range(10))
     result = []
-    net = Flow(Filter(odd), Sink(result.append))
+    net = Flow(Filter(odd), result.append)
     net(data)
     assert result == list(filter(odd, data))
 
 
 def test_implicit_filter():
-    from reboot import Flow, Filter, Sink
+    from reboot import Flow, Filter
     data = list(range(10))
     result = []
-    net = Flow({odd}, Sink(result.append))
+    net = Flow({odd}, result.append)
     net(data)
     assert result == list(filter(odd, data))
 
-
-def test_implicit_sink():
-    from reboot import Flow
-    data = list(range(10))
-    result = []
-    net = Flow((result.append,))
-    net(data)
-    assert result == data
-
-
 def test_branch():
-    from reboot import Flow, Branch, Sink
+    from reboot import Flow, Branch
     data = list(range(10))
     branch, main = [], []
-    net = Flow(Branch(Sink(branch.append)), (main.append,))
+    net = Flow(Branch(branch.append), main.append)
     net(data)
     assert main   == data
     assert branch == data
@@ -76,7 +75,7 @@ def test_implicit_branch():
     from reboot import Flow
     data = list(range(10))
     branch, main = [], []
-    net = Flow([(branch.append,)], (main.append,))
+    net = Flow([branch.append], main.append)
     net(data)
     assert main   == data
     assert branch == data
@@ -90,10 +89,10 @@ def test_integration_1():
     s, t    = [], []
     net = Flow(f,
                {a},
-               [g, {b}, (s.append,)],
+               [g, {b}, s.append],
                h,
                {c},
-               (t.append,))
+               t.append)
     net(data)
     assert s == list(filter(b, map(g, filter(a, map(f, data)))))
     assert t == list(filter(c, map(h, filter(a, map(f, data)))))
@@ -304,7 +303,6 @@ def test_args():
     net = Flow(args.a.b(sym_add), out.X)
     assert net(data).X == list(map(sym_add, map(a, values),
                                             map(b, values)))
-
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
