@@ -1,4 +1,4 @@
-from operator  import itemgetter
+from operator  import itemgetter, lt
 from functools import reduce
 from itertools import chain
 
@@ -369,6 +369,7 @@ def test_args_single_put_many():
         d['l'], d['r'] = result
     assert net(data).X == expected
 
+
 def test_args_single_filter():
     from reboot import Flow, args, out
     data = (dict(a=1, b=2),
@@ -379,6 +380,14 @@ def test_args_single_filter():
     expected = list(filter(gtN(2), map(itemgetter('b'), data)))
     assert net(data).X == expected
 
+
+def test_args_single_flatmap():
+    from reboot import Flow, FlatMap, args, out
+    data = (dict(a=1, b=2),
+            dict(a=0, b=3),
+            dict(a=3, b=1))
+    net = Flow((args.a, FlatMap(lambda n:n*[n])), out.X)
+    assert net(data).X == [1,3,3,3]
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
