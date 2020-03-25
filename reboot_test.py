@@ -293,31 +293,81 @@ def test_on_item():
     f, = symbolic_functions('f')
     values = range(3)
     data = [{name:N for name in names} for N in values]
+    net = Flow(on.a(f), out.X)
     expected = [d.copy() for d in data]
     for d in expected:
         d['a'] = f(d['a'])
-    net = Flow(on.a(f), out.X)
     assert net(data).X == expected
 
 
-def test_args():
-    from reboot import Flow, args, out
-    names = 'abc'
-    a,b,c = symbolic_functions(names)
-    values = range(3)
-    data = [{name:f(N) for (f, name) in zip((a,b,c), names)} for N in values]
-    net = Flow((args.a.b, sym_add), out.X)
-    assert net(data).X == list(map(sym_add, map(a, values),
-                                            map(b, values)))
+def namespace_source(keys='abc', length=3):
+    indices = range(length)
+    return [{key:f'{key}{i}' for key in keys} for i in indices]
+
 
 def test_args_single():
     from reboot import Flow, args, out
-    names = 'abc'
-    a,b,c,f = symbolic_functions(names+'f')
-    values = range(3)
-    data = [{name:f(N) for (f, name) in zip((a,b,c), names)} for N in values]
+    data = namespace_source()
+    f, = symbolic_functions('f')
     net = Flow((args.c, f), out.X)
-    assert net(data).X == list(map(f, map(c, values)))
+    assert net(data).X == list(map(f, map(itemgetter('c'), data)))
+
+
+def test_args_many():
+    from reboot import Flow, args, out
+    data = namespace_source()
+    net = Flow((args.a.b, sym_add), out.X)
+    expected = list(map(sym_add, map(itemgetter('a'), data),
+                                 map(itemgetter('b'), data)))
+    assert net(data).X == expected
+
+def test_put_single():
+    from reboot import Flow, put, out
+    data = namespace_source()
+    f, = symbolic_functions('f')
+    net = Flow((itemgetter('b'), f, put.xxx), out.X)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        d['xxx'] = f(d['b'])
+    assert net(data).X == expected
+
+
+def test_put_many():
+    from reboot import Flow, put, out
+    data = namespace_source()
+    l,r = symbolic_functions('lr')
+    def f(x):
+        return l(x), r(x)
+    net = Flow((f, put.left.right), out.X)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        d['left' ], d['right'] = f(d)
+    assert net(data).X == expected
+
+
+def test_args_single_put_single():
+    from reboot import Flow, args, put, out
+    data = namespace_source()
+    f, = symbolic_functions('f')
+    net = Flow((args.b, f, put.result), out.X)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        d['result'] = f(d['b'])
+    assert net(data).X == expected
+
+
+def test_args_single_put_many():
+    from reboot import Flow, args, put, out
+    l,r = symbolic_functions('lr')
+    def f(x):
+        return l(x), r(x)
+    data = namespace_source()
+    net = Flow((args.c, f, put.l.r), out.X)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        result = f(d['c'])
+        d['l'], d['r'] = result
+    assert net(data).X == expected
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

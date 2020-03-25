@@ -233,17 +233,21 @@ class ArgsPut(Component):
             for name, value in zip(self.put, returned):
                 namespace[name] = value
             return namespace
-
+        def attach_it_to_namespace(namespace, it):
+            namespace[self.put[0]] = it
+            return namespace
         def return_directly(_, returned): return returned
-        def identity     (x): return  x
-        def wrap_in_tuple(x): return (x[self.args[0]],)
+
+        def         wrap_in_tuple(x): return (x              ,)
+        def get_and_wrap_in_tuple(x): return (x[self.args[0]],)
 
         if   len(self.args)  > 1: get_args = itemgetter(*self.args)
-        elif len(self.args) == 1: get_args = wrap_in_tuple
-        else                    : get_args = identity
+        elif len(self.args) == 1: get_args = get_and_wrap_in_tuple
+        else                    : get_args =         wrap_in_tuple
 
-        if self.put: make_return = attach_each_to_namespace
-        else       : make_return = return_directly
+        if   len(self.put)  > 1: make_return = attach_each_to_namespace
+        elif len(self.put) == 1: make_return = attach_it_to_namespace
+        else                   : make_return = return_directly
 
         @coroutine
         def args_put_loop(downstream):
@@ -256,9 +260,11 @@ class ArgsPut(Component):
                     generated_returns = self.pipe_fn(*args)
                     print(f'generated_returns: {generated_returns}')
                     for returned in generated_returns:
+                        print(f'make_return: {make_return}')
                         print(f'returned: {returned}')
                         # TODO: eliminate unnecessary first copy?
                         outgoing = make_return(copy.copy(incoming), returned)
+                        print(f'outgoing: {outgoing}')
                         downstream.send((outgoing,))
         return args_put_loop, ()
 
