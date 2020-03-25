@@ -426,6 +426,31 @@ def test_slice_downstream(spec):
     assert result == data[specslice]
     assert result == data[specslice.start : specslice.stop : specslice.step]
 
+
+# slice takes an optional argument close_all. If this argument
+# is False (default), slice will close the innermost branch in
+# which the component is plugged in after the component iterates
+# over all its entries. However, when set to True, the behaviour
+# is to close the outermost pipeline, resulting in a full stop of
+# the data flow.
+@parametrize("close_all", (False, True))
+def test_slice_close_all(close_all):
+    from reboot import Slice, Flow, out
+
+    data = list(range(20))
+    n_elements = 5
+    the_slice = Slice(n_elements, close_all=close_all)
+
+    net = Flow([the_slice, out.branch], out.main)
+    result = net(data)
+
+    if close_all:
+        assert result.branch == data[:n_elements]
+        assert result.main   == data[:n_elements]
+    else:
+        assert result.branch == data[:n_elements]
+        assert result.main   == data
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

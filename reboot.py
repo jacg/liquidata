@@ -395,7 +395,10 @@ def decode_implicits(it):
 
 def push(source, pipe):
     for item in source:
-        pipe.send((item,))
+        try:
+            pipe.send((item,))
+        except StopPipeline:
+            break
     pipe.close()
 
 
