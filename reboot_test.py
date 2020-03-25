@@ -4,7 +4,7 @@ from itertools import chain
 
 from pytest import mark
 xfail = mark.xfail
-
+TODO = mark.xfail(reason='TODO')
 
 def test_trivial():
     from reboot import Flow, Sink
@@ -172,7 +172,7 @@ def test_get_implicit_filter():
     assert net(data, A={f}).B == list(filter(f, data))
 
 
-@xfail(reason='TODO')
+@TODO
 def test_implicit_filter_get():
     from reboot import Flow, get, out
     data = list(range(6))
@@ -209,7 +209,7 @@ def test_flat_map():
     assert net(data).X == list(chain(*map(f, data)))
 
 
-@xfail(reason='TODO')
+@TODO
 def test_get_implicit_sink():
     from reboot import Flow, get, out
     data = list(range(3))
