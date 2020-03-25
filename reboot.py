@@ -224,21 +224,33 @@ class ArgsPut(Component):
         self.args = cs.pop(0).names if isinstance(cs[ 0], Args) else ()
         self.put  = cs.pop( ).names if isinstance(cs[-1], Put ) else ()
         self.pipe_fn = OpenPipe(*cs).fn()
-
+        print(f'self.args: {self.args}')
+        print(f'self.put: {self.put}')
 
     def coroutine_and_outputs(self, bindings):
-        def set_puts(namespace, returned):
+
+        def attach_each_to_namespace(namespace, returned):
             for name, value in zip(self.put, returned):
                 namespace[name] = value
             return namespace
 
-        get_args = itemgetter(*self.args) if self.args else lambda x:x
-        set_puts = set_puts               if self.put  else lambda incoming, returned: returned
+        def return_directly(_, returned): return returned
+        def identity     (x): return  x
+        def wrap_in_tuple(x): return (x[self.args[0]],)
+
+        if   len(self.args)  > 1: get_args = itemgetter(*self.args)
+        elif len(self.args) == 1: get_args = wrap_in_tuple
+        else                    : get_args = identity
+
+        if self.put: make_return = attach_each_to_namespace
+        else       : make_return = return_directly
+
         @coroutine
         def args_put_loop(downstream):
             with closing(downstream):
                 while True:
                     incoming, = (yield)
+                    print(f'incoming: {incoming}')
                     args = get_args(incoming)
                     print(f'argsXXX: {args}')
                     generated_returns = self.pipe_fn(*args)
@@ -246,12 +258,11 @@ class ArgsPut(Component):
                     for returned in generated_returns:
                         print(f'returned: {returned}')
                         # TODO: eliminate unnecessary first copy?
-                        outgoing = set_puts(copy.copy(incoming), returned)
+                        outgoing = make_return(copy.copy(incoming), returned)
                         downstream.send((outgoing,))
         return args_put_loop, ()
 
 
-class Put(MultipleNames, Component): pass
 
 
 class Name:

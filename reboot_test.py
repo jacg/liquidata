@@ -306,10 +306,18 @@ def test_args():
     a,b,c = symbolic_functions(names)
     values = range(3)
     data = [{name:f(N) for (f, name) in zip((a,b,c), names)} for N in values]
-    print('test_args', data)
     net = Flow((args.a.b, sym_add), out.X)
     assert net(data).X == list(map(sym_add, map(a, values),
                                             map(b, values)))
+
+def test_args_single():
+    from reboot import Flow, args, out
+    names = 'abc'
+    a,b,c,f = symbolic_functions(names+'f')
+    values = range(3)
+    data = [{name:f(N) for (f, name) in zip((a,b,c), names)} for N in values]
+    net = Flow((args.c, f), out.X)
+    assert net(data).X == list(map(f, map(c, values)))
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
