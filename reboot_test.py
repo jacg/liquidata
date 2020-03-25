@@ -2,9 +2,17 @@ from operator  import itemgetter, lt
 from functools import reduce
 from itertools import chain
 
-from pytest import mark
+from pytest import mark, raises
 xfail = mark.xfail
 TODO = mark.xfail(reason='TODO')
+parametrize = mark.parametrize
+
+from hypothesis            import given
+from hypothesis.strategies import tuples
+from hypothesis.strategies import integers
+from hypothesis.strategies import none
+from hypothesis.strategies import one_of
+
 
 def test_trivial():
     from reboot import Flow, Sink
@@ -398,6 +406,25 @@ def test_args_many_flatmap():
     net = Flow((args.a.b, FlatMap(lambda a,b:a*[b])), out.X)
     assert net(data).X == [9,7,7,7]
 
+
+
+small_ints         = integers(min_value=0, max_value=15)
+small_ints_nonzero = integers(min_value=1, max_value=15)
+slice_arg          = one_of(none(), small_ints)
+slice_arg_nonzero  = one_of(none(), small_ints_nonzero)
+
+@given(one_of(tuples(small_ints),
+              tuples(small_ints, small_ints),
+              tuples(slice_arg,  slice_arg, slice_arg_nonzero)))
+def test_slice_downstream(spec):
+
+    from reboot import Flow, Slice, out
+    data = list('abcdefghij')
+    net = Flow(Slice(*spec), out.X)
+    result = net(data).X
+    specslice = slice(*spec)
+    assert result == data[specslice]
+    assert result == data[specslice.start : specslice.stop : specslice.step]
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

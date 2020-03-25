@@ -1,4 +1,4 @@
-from operator   import itemgetter
+from operator   import itemgetter, attrgetter
 from functools  import reduce, wraps
 from contextlib import contextmanager
 from argparse   import Namespace
@@ -343,6 +343,44 @@ class OpenPipe:
 
 
 
+
+class Slice(Component):
+
+    def __init__(self, *args, close_all=False):
+        spec = slice(*args)
+        start, stop, step = spec.start, spec.stop, spec.step
+        print(f"spec 0: {spec}")
+        if start is not None and start <  0: raise ValueError('slice requires start >= 0')
+        if stop  is not None and stop  <  0: raise ValueError('slice requires stop >= 0')
+        if step  is not None and step  <= 0: raise ValueError('slice requires step > 0')
+
+        if start is None: start = 0
+        if step  is None: step  = 1
+        if stop  is None: stopper = it.count()
+        else            : stopper = range((stop - start + step - 1) // step)
+        self.spec = slice(start, stop, step)
+        print(f"spec 1: {self.spec}")
+        self.stopper = stopper
+        self.close_all = close_all
+
+    def coroutine_and_outputs(self, bindings):
+        start, stop, step = attrgetter('start', 'stop', 'step')(self.spec)
+        stopper, close_all = attrgetter('stopper', 'close_all')(self)
+        @coroutine
+        def slice_loop(downstream):
+            with closing(downstream):
+                for _ in range(start)           : yield
+                for _ in stopper:
+                    downstream.send((yield))
+                    for _ in range(step - 1)    : yield
+
+                yield
+
+                if close_all: raise StopPipeline
+                while True:
+                    yield
+        return slice_loop, ()
+
 ######################################################################
 
 # Most component names don't have to be used explicitly, because plain python
@@ -385,3 +423,7 @@ def coroutine(generator_function):
 def closing(target):
     try:     yield
     finally: target.close()
+
+######################################################################
+
+class StopPipeline(Exception): pass
