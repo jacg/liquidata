@@ -71,7 +71,7 @@ class Sink(Component):
         @coroutine
         def sink_loop():
             while True:
-                self._fn((yield))
+                self._fn(*(yield))
         return sink_loop(), ()
 
 
@@ -85,7 +85,7 @@ class Map(Component):
         def map_loop(target):
                 with closing(target):
                     while True:
-                        target.send(self._fn((yield)))
+                        target.send((self._fn(*(yield)),))
         return map_loop, ()
 
 
@@ -99,8 +99,8 @@ class FlatMap(Component):
         def flatmap_loop(target):
                 with closing(target):
                     while True:
-                        for item in self._fn((yield)):
-                            target.send(item)
+                        for item in self._fn(*(yield)):
+                            target.send((item,))
         return flatmap_loop, ()
 
 
@@ -115,9 +115,9 @@ class Filter(Component):
         def filter_loop(target):
             with closing(target):
                 while True:
-                    val = yield
-                    if predicate(val):
-                        target.send(val)
+                    args = yield
+                    if predicate(*args):
+                        target.send(args)
         return filter_loop, ()
 
 
@@ -132,9 +132,9 @@ class Branch(Component):
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
                 while True:
-                    val = yield
-                    sideways  .send(val)
-                    downstream.send(val)
+                    args = yield
+                    sideways  .send(args)
+                    downstream.send(args)
         return branch_loop, outputs
 
 
@@ -206,11 +206,11 @@ class On(Component):
         def on_loop(downstream):
             with closing(downstream):
                 while True:
-                    namespace = (yield)
+                    namespace, = (yield)
                     for returned in self.process_one_item(namespace[self.name]):
                         updated_namespace = namespace.copy()
                         updated_namespace[self.name] = returned
-                        downstream.send(updated_namespace)
+                        downstream.send((updated_namespace,))
         return on_loop, ()
 
 
@@ -266,7 +266,7 @@ class Fold(Component):
         def reduce_loop(future):
             if self._initial is None:
                 try:
-                    accumulator = (yield)
+                    accumulator, = (yield)
                 except StopIteration:
                     # TODO: message about not being able to run on an empty stream.
                     # Try to link it to variable names in the network?
@@ -275,7 +275,7 @@ class Fold(Component):
                 accumulator = self._initial
             try:
                 while True:
-                    accumulator = binary_function(accumulator, (yield))
+                    accumulator = binary_function(accumulator, *(yield))
             finally:
                 future.set_result(accumulator)
         return reduce_loop(future)
@@ -296,9 +296,9 @@ class OpenPipe:
             self._pipe = _Pipe(chain(components, [Sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs(bindings)
 
-        def __call__(self, arg):
+        def __call__(self, *args):
             self._returns = []
-            self._coroutine.send(arg)
+            self._coroutine.send(args)
             return tuple(self._returns)
 
         def accept_result(self, item):
@@ -320,7 +320,7 @@ def decode_implicits(it):
 
 def push(source, pipe):
     for item in source:
-        pipe.send(item)
+        pipe.send((item,))
     pipe.close()
 
 
