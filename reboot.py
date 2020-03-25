@@ -5,6 +5,7 @@ from itertools  import chain
 from argparse   import Namespace
 from asyncio    import Future
 
+import copy
 
 # TODO: fill slots in OpenPipe.fn at call time: OpenPipe.fn(not only here)(data, but also here)
 
