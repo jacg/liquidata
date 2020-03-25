@@ -369,6 +369,17 @@ def test_args_single_put_many():
         d['l'], d['r'] = result
     assert net(data).X == expected
 
+def test_args_single_filter():
+    from reboot import Flow, args, out
+    data = (dict(a=1, b=2),
+            dict(a=3, b=3),
+            dict(a=2, b=1),
+            dict(a=8, b=9))
+    net = Flow((args.b, {gtN(2)}), out.X)
+    expected = list(filter(gtN(2), map(itemgetter('b'), data)))
+    assert net(data).X == expected
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
