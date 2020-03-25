@@ -389,6 +389,19 @@ def test_args_single_filter():
     assert net(data).X == expected
 
 
+@TODO
+def test_args_many_filter():
+    from reboot import Flow, args, out
+    data = (dict(a=1, b=2),
+            dict(a=3, b=3),
+            dict(a=2, b=1),
+            dict(a=8, b=9))
+    net = Flow((args.a.b, {lt}), out.X)
+    expected = (dict(a=1, b=2),
+                dict(a=8, b=9))
+    assert net(data).X == expected
+
+
 def test_args_single_flatmap():
     from reboot import Flow, FlatMap, args, out
     data = (dict(a=1, b=2),
