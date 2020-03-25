@@ -1,10 +1,10 @@
 from operator   import itemgetter
 from functools  import reduce, wraps
 from contextlib import contextmanager
-from itertools  import chain
 from argparse   import Namespace
 from asyncio    import Future
 
+import itertools as it
 import copy
 
 # TODO: fill slots in OpenPipe.fn at call time: OpenPipe.fn(not only here)(data, but also here)
@@ -30,7 +30,7 @@ class _Pipe:
         cor_out_pairs = tuple(c.coroutine_and_outputs(bindings) for c in self._components)
         coroutines = map(itemgetter(0), cor_out_pairs)
         out_groups = map(itemgetter(1), cor_out_pairs)
-        return combine_coroutines(coroutines), chain(*out_groups)
+        return combine_coroutines(coroutines), it.chain(*out_groups)
 
 
 class Flow:
@@ -330,7 +330,7 @@ class OpenPipe:
     class _Fn:
 
         def __init__(self, components, bindings):
-            self._pipe = _Pipe(chain(components, [Sink(self.accept_result)]))
+            self._pipe = _Pipe(it.chain(components, [Sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs(bindings)
 
         def __call__(self, *args):
