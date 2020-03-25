@@ -451,6 +451,19 @@ def test_slice_close_all(close_all):
         assert result.branch == data[:n_elements]
         assert result.main   == data
 
+
+@parametrize('args',
+             ((      -1,),
+              (None, -1),
+              (-1, None),
+              (None, None, -1),
+              (None, None,  0),
+             ))
+def test_slice_raises_ValueError(args):
+    from reboot import Slice
+    with raises(ValueError):
+        Slice(*args)
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
