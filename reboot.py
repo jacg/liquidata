@@ -214,25 +214,44 @@ class On(Component):
         return on_loop, ()
 
 
-class Args(MultipleNames, Component):
+class Args(MultipleNames): pass
+class Put (MultipleNames): pass
 
-    def __call__(self, fn):
-        # TODO: shoudn't really mutate self
-        #self.process_one_item = OpenPipe(*components).fn()
-        self.fn = fn
-        return self
+class ArgsPut(Component):
+
+    def __init__(self, *components):
+        cs = list(components)
+        self.args = cs.pop(0).names if isinstance(cs[ 0], Args) else ()
+        self.put  = cs.pop( ).names if isinstance(cs[-1], Put ) else ()
+        self.pipe_fn = OpenPipe(*cs).fn()
+
 
     def coroutine_and_outputs(self, bindings):
-        get_args = itemgetter(*self.names)
+        def set_puts(namespace, returned):
+            for name, value in zip(self.put, returned):
+                namespace[name] = value
+            return namespace
+
+        get_args = itemgetter(*self.args) if self.args else lambda x:x
+        set_puts = set_puts               if self.put  else lambda incoming, returned: returned
         @coroutine
-        def args_loop(downstream):
+        def args_put_loop(downstream):
             with closing(downstream):
                 while True:
-                    namespace = (yield)
-                    args = get_args(namespace)
-                    returned = self.fn(*args)
-                    downstream.send(returned)
-        return args_loop, ()
+                    incoming, = (yield)
+                    args = get_args(incoming)
+                    print(f'argsXXX: {args}')
+                    generated_returns = self.pipe_fn(*args)
+                    print(f'generated_returns: {generated_returns}')
+                    for returned in generated_returns:
+                        print(f'returned: {returned}')
+                        # TODO: eliminate unnecessary first copy?
+                        outgoing = set_puts(copy.copy(incoming), returned)
+                        downstream.send((outgoing,))
+        return args_put_loop, ()
+
+
+class Put(MultipleNames, Component): pass
 
 
 class Name:
@@ -249,7 +268,7 @@ get  = Name(Input)
 pick = Name(Pick)
 on   = Name(On)
 args = Name(Args)
-
+put  = Name(Put)
 
 class Fold(Component):
 
@@ -313,7 +332,7 @@ class OpenPipe:
 def decode_implicits(it):
     if isinstance(it, Component): return it
     if isinstance(it, list     ): return Branch(*it)
-    if isinstance(it, tuple    ): return Sink  (*it)
+    if isinstance(it, tuple    ): return ArgsPut(*it)
     if isinstance(it, set      ): return Filter(next(iter(it)))
     else                        : return Map(it)
 

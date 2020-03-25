@@ -225,6 +225,13 @@ def test_open_pipe_as_function():
     assert pipe_fn(6) == (g(f(6)),)
 
 
+def test_open_pipe_as_multi_arg_function():
+    from reboot import OpenPipe
+    f, = symbolic_functions('f')
+    pipe_fn = OpenPipe(sym_add, f).fn()
+    assert pipe_fn(6,7) == (f(sym_add(6,7)),)
+
+
 def test_open_pipe_on_filter():
     from reboot import OpenPipe, FlatMap
     f = odd
@@ -299,8 +306,8 @@ def test_args():
     a,b,c = symbolic_functions(names)
     values = range(3)
     data = [{name:f(N) for (f, name) in zip((a,b,c), names)} for N in values]
-    print(data)
-    net = Flow(args.a.b(sym_add), out.X)
+    print('test_args', data)
+    net = Flow((args.a.b, sym_add), out.X)
     assert net(data).X == list(map(sym_add, map(a, values),
                                             map(b, values)))
 
