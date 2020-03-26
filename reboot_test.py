@@ -24,16 +24,6 @@ def test_trivial():
 
 
 def test_map():
-    from reboot import flow, Map
-    data = list(range(10))
-    f, = symbolic_functions('f')
-    result = []
-    net = flow(Map(f), result.append)
-    net(data)
-    assert result == list(map(f, data))
-
-
-def test_implicit_map():
     from reboot import flow
     data = list(range(10))
     f, = symbolic_functions('f')

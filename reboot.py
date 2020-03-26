@@ -48,7 +48,7 @@ class _Pipe:
     def __init__(self, components):
         self._components = tuple(map(decode_implicits, components))
         last = self._components[-1]
-        if isinstance(last, Map):
+        if isinstance(last, _Map):
             last.__class__ = _Sink
 
     def coroutine_and_outputs(self, bindings):
@@ -101,7 +101,7 @@ class _Sink(_Component):
         return sink_loop(), ()
 
 
-class Map(_Component):
+class _Map(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -214,7 +214,7 @@ class MultipleNames:
 class Pick(MultipleNames, _Component):
 
     def coroutine_and_outputs(self, bindings):
-        return Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
+        return _Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
 
 
 class On(_Component):
@@ -416,7 +416,7 @@ def decode_implicits(it):
     if isinstance(it, list     ): return Branch(*it)
     if isinstance(it, tuple    ): return ArgsPut(*it)
     if isinstance(it, set      ): return Filter(next(iter(it)))
-    else                        : return Map(it)
+    else                        : return _Map(it)
 
 
 def push(source, pipe):
