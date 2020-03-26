@@ -205,7 +205,7 @@ class _Input(_Component):
     def coroutine_and_outputs(self, bindings):
         return decode_implicits(bindings[self.name]).coroutine_and_outputs(bindings)
 
-class MultipleNames:
+class _MultipleNames:
 
     def __init__(self, *names):
         self.names = names
@@ -213,7 +213,7 @@ class MultipleNames:
     def __getattr__(self, name):
         return type(self)(*self.names, name)
 
-class Pick(MultipleNames, _Component):
+class Pick(_MultipleNames, _Component):
 
     def coroutine_and_outputs(self, bindings):
         return _Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
@@ -242,8 +242,8 @@ class On(_Component):
         return on_loop, ()
 
 
-class Args(MultipleNames): pass
-class Put (MultipleNames): pass
+class Args(_MultipleNames): pass
+class Put (_MultipleNames): pass
 
 class ArgsPut(_Component):
 
