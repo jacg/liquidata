@@ -510,3 +510,8 @@ def closing(target):
 ######################################################################
 
 class StopPipeline(Exception): pass
+
+######################################################################
+
+def take(n, **kwds):
+    return Slice(None, n, **kwds)

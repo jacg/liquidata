@@ -492,6 +492,13 @@ def test_arg_as_lambda_call_keyword_args():
     from reboot import arg
     assert (arg(a=6, b=7))(dict) == (lambda x: x(a=6, b=7))(dict)
 
+
+def test_take():
+    from reboot import flow, take, out
+    data = 'abracadabra'
+    net = flow(take(5), out.X)(data).X == ''.join(data[:5])
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
