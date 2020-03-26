@@ -197,7 +197,7 @@ class _Output(_Component):
             return _Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
-class Input(_Component):
+class _Input(_Component):
 
     def __init__(self, name):
         self.name = name
@@ -310,7 +310,7 @@ class Name:
 
 
 out  = Name(_Output.Name)
-get  = Name(Input)
+get  = Name(_Input)
 pick = Name(Pick)
 on   = Name(On)
 args = Name(Args)
