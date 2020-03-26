@@ -458,8 +458,8 @@ class _Arg:
 
         setattr(cls,  f'__{op.__name__}__', __op__)
 
-    def __getitem__(self, key):
-        return itemgetter(key)
+    def __getitem__(self, index_or_key):
+        return itemgetter(index_or_key)
 
     def __getattr__(self, name):
         return attrgetter(name)

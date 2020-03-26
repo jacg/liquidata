@@ -463,6 +463,13 @@ def test_arg_as_lambda_getitem():
     assert (arg[3])(data) == (lambda x: x[3])(data)
 
 
+@xfail(reason="__getitem__ can't distinguish x[a,b] from x[(a,b)]")
+def test_arg_as_lambda_get_multilple_items():
+    from reboot import arg
+    data = 'abracadabra'
+    assert (arg[3,9,4])(data) == (lambda x: (x[3], x[9], x[4]))(data)
+
+
 def test_arg_as_lambda_getattr():
     from reboot import arg
     data = Namespace(a=1, b=2)
