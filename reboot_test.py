@@ -513,6 +513,14 @@ def test_until():
     got = ''.join(flow(until(_ == 'X'), out.X)(data).X)
     assert got == expected
 
+
+def test_while():
+    from reboot import flow, while_, out, arg as _
+    data = 'abcdXefghi'
+    expected = ''.join(it.takewhile(_ != 'X', data))
+    got = ''.join(flow(while_(_ != 'X'), out.X)(data).X)
+    assert got == expected
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

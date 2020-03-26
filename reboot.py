@@ -530,3 +530,6 @@ def until(predicate):
             while True:
                 yield
     return until_loop
+
+
+def while_(predicate): return until(lambda x: not predicate(x))
