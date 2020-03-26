@@ -219,7 +219,7 @@ class _Pick(_MultipleNames, _Component):
         return _Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
 
 
-class On(_Component):
+class _On(_Component):
 
     def __init__(self, name):
         self.name = name
@@ -312,7 +312,7 @@ class Name:
 out  = Name(_Output.Name)
 get  = Name(_Input)
 pick = Name(_Pick)
-on   = Name(On)
+on   = Name(_On)
 args = Name(Args)
 put  = Name(Put)
 
