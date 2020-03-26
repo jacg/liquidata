@@ -456,6 +456,11 @@ def test_arg_as_lambda_binary(op, operand):
     assert a(operand) == b(operand)
 
 
+def test_arg_as_lambda_getitem():
+    from reboot import arg
+    data = 'abracadabra'
+    assert (arg[3])(data) == (lambda x: x[3])(data)
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

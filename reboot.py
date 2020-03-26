@@ -11,8 +11,8 @@ import copy
 # TODO: return single value rather than namespace, when appropriate. Implicit naming of flow's sink.
 
 # TODO: missing arg-lambda features
-#         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a           arg[0]; arg.a.b  arg[0,1]
-# lambda x: x.a > 3; lambda x: x:[0] > 3; lambda a,b : a >     b; attrgetter('a'); itemgetter(0);
+#         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
+# lambda x: x.a > 3; lambda x: x:[0] > 3; lambda a,b : a >     b; attrgetter('a');
 
 # TODO: (a,b,c) without args or put should just be a pipe
 
@@ -457,6 +457,9 @@ class _Arg:
             return implementation
 
         setattr(cls,  f'__{op.__name__}__', __op__)
+
+    def __getitem__(self, key):
+        return itemgetter(key)
 
 
 from operator import lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv
