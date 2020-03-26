@@ -149,7 +149,7 @@ class _Filter(_Component):
         return filter_loop, ()
 
 
-class Branch(_Component):
+class _Branch(_Component):
 
     def __init__(self, *components):
         self._pipe = _Pipe(components)
@@ -415,7 +415,7 @@ class Slice(_Component):
 # types have implicit interpretations as components
 def decode_implicits(it):
     if isinstance(it, _Component): return it
-    if isinstance(it, list     ): return Branch(*it)
+    if isinstance(it, list     ): return _Branch(*it)
     if isinstance(it, tuple    ): return ArgsPut(*it)
     if isinstance(it, set      ): return _Filter(next(iter(it)))
     else                        : return _Map(it)

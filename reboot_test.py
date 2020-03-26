@@ -41,17 +41,8 @@ def test_filter():
     net(data)
     assert result == list(filter(odd, data))
 
+
 def test_branch():
-    from reboot import flow, Branch
-    data = list(range(10))
-    branch, main = [], []
-    net = flow(Branch(branch.append), main.append)
-    net(data)
-    assert main   == data
-    assert branch == data
-
-
-def test_implicit_branch():
     from reboot import flow
     data = list(range(10))
     branch, main = [], []
