@@ -8,6 +8,8 @@ import itertools as it
 import copy
 
 
+# TODO: Find public name for FlatMap
+
 # TODO: A [::] syntax for slice?
 
 # TODO: Reimplement `on` in terms of args and put, once they are done
