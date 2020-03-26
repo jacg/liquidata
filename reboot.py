@@ -18,7 +18,7 @@ import copy
 
 # TODO: Rename pipe -> Pipe
 
-# TODO: side-effect sink implicit at end of Flow (as opposed to Pipe)
+# TODO: side-effect sink implicit at end of flow (as opposed to Pipe)
 
 # TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
 
@@ -34,7 +34,7 @@ import copy
 #          [side-effect], [out.X(result-sink)] ????
 
 # TODO: option for returning single value if namespace contains only one value.
-#       net = Flow(...).no_namespace. Similar for namespace -> (named?)tuple?
+#       net = flow(...).no_namespace. Similar for namespace -> (named?)tuple?
 
 # TODO: option to pipe.fn to assume that the pipe is a map, and therefore
 # return the first (hopefully existent and only) thing yielded.
@@ -58,7 +58,7 @@ class _Pipe:
         return combine_coroutines(coroutines), it.chain(*out_groups)
 
 
-class Flow:
+class flow:
 
     def __init__(self, *components):
         self._pipe = _Pipe(components)
