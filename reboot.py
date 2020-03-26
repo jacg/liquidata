@@ -166,7 +166,7 @@ class _Branch(_Component):
         return branch_loop, outputs
 
 
-class Output(_Component):
+class _Output(_Component):
 
     def __init__(self, name, sink=None):
         self._name = name
@@ -187,14 +187,14 @@ class Output(_Component):
                 # TODO: issue warning/error if initial is not None
                 sink = Fold(sink, initial=initial)
             # TODO: set as implicit count filter?
-            return Output(self.name, sink)
+            return _Output(self.name, sink)
 
         def coroutine_and_outputs(self, bindings):
             def append(the_list, element):
                 the_list.append(element)
                 return the_list
             collect_into_list = Fold(append, [])
-            return Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
+            return _Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
 class Input(_Component):
@@ -309,7 +309,7 @@ class Name:
         return self.callable(name)
 
 
-out  = Name(Output.Name)
+out  = Name(_Output.Name)
 get  = Name(Input)
 pick = Name(Pick)
 on   = Name(On)
