@@ -28,10 +28,9 @@ import copy
 
 # TODO: A [::] syntax for slice? Can we do better than `slice[start:stop:step]`? what about close_all?
 
-# TODO: Reimplement `on` in terms of args and put, once they are done
-
-# TODO: Extend `on` to work on namedtuples, Namespaces, sequences. [Give it a
-#       mutate option? Don't bother, just switch to persistent data structures]
+# TODO: Extend `args` & `put` to work on namedtuples, Namespaces, sequences.
+#       [Give it a mutate option? Don't bother, just switch to persistent data
+#       structures]
 
 # TODO: `pick.x, f` works. Think about what `pick.x(f)` could mean.
 
@@ -242,22 +241,10 @@ class _On(_Component):
     def __init__(self, name):
         self.name = name
 
-    def __call__(self, *components):
-        # TODO: shoudn't really mutate self
-        self.process_one_item = pipe(*components).fn()
-        return self
-
-    def coroutine_and_outputs(self, bindings):
-        @coroutine
-        def on_loop(downstream):
-            with closing(downstream):
-                while True:
-                    namespace, = (yield)
-                    for returned in self.process_one_item(namespace[self.name]):
-                        updated_namespace = namespace.copy()
-                        updated_namespace[self.name] = returned
-                        downstream.send((updated_namespace,))
-        return on_loop, ()
+    def __call__(self, *ARGS):
+        return tuple(it.chain([getattr(args, self.name)],
+                              ARGS,
+                              [getattr(put, self.name)]))
 
 
 class _Args(_MultipleNames): pass
