@@ -132,7 +132,7 @@ class FlatMap(_Component):
         return flatmap_loop, ()
 
 
-class Filter(_Component):
+class _Filter(_Component):
 
     def __init__(self, predicate):
         self._predicate = predicate
@@ -417,7 +417,7 @@ def decode_implicits(it):
     if isinstance(it, _Component): return it
     if isinstance(it, list     ): return Branch(*it)
     if isinstance(it, tuple    ): return ArgsPut(*it)
-    if isinstance(it, set      ): return Filter(next(iter(it)))
+    if isinstance(it, set      ): return _Filter(next(iter(it)))
     else                        : return _Map(it)
 
 

@@ -34,16 +34,7 @@ def test_map():
 
 
 def test_filter():
-    from reboot import flow, Filter
-    data = list(range(10))
-    result = []
-    net = flow(Filter(odd), result.append)
-    net(data)
-    assert result == list(filter(odd, data))
-
-
-def test_implicit_filter():
-    from reboot import flow, Filter
+    from reboot import flow
     data = list(range(10))
     result = []
     net = flow({odd}, result.append)
