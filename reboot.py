@@ -8,6 +8,8 @@ import itertools as it
 import copy
 
 
+# TODO: Find public name for FlatMap
+
 # TODO: A [::] syntax for slice?
 
 # TODO: Reimplement `on` in terms of args and put, once they are done
@@ -18,7 +20,7 @@ import copy
 
 # TODO: Rename pipe -> Pipe
 
-# TODO: side-effect sink implicit at end of Flow (as opposed to Pipe)
+# TODO: side-effect sink implicit at end of flow (as opposed to Pipe)
 
 # TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
 
@@ -34,7 +36,7 @@ import copy
 #          [side-effect], [out.X(result-sink)] ????
 
 # TODO: option for returning single value if namespace contains only one value.
-#       net = Flow(...).no_namespace. Similar for namespace -> (named?)tuple?
+#       net = flow(...).no_namespace. Similar for namespace -> (named?)tuple?
 
 # TODO: option to pipe.fn to assume that the pipe is a map, and therefore
 # return the first (hopefully existent and only) thing yielded.
@@ -48,8 +50,8 @@ class _Pipe:
     def __init__(self, components):
         self._components = tuple(map(decode_implicits, components))
         last = self._components[-1]
-        if isinstance(last, Map):
-            last.__class__ = Sink
+        if isinstance(last, _Map):
+            last.__class__ = _Sink
 
     def coroutine_and_outputs(self, bindings):
         cor_out_pairs = tuple(c.coroutine_and_outputs(bindings) for c in self._components)
@@ -58,7 +60,7 @@ class _Pipe:
         return combine_coroutines(coroutines), it.chain(*out_groups)
 
 
-class Flow:
+class flow:
 
     def __init__(self, *components):
         self._pipe = _Pipe(components)
@@ -85,10 +87,10 @@ class Flow:
 #    Component types                                                 #
 ######################################################################
 
-class Component:
+class _Component:
     pass
 
-class Sink(Component):
+class _Sink(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -101,7 +103,7 @@ class Sink(Component):
         return sink_loop(), ()
 
 
-class Map(Component):
+class _Map(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -115,7 +117,7 @@ class Map(Component):
         return map_loop, ()
 
 
-class FlatMap(Component):
+class FlatMap(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -130,7 +132,7 @@ class FlatMap(Component):
         return flatmap_loop, ()
 
 
-class Filter(Component):
+class _Filter(_Component):
 
     def __init__(self, predicate):
         self._predicate = predicate
@@ -147,7 +149,7 @@ class Filter(Component):
         return filter_loop, ()
 
 
-class Branch(Component):
+class _Branch(_Component):
 
     def __init__(self, *components):
         self._pipe = _Pipe(components)
@@ -164,7 +166,7 @@ class Branch(Component):
         return branch_loop, outputs
 
 
-class Output(Component):
+class _Output(_Component):
 
     def __init__(self, name, sink=None):
         self._name = name
@@ -175,27 +177,27 @@ class Output(Component):
         coroutine = self._sink.make_coroutine(future)
         return coroutine, ((self._name, future),)
 
-    class Name(Component):
+    class Name(_Component):
 
         def __init__(self, name):
             self.name = name
 
         def __call__(self, sink, initial=None):
-            if not isinstance(sink, Component):
+            if not isinstance(sink, _Component):
                 # TODO: issue warning/error if initial is not None
-                sink = Fold(sink, initial=initial)
+                sink = _Fold(sink, initial=initial)
             # TODO: set as implicit count filter?
-            return Output(self.name, sink)
+            return _Output(self.name, sink)
 
         def coroutine_and_outputs(self, bindings):
             def append(the_list, element):
                 the_list.append(element)
                 return the_list
-            collect_into_list = Fold(append, [])
-            return Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
+            collect_into_list = _Fold(append, [])
+            return _Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
-class Input(Component):
+class _Input(_Component):
 
     def __init__(self, name):
         self.name = name
@@ -203,7 +205,7 @@ class Input(Component):
     def coroutine_and_outputs(self, bindings):
         return decode_implicits(bindings[self.name]).coroutine_and_outputs(bindings)
 
-class MultipleNames:
+class _MultipleNames:
 
     def __init__(self, *names):
         self.names = names
@@ -211,20 +213,20 @@ class MultipleNames:
     def __getattr__(self, name):
         return type(self)(*self.names, name)
 
-class Pick(MultipleNames, Component):
+class _Pick(_MultipleNames, _Component):
 
     def coroutine_and_outputs(self, bindings):
-        return Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
+        return _Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
 
 
-class On(Component):
+class _On(_Component):
 
     def __init__(self, name):
         self.name = name
 
     def __call__(self, *components):
         # TODO: shoudn't really mutate self
-        self.process_one_item = OpenPipe(*components).fn()
+        self.process_one_item = pipe(*components).fn()
         return self
 
     def coroutine_and_outputs(self, bindings):
@@ -240,16 +242,17 @@ class On(Component):
         return on_loop, ()
 
 
-class Args(MultipleNames): pass
-class Put (MultipleNames): pass
+class _Args(_MultipleNames): pass
+class _Put (_MultipleNames): pass
 
-class ArgsPut(Component):
+class _ArgsPut(_Component):
 
     def __init__(self, *components):
         cs = list(components)
-        self.args = cs.pop(0).names if isinstance(cs[ 0], Args) else ()
-        self.put  = cs.pop( ).names if isinstance(cs[-1], Put ) else ()
-        self.pipe_fn = OpenPipe(*cs).fn()
+        self.args = cs.pop(0).names if isinstance(cs[ 0], _Args) else ()
+        self.put  = cs.pop( ).names if isinstance(cs[-1], _Put ) else ()
+        self.pipe_fn = pipe(*cs).fn()
+        print(f'components: {cs}')
         print(f'self.args: {self.args}')
         print(f'self.put: {self.put}')
 
@@ -297,7 +300,7 @@ class ArgsPut(Component):
 
 
 
-class Name:
+class _Name:
 
     def __init__(self, callable):
         self.callable = callable
@@ -306,14 +309,15 @@ class Name:
         return self.callable(name)
 
 
-out  = Name(Output.Name)
-get  = Name(Input)
-pick = Name(Pick)
-on   = Name(On)
-args = Name(Args)
-put  = Name(Put)
+out  = _Name(_Output.Name)
+get  = _Name(_Input)
+pick = _Name(_Pick)
+on   = _Name(_On)
+args = _Name(_Args)
+put  = _Name(_Put)
 
-class Fold(Component):
+
+class _Fold(_Component):
 
     # TODO: future-sinks should not appear at toplevel, as they must be wrapped
     # in an output. Detect and report error at conversion from implicit
@@ -343,19 +347,19 @@ class Fold(Component):
         return reduce_loop(future)
 
 
-class OpenPipe:
+class pipe:
 
     def __init__(self, *components):
         # TODO: should disallow branches (unless we implement joins)
         self._components = components
 
-    def fn  (self, **bindings): return OpenPipe._Fn(self._components, bindings)
+    def fn  (self, **bindings): return pipe._Fn(self._components, bindings)
     def pipe(self, **bindings): return FlatMap     (self.fn(        **bindings))
 
     class _Fn:
 
         def __init__(self, components, bindings):
-            self._pipe = _Pipe(it.chain(components, [Sink(self.accept_result)]))
+            self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs(bindings)
 
         def __call__(self, *args):
@@ -369,7 +373,7 @@ class OpenPipe:
 
 
 
-class Slice(Component):
+class Slice(_Component):
 
     def __init__(self, *args, close_all=False):
         spec = slice(*args)
@@ -411,11 +415,11 @@ class Slice(Component):
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
 def decode_implicits(it):
-    if isinstance(it, Component): return it
-    if isinstance(it, list     ): return Branch(*it)
-    if isinstance(it, tuple    ): return ArgsPut(*it)
-    if isinstance(it, set      ): return Filter(next(iter(it)))
-    else                        : return Map(it)
+    if isinstance(it, _Component): return it
+    if isinstance(it, list     ): return _Branch(*it)
+    if isinstance(it, tuple    ): return _ArgsPut(*it)
+    if isinstance(it, set      ): return _Filter(next(iter(it)))
+    else                        : return _Map(it)
 
 
 def push(source, pipe):
