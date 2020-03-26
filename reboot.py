@@ -185,7 +185,7 @@ class _Output(_Component):
         def __call__(self, sink, initial=None):
             if not isinstance(sink, _Component):
                 # TODO: issue warning/error if initial is not None
-                sink = Fold(sink, initial=initial)
+                sink = _Fold(sink, initial=initial)
             # TODO: set as implicit count filter?
             return _Output(self.name, sink)
 
@@ -193,7 +193,7 @@ class _Output(_Component):
             def append(the_list, element):
                 the_list.append(element)
                 return the_list
-            collect_into_list = Fold(append, [])
+            collect_into_list = _Fold(append, [])
             return _Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
@@ -316,7 +316,8 @@ on   = _Name(_On)
 args = _Name(_Args)
 put  = _Name(_Put)
 
-class Fold(_Component):
+
+class _Fold(_Component):
 
     # TODO: future-sinks should not appear at toplevel, as they must be wrapped
     # in an output. Detect and report error at conversion from implicit

@@ -70,41 +70,27 @@ def test_integration_1():
 
 
 def test_fold_and_return():
-    from reboot import flow, out, Fold
-    data = range(10)
-    net = flow(out.total(Fold(sym_add)))
-    assert net(data).total == reduce(sym_add, data)
-
-
-def test_fold_with_initial_value():
-    from reboot import flow, out, Fold
-    data = range(3)
-    net = flow(out.total(Fold(sym_add, 99)))
-    assert net(data).total == reduce(sym_add, data, 99)
-
-
-def test_return_value_from_branch():
-    from reboot import flow, out, Fold
-    data = range(3)
-    net = flow([out.branch(Fold(sym_add))],
-                out.main  (Fold(sym_mul)))
-    result = net(data)
-    assert result.main   == reduce(sym_mul, data)
-    assert result.branch == reduce(sym_add, data)
-
-
-def test_implicit_fold():
     from reboot import flow, out
     data = range(3)
     net = flow(out.total(sym_add))
     assert net(data).total == reduce(sym_add, data)
 
 
-def test_implicit_fold_with_initial_value():
+def test_fold_with_initial_value():
     from reboot import flow, out
     data = range(3)
     net = flow(out.total(sym_add, 99))
     assert net(data).total == reduce(sym_add, data, 99)
+
+
+def test_return_value_from_branch():
+    from reboot import flow, out
+    data = range(3)
+    net = flow([out.branch(sym_add)],
+                out.main  (sym_mul))
+    result = net(data)
+    assert result.main   == reduce(sym_mul, data)
+    assert result.branch == reduce(sym_add, data)
 
 
 def test_implicit_collect_into_list():
