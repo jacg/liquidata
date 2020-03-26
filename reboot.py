@@ -8,19 +8,37 @@ import itertools as it
 import copy
 
 
+# TODO: return single value rather than namespace, when appropriate. Implicit naming of flow's sink.
+
+# TODO: define operators on `args` as an alternative lambda syntax.
+#          arg > 3           arg.a > 3            arg[0] > 3            arg > 3             arg.a > arg.b
+#  lambda x: x > 3   lambda x: x.a > 3   lambda x: x:[0] > 3    lambda x: x > 3    lambda a,b : a >     b
+
+# TODO: (a,b,c) without args or put should just be a pipe
+
+# TODO: rename get -> slot. Then use `get.a.b` as itemgetter('a','b')
+
+# TODO: print_every(n)  [slice(None, None, n), print]
+
+# TODO, take(n, close_all=?); drop(n) ; takewhile(f, close_all=??); dropwhile
+
 # TODO: Find public name for FlatMap
 
-# TODO: A [::] syntax for slice?
+# TODO: find public interface for Slice
+
+# TODO: A [::] syntax for slice? Can we do better than `slice[start:stop:step]`? what about close_all?
 
 # TODO: Reimplement `on` in terms of args and put, once they are done
 
-# TODO: Extend `on` to work on namedtuples, Namespaces, sequences. Give it a mutate option?
+# TODO: Extend `on` to work on namedtuples, Namespaces, sequences. [Give it a
+#       mutate option? Don't bother, just switch to persistent data structures]
 
 # TODO: `pick.x, f` works. Think about what `pick.x(f)` could mean.
 
-# TODO: Rename pipe -> Pipe
+# TODO: args-put syntax for turning atomic stream into namespace
 
-# TODO: side-effect sink implicit at end of flow (as opposed to Pipe)
+# TODO: operator module containing curried operators. Names uppercase or with
+#       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
 
 # TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
 
@@ -30,7 +48,7 @@ import copy
 
 # TODO: get inside out
 
-# TODO: call
+# TODO: call / bind:   bind(1, get.a, key=get.b)(f) -> f(1, a, key=b)
 
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
@@ -369,8 +387,6 @@ class pipe:
 
         def accept_result(self, item):
             self._returns.append(item)
-
-
 
 
 class Slice(_Component):
