@@ -213,7 +213,7 @@ class _MultipleNames:
     def __getattr__(self, name):
         return type(self)(*self.names, name)
 
-class Pick(_MultipleNames, _Component):
+class _Pick(_MultipleNames, _Component):
 
     def coroutine_and_outputs(self, bindings):
         return _Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
@@ -311,7 +311,7 @@ class Name:
 
 out  = Name(_Output.Name)
 get  = Name(_Input)
-pick = Name(Pick)
+pick = Name(_Pick)
 on   = Name(On)
 args = Name(Args)
 put  = Name(Put)
