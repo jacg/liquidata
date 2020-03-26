@@ -8,10 +8,11 @@ TODO = mark.xfail(reason='TODO')
 parametrize = mark.parametrize
 
 from hypothesis            import given
+from hypothesis            import assume
 from hypothesis.strategies import tuples
 from hypothesis.strategies import integers
 from hypothesis.strategies import none
-from hypothesis.strategies import one_of
+from hypothesis.strategies import one_of, sampled_from
 
 
 def test_trivial():
@@ -427,12 +428,21 @@ def test_slice_raises_ValueError(args):
         Slice(*args)
 
 
-@given(integers(), integers())
-def test_arg_as_lambda(n, c):
+from operator import      eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv
+operators = sampled_from((eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv))
+
+@given(operators, integers(), integers())
+def test_arg_as_lambda_binary(op, lhs, rhs):
+    assume(op not in (truediv, floordiv) or rhs != 0)
     from reboot import arg
-    a =         arg > c
-    b = lambda x: x > c
-    assert a(n) == b(n)
+
+    a  =           op(arg, rhs)
+    ar =           op(lhs, arg)
+    b  = lambda x: op(x  , rhs)
+    br = lambda x: op(lhs, x)
+    assert a (lhs) == b (lhs)
+    assert ar(rhs) == br(rhs)
+
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #

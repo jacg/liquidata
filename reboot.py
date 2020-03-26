@@ -429,8 +429,30 @@ class Slice(_Component):
 
 class _Arg:
 
-    def __gt__(self, rhs):
-        return lambda lhs: lhs > rhs
+    @classmethod
+    def install_binary_op(cls, op):
+
+        from operator import sub, floordiv, truediv
+        swap = sub, floordiv, truediv
+
+        # TODO: set __name__ etc
+        def __op__(self, rhs):
+            def implementation(lhs):
+                return op(lhs, rhs)
+            return implementation
+
+        def swapped(self, rhs):
+            def implementation(lhs):
+                return op(rhs, lhs)
+            return implementation
+
+        setattr(cls,  f'__{op.__name__}__', __op__)
+        setattr(cls, f'__r{op.__name__}__', __op__ if op not in swap else swapped)
+
+
+from operator import lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv
+for op in           (lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv):
+    _Arg.install_binary_op(op)
 
 arg = _Arg()
 
