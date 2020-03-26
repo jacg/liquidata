@@ -1,6 +1,7 @@
 from operator  import itemgetter, lt
 from functools import reduce
 from itertools import chain
+from argparse  import Namespace
 
 from pytest import mark, raises
 xfail = mark.xfail
@@ -8,10 +9,11 @@ TODO = mark.xfail(reason='TODO')
 parametrize = mark.parametrize
 
 from hypothesis            import given
+from hypothesis            import assume
 from hypothesis.strategies import tuples
 from hypothesis.strategies import integers
 from hypothesis.strategies import none
-from hypothesis.strategies import one_of
+from hypothesis.strategies import one_of, sampled_from
 
 
 def test_trivial():
@@ -425,6 +427,70 @@ def test_slice_raises_ValueError(args):
     from reboot import Slice
     with raises(ValueError):
         Slice(*args)
+
+
+from operator import   eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv
+binops = sampled_from((eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv))
+
+@given(binops, integers(), integers())
+def test_arg_as_lambda_binary(op, lhs, rhs):
+    assume(op not in (truediv, floordiv) or rhs != 0)
+    from reboot import arg
+
+    a  =           op(arg, rhs)
+    ar =           op(lhs, arg)
+    b  = lambda x: op(x  , rhs)
+    br = lambda x: op(lhs, x)
+    assert a (lhs) == b (lhs)
+    assert ar(rhs) == br(rhs)
+
+
+from operator import  neg, pos
+unops = sampled_from((neg, pos))
+
+@given(unops, integers())
+def test_arg_as_lambda_binary(op, operand):
+    from reboot import arg
+
+    a  =           op(arg)
+    b  = lambda x: op(x)
+    assert a(operand) == b(operand)
+
+
+def test_arg_as_lambda_getitem():
+    from reboot import arg
+    data = 'abracadabra'
+    assert (arg[3])(data) == (lambda x: x[3])(data)
+
+
+@xfail(reason="__getitem__ can't distinguish x[a,b] from x[(a,b)]")
+def test_arg_as_lambda_get_multilple_items():
+    from reboot import arg
+    data = 'abracadabra'
+    assert (arg[3,9,4])(data) == (lambda x: (x[3], x[9], x[4]))(data)
+
+
+def test_arg_as_lambda_getattr():
+    from reboot import arg
+    data = Namespace(a=1, b=2)
+    assert (arg.a)(data) == (lambda x: x.a)(data)
+
+
+def test_arg_as_lambda_call_single_arg():
+    from reboot import arg
+    def square(x):
+        return x * x
+    assert (arg(3))(square) == (lambda x: x(3))(square)
+
+
+def test_arg_as_lambda_call_two_args():
+    from reboot import arg
+    assert (arg(2,3))(add) == (lambda x: x(2,3))(add)
+
+
+def test_arg_as_lambda_call_keyword_args():
+    from reboot import arg
+    assert (arg(a=6, b=7))(dict) == (lambda x: x(a=6, b=7))(dict)
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
