@@ -499,6 +499,12 @@ def test_take():
     net = flow(take(5), out.X)(data).X == ''.join(data[:5])
 
 
+def test_drop():
+    from reboot import flow, drop, out
+    data = 'abracadabra'
+    net = flow(drop(5), out.X)(data).X == ''.join(data[5:])
+
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

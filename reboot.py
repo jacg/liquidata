@@ -513,5 +513,5 @@ class StopPipeline(Exception): pass
 
 ######################################################################
 
-def take(n, **kwds):
-    return Slice(None, n, **kwds)
+def take(n, **kwds): return Slice(None, n, **kwds)
+def drop(n, **kwds): return Slice(n, None, **kwds)
