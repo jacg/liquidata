@@ -242,15 +242,15 @@ class _On(_Component):
         return on_loop, ()
 
 
-class Args(_MultipleNames): pass
-class Put (_MultipleNames): pass
+class _Args(_MultipleNames): pass
+class _Put (_MultipleNames): pass
 
-class ArgsPut(_Component):
+class _ArgsPut(_Component):
 
     def __init__(self, *components):
         cs = list(components)
-        self.args = cs.pop(0).names if isinstance(cs[ 0], Args) else ()
-        self.put  = cs.pop( ).names if isinstance(cs[-1], Put ) else ()
+        self.args = cs.pop(0).names if isinstance(cs[ 0], _Args) else ()
+        self.put  = cs.pop( ).names if isinstance(cs[-1], _Put ) else ()
         self.pipe_fn = pipe(*cs).fn()
         print(f'components: {cs}')
         print(f'self.args: {self.args}')
@@ -313,8 +313,8 @@ out  = Name(_Output.Name)
 get  = Name(_Input)
 pick = Name(_Pick)
 on   = Name(_On)
-args = Name(Args)
-put  = Name(Put)
+args = Name(_Args)
+put  = Name(_Put)
 
 class Fold(_Component):
 
@@ -416,7 +416,7 @@ class Slice(_Component):
 def decode_implicits(it):
     if isinstance(it, _Component): return it
     if isinstance(it, list     ): return _Branch(*it)
-    if isinstance(it, tuple    ): return ArgsPut(*it)
+    if isinstance(it, tuple    ): return _ArgsPut(*it)
     if isinstance(it, set      ): return _Filter(next(iter(it)))
     else                        : return _Map(it)
 
