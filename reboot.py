@@ -461,6 +461,9 @@ class _Arg:
     def __getitem__(self, key):
         return itemgetter(key)
 
+    def __getattr__(self, name):
+        return attrgetter(name)
+
     def __call__(self, *args, **kwds):
         def implementation(fn):
             return fn(*args, **kwds)

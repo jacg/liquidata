@@ -1,6 +1,7 @@
 from operator  import itemgetter, lt
 from functools import reduce
 from itertools import chain
+from argparse  import Namespace
 
 from pytest import mark, raises
 xfail = mark.xfail
@@ -460,6 +461,12 @@ def test_arg_as_lambda_getitem():
     from reboot import arg
     data = 'abracadabra'
     assert (arg[3])(data) == (lambda x: x[3])(data)
+
+
+def test_arg_as_lambda_getattr():
+    from reboot import arg
+    data = Namespace(a=1, b=2)
+    assert (arg.a)(data) == (lambda x: x.a)(data)
 
 
 def test_arg_as_lambda_call_single_arg():
