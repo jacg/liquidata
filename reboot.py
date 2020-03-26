@@ -107,63 +107,57 @@ class flow:
 class _Component:
     pass
 
-class _Sink(_Component):
+
+def component(loop):
 
     def __init__(self, fn):
         self._fn = fn
 
     def coroutine_and_outputs(self, bindings):
-        @coroutine
-        def sink_loop():
+        if loop.__name__ == '_Sink': return coroutine(loop(self._fn))(), ()
+        else                       : return coroutine(loop(self._fn))  , ()
+
+    ns = dict(__init__=__init__, coroutine_and_outputs=coroutine_and_outputs)
+
+    return type(loop.__name__, (_Component,), ns)
+
+
+@component
+def _Sink(fn):
+    def sink_loop():
+        while True:
+            fn(*(yield))
+    return sink_loop
+
+
+@component
+def _Map(fn):
+    def map_loop(downstream):
+        with closing(downstream):
             while True:
-                self._fn(*(yield))
-        return sink_loop(), ()
+                downstream.send((fn(*(yield)),))
+    return map_loop
 
 
-class _Map(_Component):
-
-    def __init__(self, fn):
-        self._fn = fn
-
-    def coroutine_and_outputs(self, bindings):
-        @coroutine
-        def map_loop(target):
-                with closing(target):
-                    while True:
-                        target.send((self._fn(*(yield)),))
-        return map_loop, ()
+@component
+def FlatMap(fn):
+    def flatmap_loop(downstream):
+        with closing(downstream):
+            while True:
+                for item in fn(*(yield)):
+                    downstream.send((item,))
+    return flatmap_loop
 
 
-class FlatMap(_Component):
-
-    def __init__(self, fn):
-        self._fn = fn
-
-    def coroutine_and_outputs(self, bindings):
-        @coroutine
-        def flatmap_loop(target):
-                with closing(target):
-                    while True:
-                        for item in self._fn(*(yield)):
-                            target.send((item,))
-        return flatmap_loop, ()
-
-
-class _Filter(_Component):
-
-    def __init__(self, predicate):
-        self._predicate = predicate
-
-    def coroutine_and_outputs(self, bindings):
-        predicate = self._predicate
-        @coroutine
-        def filter_loop(target):
-            with closing(target):
-                while True:
-                    args = yield
-                    if predicate(*args):
-                        target.send(args)
-        return filter_loop, ()
+@component
+def _Filter(predicate):
+    def filter_loop(downstream):
+        with closing(downstream):
+            while True:
+                args = yield
+                if predicate(*args):
+                    downstream.send(args)
+    return filter_loop
 
 
 class _Branch(_Component):
