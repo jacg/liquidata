@@ -49,7 +49,7 @@ class _Pipe:
         self._components = tuple(map(decode_implicits, components))
         last = self._components[-1]
         if isinstance(last, Map):
-            last.__class__ = Sink
+            last.__class__ = _Sink
 
     def coroutine_and_outputs(self, bindings):
         cor_out_pairs = tuple(c.coroutine_and_outputs(bindings) for c in self._components)
@@ -88,7 +88,7 @@ class flow:
 class _Component:
     pass
 
-class Sink(_Component):
+class _Sink(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -356,7 +356,7 @@ class pipe:
     class _Fn:
 
         def __init__(self, components, bindings):
-            self._pipe = _Pipe(it.chain(components, [Sink(self.accept_result)]))
+            self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs(bindings)
 
         def __call__(self, *args):

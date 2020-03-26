@@ -15,15 +15,6 @@ from hypothesis.strategies import one_of
 
 
 def test_trivial():
-    from reboot import flow, Sink
-    data = list(range(10))
-    result = []
-    net = flow(Sink(result.append))
-    net(data)
-    assert result == data
-
-
-def test_implicit_sink():
     from reboot import flow
     data = list(range(10))
     result = []
