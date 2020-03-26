@@ -85,10 +85,10 @@ class flow:
 #    Component types                                                 #
 ######################################################################
 
-class Component:
+class _Component:
     pass
 
-class Sink(Component):
+class Sink(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -101,7 +101,7 @@ class Sink(Component):
         return sink_loop(), ()
 
 
-class Map(Component):
+class Map(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -115,7 +115,7 @@ class Map(Component):
         return map_loop, ()
 
 
-class FlatMap(Component):
+class FlatMap(_Component):
 
     def __init__(self, fn):
         self._fn = fn
@@ -130,7 +130,7 @@ class FlatMap(Component):
         return flatmap_loop, ()
 
 
-class Filter(Component):
+class Filter(_Component):
 
     def __init__(self, predicate):
         self._predicate = predicate
@@ -147,7 +147,7 @@ class Filter(Component):
         return filter_loop, ()
 
 
-class Branch(Component):
+class Branch(_Component):
 
     def __init__(self, *components):
         self._pipe = _Pipe(components)
@@ -164,7 +164,7 @@ class Branch(Component):
         return branch_loop, outputs
 
 
-class Output(Component):
+class Output(_Component):
 
     def __init__(self, name, sink=None):
         self._name = name
@@ -175,13 +175,13 @@ class Output(Component):
         coroutine = self._sink.make_coroutine(future)
         return coroutine, ((self._name, future),)
 
-    class Name(Component):
+    class Name(_Component):
 
         def __init__(self, name):
             self.name = name
 
         def __call__(self, sink, initial=None):
-            if not isinstance(sink, Component):
+            if not isinstance(sink, _Component):
                 # TODO: issue warning/error if initial is not None
                 sink = Fold(sink, initial=initial)
             # TODO: set as implicit count filter?
@@ -195,7 +195,7 @@ class Output(Component):
             return Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
-class Input(Component):
+class Input(_Component):
 
     def __init__(self, name):
         self.name = name
@@ -211,13 +211,13 @@ class MultipleNames:
     def __getattr__(self, name):
         return type(self)(*self.names, name)
 
-class Pick(MultipleNames, Component):
+class Pick(MultipleNames, _Component):
 
     def coroutine_and_outputs(self, bindings):
         return Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
 
 
-class On(Component):
+class On(_Component):
 
     def __init__(self, name):
         self.name = name
@@ -243,7 +243,7 @@ class On(Component):
 class Args(MultipleNames): pass
 class Put (MultipleNames): pass
 
-class ArgsPut(Component):
+class ArgsPut(_Component):
 
     def __init__(self, *components):
         cs = list(components)
@@ -314,7 +314,7 @@ on   = Name(On)
 args = Name(Args)
 put  = Name(Put)
 
-class Fold(Component):
+class Fold(_Component):
 
     # TODO: future-sinks should not appear at toplevel, as they must be wrapped
     # in an output. Detect and report error at conversion from implicit
@@ -370,7 +370,7 @@ class pipe:
 
 
 
-class Slice(Component):
+class Slice(_Component):
 
     def __init__(self, *args, close_all=False):
         spec = slice(*args)
@@ -412,7 +412,7 @@ class Slice(Component):
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
 def decode_implicits(it):
-    if isinstance(it, Component): return it
+    if isinstance(it, _Component): return it
     if isinstance(it, list     ): return Branch(*it)
     if isinstance(it, tuple    ): return ArgsPut(*it)
     if isinstance(it, set      ): return Filter(next(iter(it)))
