@@ -1,7 +1,8 @@
 from operator  import itemgetter, lt
 from functools import reduce
-from itertools import chain
 from argparse  import Namespace
+
+import itertools as it
 
 from pytest import mark, raises
 xfail = mark.xfail
@@ -165,7 +166,7 @@ def test_flat_map():
     data = range(4)
     f = range
     net = flow(FlatMap(f), out.X)
-    assert net(data).X == list(chain(*map(f, data)))
+    assert net(data).X == list(it.chain(*map(f, data)))
 
 
 @TODO
@@ -504,6 +505,13 @@ def test_drop():
     data = 'abracadabra'
     net = flow(drop(5), out.X)(data).X == ''.join(data[5:])
 
+
+def test_until():
+    from reboot import flow, until, out, arg as _
+    data = 'abcdXefghi'
+    expected = ''.join(it.takewhile(_ != 'X', data))
+    got = ''.join(flow(until(_ == 'X'), out.X)(data).X)
+    assert got == expected
 
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
