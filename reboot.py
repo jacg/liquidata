@@ -461,6 +461,11 @@ class _Arg:
     def __getitem__(self, key):
         return itemgetter(key)
 
+    def __call__(self, *args, **kwds):
+        def implementation(fn):
+            return fn(*args, **kwds)
+        return implementation
+
 
 from operator import lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv
 for op in           (lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv):

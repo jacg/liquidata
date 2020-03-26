@@ -461,6 +461,23 @@ def test_arg_as_lambda_getitem():
     data = 'abracadabra'
     assert (arg[3])(data) == (lambda x: x[3])(data)
 
+
+def test_arg_as_lambda_call_single_arg():
+    from reboot import arg
+    def square(x):
+        return x * x
+    assert (arg(3))(square) == (lambda x: x(3))(square)
+
+
+def test_arg_as_lambda_call_two_args():
+    from reboot import arg
+    assert (arg(2,3))(add) == (lambda x: x(2,3))(add)
+
+
+def test_arg_as_lambda_call_keyword_args():
+    from reboot import arg
+    assert (arg(a=6, b=7))(dict) == (lambda x: x(a=6, b=7))(dict)
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################
