@@ -55,10 +55,10 @@ def test_branch():
 
 
 def test_integration_1():
-    from reboot import flow
+    from reboot import flow, arg as _
     data = range(20)
-    f, g, h = square, addN(1), addN(2)
-    a, b, c = odd   , gtN(50), ltN(100)
+    f, g, h = square, (_ +  1), (_ +   2)
+    a, b, c = odd   , (_ > 50), (_ < 100)
     s, t    = [], []
     net = flow(f,
                {a},
@@ -330,13 +330,13 @@ def test_args_single_put_many():
 
 
 def test_args_single_filter():
-    from reboot import flow, args, out
+    from reboot import flow, args, out, arg as _
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
             dict(a=8, b=9))
-    net = flow((args.b, {gtN(2)}), out.X)
-    expected = list(filter(gtN(2), map(itemgetter('b'), data)))
+    net = flow((args.b, {_ > 2}), out.X)
+    expected = list(filter(_ > 2, map(itemgetter('b'), data)))
     assert net(data).X == expected
 
 
