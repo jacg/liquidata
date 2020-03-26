@@ -428,10 +428,10 @@ def test_slice_raises_ValueError(args):
         Slice(*args)
 
 
-from operator import      eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv
-operators = sampled_from((eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv))
+from operator import   eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv
+binops = sampled_from((eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv))
 
-@given(operators, integers(), integers())
+@given(binops, integers(), integers())
 def test_arg_as_lambda_binary(op, lhs, rhs):
     assume(op not in (truediv, floordiv) or rhs != 0)
     from reboot import arg
@@ -442,6 +442,18 @@ def test_arg_as_lambda_binary(op, lhs, rhs):
     br = lambda x: op(lhs, x)
     assert a (lhs) == b (lhs)
     assert ar(rhs) == br(rhs)
+
+
+from operator import  neg, pos
+unops = sampled_from((neg, pos))
+
+@given(unops, integers())
+def test_arg_as_lambda_binary(op, operand):
+    from reboot import arg
+
+    a  =           op(arg)
+    b  = lambda x: op(x)
+    assert a(operand) == b(operand)
 
 
 ###################################################################

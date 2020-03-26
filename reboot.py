@@ -10,9 +10,9 @@ import copy
 
 # TODO: return single value rather than namespace, when appropriate. Implicit naming of flow's sink.
 
-# TODO: define operators on `args` as an alternative lambda syntax.
-#          arg > 3           arg.a > 3            arg[0] > 3            arg > 3             arg.a > arg.b
-#  lambda x: x > 3   lambda x: x.a > 3   lambda x: x:[0] > 3    lambda x: x > 3    lambda a,b : a >     b
+# TODO: missing arg-lambda features
+#         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a           arg[0]; arg.a.b  arg[0,1]
+# lambda x: x.a > 3; lambda x: x:[0] > 3; lambda a,b : a >     b; attrgetter('a'); itemgetter(0);
 
 # TODO: (a,b,c) without args or put should just be a pipe
 
@@ -449,10 +449,23 @@ class _Arg:
         setattr(cls,  f'__{op.__name__}__', __op__)
         setattr(cls, f'__r{op.__name__}__', __op__ if op not in swap else swapped)
 
+    @classmethod
+    def install_unary_op(cls, op):
+        def __op__(self):
+            def implementation(operand):
+                return op(operand)
+            return implementation
+
+        setattr(cls,  f'__{op.__name__}__', __op__)
+
 
 from operator import lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv
 for op in           (lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv):
     _Arg.install_binary_op(op)
+
+from operator import neg, pos
+for op in           (neg, pos):
+    _Arg.install_unary_op(op)
 
 arg = _Arg()
 
