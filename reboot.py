@@ -300,7 +300,7 @@ class _ArgsPut(_Component):
 
 
 
-class Name:
+class _Name:
 
     def __init__(self, callable):
         self.callable = callable
@@ -309,12 +309,12 @@ class Name:
         return self.callable(name)
 
 
-out  = Name(_Output.Name)
-get  = Name(_Input)
-pick = Name(_Pick)
-on   = Name(_On)
-args = Name(_Args)
-put  = Name(_Put)
+out  = _Name(_Output.Name)
+get  = _Name(_Input)
+pick = _Name(_Pick)
+on   = _Name(_On)
+args = _Name(_Args)
+put  = _Name(_Put)
 
 class Fold(_Component):
 
