@@ -226,51 +226,51 @@ def test_get_implicit_sink():
     assert net(data, SINK=f).OUT == reduce(f, data)
 
 
-def test_open_pipe_as_function():
-    from reboot import OpenPipe
+def test_pipe_as_function():
+    from reboot import pipe
     f,g = symbolic_functions('fg')
-    pipe_fn = OpenPipe(f,g).fn()
+    pipe_fn = pipe(f,g).fn()
     assert pipe_fn(6) == (g(f(6)),)
 
 
-def test_open_pipe_as_multi_arg_function():
-    from reboot import OpenPipe
+def test_pipe_as_multi_arg_function():
+    from reboot import pipe
     f, = symbolic_functions('f')
-    pipe_fn = OpenPipe(sym_add, f).fn()
+    pipe_fn = pipe(sym_add, f).fn()
     assert pipe_fn(6,7) == (f(sym_add(6,7)),)
 
 
-def test_open_pipe_on_filter():
-    from reboot import OpenPipe, FlatMap
+def test_pipe_on_filter():
+    from reboot import pipe, FlatMap
     f = odd
-    pipe_fn = OpenPipe({f}).fn()
+    pipe_fn = pipe({f}).fn()
     assert pipe_fn(3) == (3,)
     assert pipe_fn(4) == ()
 
 
-def test_open_pipe_on_flatmap():
-    from reboot import OpenPipe, FlatMap
+def test_pipe_on_flatmap():
+    from reboot import pipe, FlatMap
     f = range
-    pipe_fn = OpenPipe(FlatMap(f)).fn()
+    pipe_fn = pipe(FlatMap(f)).fn()
     assert pipe_fn(3) == (0,1,2)
     assert pipe_fn(5) == (0,1,2,3,4)
 
 
-def test_open_pipe_with_get_as_function():
-    from reboot import OpenPipe, get
+def test_pipe_with_get_as_function():
+    from reboot import pipe, get
     f,g,h = symbolic_functions('fgh')
-    pipe = OpenPipe(f, get.FN)
+    pipe = pipe(f, get.FN)
     pipe_g = pipe.fn(FN=g)
     pipe_h = pipe.fn(FN=h)
     assert pipe_g(6) == (g(f(6)),)
     assert pipe_h(7) == (h(f(7)),)
 
 
-def test_open_pipe_as_component():
-    from reboot import OpenPipe, Flow, out
+def test_pipe_as_component():
+    from reboot import pipe, Flow, out
     data = range(3,6)
     a,b,f,g = symbolic_functions('abfg')
-    pipe = OpenPipe(f, g).pipe()
+    pipe = pipe(f, g).pipe()
     net = Flow(a, pipe, b, out.X)
     assert net(data).X == list(map(b, map(g, map(f, map(a, data)))))
 

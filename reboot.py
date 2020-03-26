@@ -224,7 +224,7 @@ class On(Component):
 
     def __call__(self, *components):
         # TODO: shoudn't really mutate self
-        self.process_one_item = OpenPipe(*components).fn()
+        self.process_one_item = pipe(*components).fn()
         return self
 
     def coroutine_and_outputs(self, bindings):
@@ -249,7 +249,8 @@ class ArgsPut(Component):
         cs = list(components)
         self.args = cs.pop(0).names if isinstance(cs[ 0], Args) else ()
         self.put  = cs.pop( ).names if isinstance(cs[-1], Put ) else ()
-        self.pipe_fn = OpenPipe(*cs).fn()
+        self.pipe_fn = pipe(*cs).fn()
+        print(f'components: {cs}')
         print(f'self.args: {self.args}')
         print(f'self.put: {self.put}')
 
@@ -343,13 +344,13 @@ class Fold(Component):
         return reduce_loop(future)
 
 
-class OpenPipe:
+class pipe:
 
     def __init__(self, *components):
         # TODO: should disallow branches (unless we implement joins)
         self._components = components
 
-    def fn  (self, **bindings): return OpenPipe._Fn(self._components, bindings)
+    def fn  (self, **bindings): return pipe._Fn(self._components, bindings)
     def pipe(self, **bindings): return FlatMap     (self.fn(        **bindings))
 
     class _Fn:
