@@ -426,6 +426,14 @@ def test_slice_raises_ValueError(args):
     with raises(ValueError):
         Slice(*args)
 
+
+@given(integers(), integers())
+def test_arg_as_lambda(n, c):
+    from reboot import arg
+    a =         arg > c
+    b = lambda x: x > c
+    assert a(n) == b(n)
+
 ###################################################################
 # Guinea pig functions for use in graphs constructed in the tests #
 ###################################################################

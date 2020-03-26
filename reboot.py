@@ -426,6 +426,14 @@ class Slice(_Component):
                     yield
         return slice_loop, ()
 
+
+class _Arg:
+
+    def __gt__(self, rhs):
+        return lambda lhs: lhs > rhs
+
+arg = _Arg()
+
 ######################################################################
 
 # Most component names don't have to be used explicitly, because plain python
