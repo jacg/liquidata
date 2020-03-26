@@ -7,7 +7,20 @@ from asyncio    import Future
 import itertools as it
 import copy
 
-# TODO: fill slots in OpenPipe.fn at call time: OpenPipe.fn(not only here)(data, but also here)
+
+# TODO: A [::] syntax for slice?
+
+# TODO: Reimplement `on` in terms of args and put, once they are done
+
+# TODO: Extend `on` to work on namedtuples, Namespaces, sequences. Give it a mutate option?
+
+# TODO: `pick.x, f` works. Think about what `pick.x(f)` could mean.
+
+# TODO: Rename pipe -> Pipe
+
+# TODO: side-effect sink implicit at end of Flow (as opposed to Pipe)
+
+# TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
 
 # TODO: count-filter: implicit {} in out: out.NAME({predicate}) -> .passed & .stopped
 
@@ -17,6 +30,18 @@ import copy
 
 # TODO: call
 
+# TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
+#          [side-effect], [out.X(result-sink)] ????
+
+# TODO: option for returning single value if namespace contains only one value.
+#       net = Flow(...).no_namespace. Similar for namespace -> (named?)tuple?
+
+# TODO: option to pipe.fn to assume that the pipe is a map, and therefore
+# return the first (hopefully existent and only) thing yielded.
+
+# TODO: send down one branch or other depending on predicate
+
+# TODO: monads?
 
 class _Pipe:
 
