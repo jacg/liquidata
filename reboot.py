@@ -10,13 +10,13 @@ import copy
 
 # TODO: out.X(foldfn)    out(foldfn)  for direct return?
 
-# TODO: rename get -> slot. Then use `get.a.b` as itemgetter('a','b')
-
 # TODO: return single value rather than namespace, when appropriate (implicit
 #       when only one out? or explicit choice?). Implicit naming of flow's
 #       sink.
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
+
+# TODO: Now that get is called slot,  use `get.a.b` as itemgetter('a','b')
 
 # TODO: missing arg-lambda features
 #         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
