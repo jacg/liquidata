@@ -526,20 +526,20 @@ def test_arg_as_lambda_call_keyword_args():
 def test_take():
     from reboot import flow, take, out
     data = 'abracadabra'
-    net = flow(take(5), out)(data) == ''.join(data[:5])
+    assert ''.join(flow(take(5), out)(data)) == ''.join(data[:5])
 
 
 def test_drop():
     from reboot import flow, drop, out
     data = 'abracadabra'
-    net = flow(drop(5), out)(data) == ''.join(data[5:])
+    assert ''.join(flow(drop(5), out)(data)) == ''.join(data[5:])
 
 
 def test_until():
     from reboot import flow, until, out, arg as _
     data = 'abcdXefghi'
     expected = ''.join(it.takewhile(_ != 'X', data))
-    got = ''.join(flow(until(_ == 'X'), out)(data))
+    got      = ''.join(flow(until  (_ == 'X'), out)(data))
     assert got == expected
 
 
@@ -547,7 +547,7 @@ def test_while():
     from reboot import flow, while_, out, arg as _
     data = 'abcdXefghi'
     expected = ''.join(it.takewhile(_ != 'X', data))
-    got = ''.join(flow(while_(_ != 'X'), out)(data))
+    got      = ''.join(flow(while_ (_ != 'X'), out)(data))
     assert got == expected
 
 ###################################################################
