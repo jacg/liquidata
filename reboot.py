@@ -1,18 +1,15 @@
-from operator   import itemgetter, attrgetter
-from functools  import reduce, wraps
-from contextlib import contextmanager
-from argparse   import Namespace
-from asyncio    import Future
+from operator    import itemgetter, attrgetter
+from functools   import reduce, wraps
+from collections import namedtuple
+from contextlib  import contextmanager
+from argparse    import Namespace
+from asyncio     import Future
 
 import itertools as it
 import copy
 
 
-# TODO: out.X(foldfn)    out(foldfn)  for direct return?
-
-# TODO: return single value rather than namespace, when appropriate (implicit
-#       when only one out? or explicit choice?). Implicit naming of flow's
-#       sink.
+# TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
 
@@ -94,7 +91,13 @@ class flow:
         coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
-        return Namespace(**{name: future.result() for name, future in outputs})
+        number_of_returns = sum(map(lambda output: 1 if output.name == 'return' else 0, outputs))
+        if number_of_returns > 1:
+            raise MultipleReturns(f'Cannot run network because it contains more than one nameless `out`')
+        returns = Namespace(**{o.name: o.future.result() for o in outputs})
+        if 'return' in returns:
+            return vars(returns)['return']
+        return returns
 
 
 ######################################################################
@@ -183,7 +186,7 @@ class _Return(_Component):
     def coroutine_and_outputs(self, bindings):
         future = Future()
         coroutine = self._sink.make_coroutine(future)
-        return coroutine, ((self._name, future),)
+        return coroutine, (NamedFuture(self._name, future),)
 
     class Name(_Component):
 
@@ -198,11 +201,13 @@ class _Return(_Component):
             return _Return(self.name, sink)
 
         def coroutine_and_outputs(self, bindings):
-            def append(the_list, element):
-                the_list.append(element)
-                return the_list
-            collect_into_list = _Fold(append, [])
-            return _Return(self.name, collect_into_list).coroutine_and_outputs(bindings)
+            return _Return(self.name, into_list()).coroutine_and_outputs(bindings)
+
+        @classmethod
+        def no_name_given(cls, sink=None, *args, **kwds):
+            if sink is None:
+                sink = into_list()
+            return cls('return')(sink, *args, **kwds)
 
 
 class _Slot(_Component):
@@ -300,9 +305,7 @@ class _ArgsPut(_Component):
         return args_put_loop, ()
 
 
-
-
-class _Name:
+class _Name(_Component):
 
     def __init__(self, constructor):
         self.constructor = constructor
@@ -310,7 +313,11 @@ class _Name:
     def __getattr__(self, name):
         return self.constructor(name)
 
+    def __call__(self, *args, **kwds):
+        return self.constructor.no_name_given(*args, **kwds)
 
+    def coroutine_and_outputs(self, bindings):
+        return self.constructor.no_name_given().coroutine_and_outputs(bindings)
 
 out  = _Name(_Return.Name)
 slot = _Name(_Slot)
@@ -488,9 +495,9 @@ def push(source, pipe):
 def combine_coroutines(coroutines):
     coroutines = tuple(coroutines)
     if not coroutines:
-        raise Exception('Need at least one coroutine')
+        raise NeedAtLeastOneCoroutine
     if not hasattr(coroutines[-1], 'close'):
-        raise Exception(f'No sink at end of {coroutines}')
+        raise SinkMissing(f'No sink at end of {coroutines}')
     def apply(arg, fn):
         return fn(arg)
     return reduce(apply, reversed(coroutines))
@@ -536,3 +543,21 @@ def until(predicate):
 
 
 def while_(predicate): return until(lambda x: not predicate(x))
+
+
+def into_list():
+    def append(the_list, element):
+        the_list.append(element)
+        return the_list
+    return _Fold(append, [])
+
+######################################################################
+
+class LiquiDataException(Exception): pass
+class SinkMissing            (LiquiDataException): pass
+class NeedAtLeastOneCoroutine(LiquiDataException): pass
+class MultipleReturns        (LiquiDataException): pass
+
+######################################################################
+
+NamedFuture = namedtuple('NamedFuture', 'name, future')
