@@ -109,12 +109,12 @@ class _Component:
 
 def component(loop):
 
-    def __init__(self, fn):
-        self._fn = fn
+    def __init__(self, *args):
+        self._args = args
 
     def coroutine_and_outputs(self, bindings):
-        if loop.__name__ == '_Sink': return coroutine(loop(self._fn))(), ()
-        else                       : return coroutine(loop(self._fn))  , ()
+        if loop.__name__ == '_Sink': return coroutine(loop(*self._args))(), ()
+        else                       : return coroutine(loop(*self._args))  , ()
 
     ns = dict(__init__=__init__, coroutine_and_outputs=coroutine_and_outputs)
 
