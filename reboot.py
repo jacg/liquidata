@@ -215,7 +215,7 @@ class _Output(_Component):
             return _Output(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
 
-class _Input(_Component):
+class _Slot(_Component):
 
     def __init__(self, name):
         self.name = name
@@ -322,7 +322,7 @@ class _Name:
 
 
 out  = _Name(_Output.Name)
-slot = _Name(_Input)
+slot = _Name(_Slot)
 pick = _Name(_Pick)
 on   = _Name(_On)
 args = _Name(_Args)
