@@ -464,7 +464,7 @@ for op in           (lt, gt, le, ge, eq, ne, add, sub, mul, floordiv, truediv):
     _Arg.install_binary_op(op)
 
 from operator import neg, pos
-for op in           (neg, pos):
+for op in           (neg, pos, abs):
     _Arg.install_unary_op(op)
 
 arg = _Arg()

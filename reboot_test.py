@@ -468,7 +468,7 @@ def test_arg_as_lambda_binary(op, lhs, rhs):
 
 
 from operator import  neg, pos
-unops = sampled_from((neg, pos))
+unops = sampled_from((neg, pos, abs))
 
 @given(unops, integers())
 def test_arg_as_lambda_binary(op, operand):
