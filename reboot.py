@@ -13,6 +13,7 @@ import copy
 # TODO: return single value rather than namespace, when appropriate (implicit
 #       when only one out? or explicit choice?). Implicit naming of flow's
 #       sink.
+# TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
 
@@ -495,9 +496,9 @@ def push(source, pipe):
 def combine_coroutines(coroutines):
     coroutines = tuple(coroutines)
     if not coroutines:
-        raise Exception('Need at least one coroutine')
+        raise NeedAtLeastOneCoroutine
     if not hasattr(coroutines[-1], 'close'):
-        raise Exception(f'No sink at end of {coroutines}')
+        raise SinkMissing(f'No sink at end of {coroutines}')
     def apply(arg, fn):
         return fn(arg)
     return reduce(apply, reversed(coroutines))
@@ -550,3 +551,8 @@ def into_list():
         the_list.append(element)
         return the_list
     return _Fold(append, [])
+
+######################################################################
+class LiquiDataException(Exception): pass
+class SinkMissing            (LiquiDataException): pass
+class NeedAtLeastOneCoroutine(LiquiDataException): pass
