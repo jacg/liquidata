@@ -159,17 +159,6 @@ def _Filter(predicate, key=None):
     return filter_loop
 
 
-@component
-def _KeyFilter(predicate, key):
-    def filter_loop(downstream):
-        with closing(downstream):
-            while True:
-                args = yield
-                if predicate(key(*args)):
-                    downstream.send(args)
-    return filter_loop
-
-
 class _Branch(_Component):
 
     def __init__(self, *components):
