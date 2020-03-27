@@ -8,19 +8,30 @@ import itertools as it
 import copy
 
 
-# TODO: return single value rather than namespace, when appropriate. Implicit naming of flow's sink.
+# TODO: out.X(foldfn)    out(foldfn)  for direct return?
+
+# TODO: rename get -> slot. Then use `get.a.b` as itemgetter('a','b')
+
+# TODO: return single value rather than namespace, when appropriate (implicit
+#       when only one out? or explicit choice?). Implicit naming of flow's
+#       sink.
+
+# TODO: return namedtuple rather than namespace? Would allow unpacking.
 
 # TODO: missing arg-lambda features
 #         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
 # lambda x: x.a > 3; lambda x: x:[0] > 3; lambda a,b : a >     b; attrgetter('a');
 
-# TODO: (a,b,c) without args or put should just be a pipe
+# TODO: something like Haskell's on or Python's key. Where is it useful beyond
+#       filter? Maybe this is where {pred:key} would be used?
 
-# TODO: rename get -> slot. Then use `get.a.b` as itemgetter('a','b')
+# TODO: (a,b,c) without args or put should just be a pipe
 
 # TODO: print_every(n)  [slice(None, None, n), print]
 
-# TODO, take(n, close_all=?); drop(n) ; takewhile(f, close_all=??); dropwhile
+# TODO: test close_all for take, drop & co
+
+# TODO, dropwhile / since / after
 
 # TODO: Find public name for FlatMap
 
@@ -52,13 +63,10 @@ import copy
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
 
-# TODO: option for returning single value if namespace contains only one value.
-#       net = flow(...).no_namespace. Similar for namespace -> (named?)tuple?
-
 # TODO: option to pipe.fn to assume that the pipe is a map, and therefore
 # return the first (hopefully existent and only) thing yielded.
 
-# TODO: send down one branch or other depending on predicate
+# TODO: send down one branch or other depending on predicate. Dispatch. Match
 
 # TODO: monads?
 

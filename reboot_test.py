@@ -494,6 +494,7 @@ def test_arg_as_lambda_call_keyword_args():
     assert (arg(a=6, b=7))(dict) == (lambda x: x(a=6, b=7))(dict)
 
 
+# TODO test close_all for take, drop, until, while_, ...
 def test_take():
     from reboot import flow, take, out
     data = 'abracadabra'
