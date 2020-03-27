@@ -277,6 +277,7 @@ def test_pick_multiple_items():
     values = range(3)
     data = [{name:op(N) for (name, op) in zip(names, ops)} for N in values]
     assert flow(pick.a.b, out)(data) == list(map(itemgetter('a', 'b'), data))
+    assert flow(pick.a  , out)(data) == list(map(itemgetter('a'     ), data))
 
 
 def test_on_item():
