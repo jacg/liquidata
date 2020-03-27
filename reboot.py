@@ -304,11 +304,12 @@ class _ArgsPut(_Component):
 
 class _Name:
 
-    def __init__(self, callable):
-        self.callable = callable
+    def __init__(self, constructor):
+        self.constructor = constructor
 
     def __getattr__(self, name):
-        return self.callable(name)
+        return self.constructor(name)
+
 
 
 out  = _Name(_Output.Name)
