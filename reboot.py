@@ -201,11 +201,7 @@ class _Return(_Component):
             return _Return(self.name, sink)
 
         def coroutine_and_outputs(self, bindings):
-            def append(the_list, element):
-                the_list.append(element)
-                return the_list
-            collect_into_list = _Fold(append, [])
-            return _Return(self.name, collect_into_list).coroutine_and_outputs(bindings)
+            return _Return(self.name, into_list()).coroutine_and_outputs(bindings)
 
         @classmethod
         def no_name_given(cls, *args, **kwds):
@@ -541,3 +537,10 @@ def until(predicate):
 
 
 def while_(predicate): return until(lambda x: not predicate(x))
+
+
+def into_list():
+    def append(the_list, element):
+        the_list.append(element)
+        return the_list
+    return _Fold(append, [])
