@@ -555,7 +555,6 @@ def into_list():
 class LiquiDataException(Exception): pass
 class SinkMissing            (LiquiDataException): pass
 class NeedAtLeastOneCoroutine(LiquiDataException): pass
-class MultipleReturns        (LiquiDataException): pass
 
 ######################################################################
 
