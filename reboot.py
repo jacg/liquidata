@@ -9,6 +9,11 @@ import itertools as it
 import copy
 
 
+
+# TODO: count-filter: implicit {} in out: out.NAME({predicate}) -> .passed & .stopped
+
+# TODO: send down one branch or other depending on predicate. dispatch, match, divert, split
+
 # TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
@@ -18,9 +23,6 @@ import copy
 # TODO: missing arg-lambda features
 #         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
 # lambda x: x.a > 3; lambda x: x:[0] > 3; lambda a,b : a >     b; attrgetter('a');
-
-# TODO: something like Haskell's on or Python's key. Where is it useful beyond
-#       filter? Maybe this is where {pred:key} would be used?
 
 # TODO: (a,b,c) without args or put should just be a pipe
 
@@ -49,8 +51,6 @@ import copy
 
 # TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
 
-# TODO: count-filter: implicit {} in out: out.NAME({predicate}) -> .passed & .stopped
-
 # TODO: string as implicit pick
 
 # TODO: get inside out
@@ -62,8 +62,6 @@ import copy
 
 # TODO: option to pipe.fn to assume that the pipe is a map, and therefore
 # return the first (hopefully existent and only) thing yielded.
-
-# TODO: send down one branch or other depending on predicate. Dispatch. Match
 
 # TODO: monads?
 
