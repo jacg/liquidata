@@ -21,8 +21,7 @@ def test_trivial():
     from reboot import flow
     data = list(range(10))
     result = []
-    net = flow(result.append)
-    net(data)
+    flow(result.append)(data)
     assert result == data
 
 
@@ -31,8 +30,7 @@ def test_map():
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    net = flow(f, result.append)
-    net(data)
+    flow(f, result.append)(data)
     assert result == list(map(f, data))
 
 
@@ -40,8 +38,7 @@ def test_filter():
     from reboot import flow
     data = list(range(10))
     result = []
-    net = flow({odd}, result.append)
-    net(data)
+    flow({odd}, result.append)(data)
     assert result == list(filter(odd, data))
 
 
@@ -49,8 +46,7 @@ def test_branch():
     from reboot import flow
     data = list(range(10))
     branch, main = [], []
-    net = flow([branch.append], main.append)
-    net(data)
+    flow([branch.append], main.append)(data)
     assert main   == data
     assert branch == data
 
@@ -61,13 +57,12 @@ def test_integration_1():
     f, g, h = square, (_ +  1), (_ +   2)
     a, b, c = odd   , (_ > 50), (_ < 100)
     s, t    = [], []
-    net = flow(f,
-               {a},
-               [g, {b}, s.append],
-               h,
-               {c},
-               t.append)
-    net(data)
+    flow(f,
+         {a},
+         [g, {b}, s.append],
+         h,
+         {c},
+         t.append)(data)
     assert s == list(filter(b, map(g, filter(a, map(f, data)))))
     assert t == list(filter(c, map(h, filter(a, map(f, data)))))
 
@@ -75,22 +70,19 @@ def test_integration_1():
 def test_fold_and_return():
     from reboot import flow, out
     data = range(3)
-    net = flow(out(sym_add))
-    assert net(data) == reduce(sym_add, data)
+    assert flow(out(sym_add))(data) == reduce(sym_add, data)
 
 
 def test_fold_and_named_return():
     from reboot import flow, out
     data = range(3)
-    net = flow(out.total(sym_add))
-    assert net(data).total == reduce(sym_add, data)
+    assert flow(out.total(sym_add))(data).total == reduce(sym_add, data)
 
 
 def test_fold_with_initial_value():
     from reboot import flow, out
     data = range(3)
-    net = flow(out(sym_add, 99))
-    assert net(data) == reduce(sym_add, data, 99)
+    assert flow(out(sym_add, 99))(data) == reduce(sym_add, data, 99)
 
 
 def test_fold_with_initial_value_named():
@@ -103,9 +95,8 @@ def test_fold_with_initial_value_named():
 def test_return_value_from_branch():
     from reboot import flow, out
     data = range(3)
-    net = flow([out.branch(sym_add)],
-                out.main  (sym_mul))
-    result = net(data)
+    result = flow([out.branch(sym_add)],
+                   out.main  (sym_mul))(data)
     assert result.main   == reduce(sym_mul, data)
     assert result.branch == reduce(sym_add, data)
 
@@ -113,31 +104,27 @@ def test_return_value_from_branch():
 def test_implicit_collect_into_list_named():
     from reboot import flow, out
     data = range(3)
-    net = flow(out.everything)
-    assert net(data).everything == list(data)
+    flow(out.everything)(data).everything == list(data)
 
 
 def test_implicit_collect_into_list_nameless_with_call():
     from reboot import flow, out
     data = range(3)
-    net = flow(out())
-    assert net(data) == list(data)
+    flow(out())(data) == list(data)
 
 
 def test_implicit_collect_into_list_nameless_without_call():
     from reboot import flow, out
     data = range(3)
-    net = flow(out)
-    assert net(data) == list(data)
+    flow(out)(data) == list(data)
 
 
 def test_nested_branches():
     from reboot import flow, out
     f,g,h,i = symbolic_functions('fghi')
     data = range(3)
-    net = flow([[f, out.BB], g, out.BM],
-                [h, out.MB], i, out.MM )
-    res = net(data)
+    res = flow([[f, out.BB], g, out.BM],
+                [h, out.MB], i, out.MM )(data)
     assert res.BB == list(map(f, data))
     assert res.BM == list(map(g, data))
     assert res.MB == list(map(h, data))
@@ -148,16 +135,14 @@ def test_slot_implicit_map():
     from reboot import flow, slot, out
     data = list(range(3))
     f, = symbolic_functions('f')
-    net = flow(slot.A, out)
-    assert net(data, A=f) == list(map(f, data))
+    assert flow(slot.A, out)(data, A=f) == list(map(f, data))
 
 
 def test_slot_implicit_filter():
     from reboot import flow, slot, out
     data = list(range(6))
     f = odd
-    net = flow(slot.A, out)
-    assert net(data, A={f}) == list(filter(f, data))
+    assert flow(slot.A, out)(data, A={f}) == list(filter(f, data))
 
 
 @TODO
@@ -165,16 +150,14 @@ def test_slot_implicit_filter():
     from reboot import flow, slot, out
     data = list(range(6))
     f = odd
-    net = flow({slot.A}, out)
-    assert net(data, A=f) == list(filter(f, data))
+    assert flow({slot.A}, out)(data, A=f) == list(filter(f, data))
 
 
 def test_slot_in_branch():
     from reboot import flow, slot, out
     data = list(range(3))
     f, = symbolic_functions('f')
-    net = flow([slot.A, out.branch], out.main)
-    r = net(data, A=f)
+    r = flow([slot.A, out.branch], out.main)(data, A=f)
     assert r.main   ==             data
     assert r.branch == list(map(f, data))
 
@@ -183,8 +166,7 @@ def test_slot_branch():
     from reboot import flow, slot, out
     data = list(range(3))
     f, = symbolic_functions('f')
-    net = flow(slot.A, out.main)
-    r = net(data, A=[f, out.branch])
+    r = flow(slot.A, out.main)(data, A=[f, out.branch])
     assert r.main   ==             data
     assert r.branch == list(map(f, data))
 
@@ -193,8 +175,7 @@ def test_flat_map():
     from reboot import flow, FlatMap, out
     data = range(4)
     f = range
-    net = flow(FlatMap(f), out)
-    assert net(data) == list(it.chain(*map(f, data)))
+    assert flow(FlatMap(f), out)(data) == list(it.chain(*map(f, data)))
 
 
 @TODO # TODO also the unnamed version: out(slot.SINK)
@@ -202,8 +183,7 @@ def test_slot_implicit_sink():
     from reboot import flow, slot, out
     data = list(range(3))
     f = sym_add
-    net = flow(out.OUT(slot.SINK))
-    assert net(data, SINK=f).OUT == reduce(f, data)
+    assert flow(out.OUT(slot.SINK))(data, SINK=f).OUT == reduce(f, data)
 
 
 def test_pipe_as_function():
@@ -251,8 +231,7 @@ def test_pipe_as_component():
     data = range(3,6)
     a,b,f,g = symbolic_functions('abfg')
     pipe = pipe(f, g)
-    net = flow(a, pipe, b, out)
-    assert net(data) == list(map(b, map(g, map(f, map(a, data)))))
+    assert flow(a, pipe, b, out)(data) == list(map(b, map(g, map(f, map(a, data)))))
 
 
 def test_pick_item():
@@ -261,8 +240,7 @@ def test_pick_item():
     values = range(3)
     f, = symbolic_functions('f')
     data = [dict((name, value) for name in names) for value in values]
-    net = flow(pick.a, f, out)
-    assert net(data) == list(map(f, values))
+    assert flow(pick.a, f, out)(data) == list(map(f, values))
 
 
 def test_pick_multiple_items():
@@ -271,8 +249,7 @@ def test_pick_multiple_items():
     ops = tuple(symbolic_functions(names))
     values = range(3)
     data = [{name:op(N) for (name, op) in zip(names, ops)} for N in values]
-    net = flow(pick.a.b, out)
-    assert net(data) == list(map(itemgetter('a', 'b'), data))
+    assert flow(pick.a.b, out)(data) == list(map(itemgetter('a', 'b'), data))
 
 
 def test_on_item():
@@ -297,8 +274,7 @@ def test_args_single():
     from reboot import flow, args, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    net = flow((args.c, f), out)
-    assert net(data) == list(map(f, map(itemgetter('c'), data)))
+    assert flow((args.c, f), out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
 def test_args_many():
@@ -413,8 +389,7 @@ def test_slice_downstream(spec):
 
     from reboot import flow, Slice, out
     data = list('abcdefghij')
-    net = flow(Slice(*spec), out)
-    result = net(data)
+    result = flow(Slice(*spec), out)(data)
     specslice = slice(*spec)
     assert result == data[specslice]
     assert result == data[specslice.start : specslice.stop : specslice.step]
@@ -434,8 +409,7 @@ def test_slice_close_all(close_all):
     n_elements = 5
     the_slice = Slice(n_elements, close_all=close_all)
 
-    net = flow([the_slice, out.branch], out.main)
-    result = net(data)
+    result = flow([the_slice, out.branch], out.main)(data)
 
     if close_all:
         assert result.branch == data[:n_elements]
