@@ -481,10 +481,7 @@ unops = sampled_from((neg, pos, abs))
 @given(unops, integers())
 def test_arg_as_lambda_binary(op, operand):
     from reboot import arg
-
-    a  =           op(arg)
-    b  = lambda x: op(x)
-    assert a(operand) == b(operand)
+    assert op(arg)(operand) == op(operand)
 
 
 def test_arg_as_lambda_getitem():
