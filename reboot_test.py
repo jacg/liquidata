@@ -220,7 +220,7 @@ def test_pipe_as_multi_arg_function():
 
 
 def test_pipe_on_filter():
-    from reboot import pipe, FlatMap
+    from reboot import pipe
     f = odd
     pipe_fn = pipe({f}).fn()
     assert pipe_fn(3) == (3,)
