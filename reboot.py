@@ -97,16 +97,6 @@ class flow:
         return Namespace(**{name: future.result() for name, future in outputs})
 
 
-# components:
-#
-# map
-# filter
-# sink:   fold, side-effect, side-effect with result
-# branch
-# get
-# out
-# call
-
 ######################################################################
 #    Component types                                                 #
 ######################################################################
