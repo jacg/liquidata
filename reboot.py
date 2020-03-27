@@ -204,8 +204,11 @@ class _Return(_Component):
             return _Return(self.name, into_list()).coroutine_and_outputs(bindings)
 
         @classmethod
-        def no_name_given(cls, *args, **kwds):
-            return cls('return')(*args, **kwds)
+        def no_name_given(cls, sink=None, *args, **kwds):
+            if sink is None:
+                sink = into_list()
+            return cls('return')(sink, *args, **kwds)
+
 
 class _Slot(_Component):
 
