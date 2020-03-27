@@ -192,12 +192,14 @@ class _Return(_Component):
         def __init__(self, name):
             self.name = name
 
-        def __call__(self, sink, initial=None):
-            if not isinstance(sink, _Component):
+        def __call__(self, arg, initial=None, key=None):
+            if isinstance(arg, set):
+                arg = _CountFilter(arg, key=key)
+            if not isinstance(arg, _Component):
                 # TODO: issue warning/error if initial is not None
-                sink = _Fold(sink, initial=initial)
+                arg = _Fold(arg, initial=initial)
             # TODO: set as implicit count filter?
-            return _Return(self.name, sink)
+            return _Return(self.name, arg)
 
         def coroutine_and_outputs(self, bindings):
             return _Return(self.name, into_list()).coroutine_and_outputs(bindings)
