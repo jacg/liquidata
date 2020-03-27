@@ -322,7 +322,7 @@ class _Name:
 
 
 out  = _Name(_Output.Name)
-get  = _Name(_Input)
+slot = _Name(_Input)
 pick = _Name(_Pick)
 on   = _Name(_On)
 args = _Name(_Args)
