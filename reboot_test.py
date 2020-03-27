@@ -222,7 +222,7 @@ def test_pipe_as_component():
     from reboot import pipe, flow, out
     data = range(3,6)
     a,b,f,g = symbolic_functions('abfg')
-    pipe = pipe(f, g).pipe()
+    pipe = pipe(f, g)
     net = flow(a, pipe, b, out.X)
     assert net(data).X == list(map(b, map(g, map(f, map(a, data)))))
 
