@@ -42,6 +42,14 @@ def test_filter():
     assert result == list(filter(odd, data))
 
 
+def test_filter_with_key():
+    from reboot import flow, arg as _
+    data = list(range(10))
+    result = []
+    flow({odd : _+1}, result.append)(data)
+    assert result == list(filter(even, data))
+
+
 def test_branch():
     from reboot import flow
     data = list(range(10))

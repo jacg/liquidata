@@ -159,6 +159,17 @@ def _Filter(predicate):
     return filter_loop
 
 
+@component
+def _KeyFilter(predicate, key):
+    def filter_loop(downstream):
+        with closing(downstream):
+            while True:
+                args = yield
+                if predicate(key(*args)):
+                    downstream.send(args)
+    return filter_loop
+
+
 class _Branch(_Component):
 
     def __init__(self, *components):
@@ -479,6 +490,7 @@ def decode_implicits(it):
     if isinstance(it, list     ) : return _Branch(*it)
     if isinstance(it, tuple    ) : return _ArgsPut(*it)
     if isinstance(it, set      ) : return _Filter(next(iter(it)))
+    if isinstance(it, dict     ) : return _KeyFilter(*next(iter(it.items())))
     else                         : return _Map(it)
 
 
