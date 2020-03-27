@@ -147,12 +147,14 @@ def FlatMap(fn):
 
 
 @component
-def _Filter(predicate):
+def _Filter(predicate, key=None):
+    if key is None:
+        key = lambda x:x
     def filter_loop(downstream):
         with closing(downstream):
             while True:
                 args = yield
-                if predicate(*args):
+                if predicate(key(*args)):
                     downstream.send(args)
     return filter_loop
 
@@ -488,7 +490,7 @@ def decode_implicits(it):
     if isinstance(it, list     ) : return _Branch(*it)
     if isinstance(it, tuple    ) : return _ArgsPut(*it)
     if isinstance(it, set      ) : return _Filter(next(iter(it)))
-    if isinstance(it, dict     ) : return _KeyFilter(*next(iter(it.items())))
+    if isinstance(it, dict     ) : return _Filter(*next(iter(it.items())))
     else                         : return _Map(it)
 
 
