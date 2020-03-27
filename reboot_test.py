@@ -119,6 +119,14 @@ def test_implicit_collect_into_list_nameless_without_call():
     flow(out)(data) == list(data)
 
 
+def test_more_than_one_nameless_out_disallowed():
+    from reboot import flow, out, MultipleReturns
+    data = range(3)
+    net = flow([out], out)
+    with raises(MultipleReturns):
+        net(data)
+
+
 def test_nested_branches():
     from reboot import flow, out
     f,g,h,i = symbolic_functions('fghi')

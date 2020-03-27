@@ -91,6 +91,9 @@ class flow:
         coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
+        number_of_returns = sum(map(lambda output: 1 if output.name == 'return' else 0, outputs))
+        if number_of_returns > 1:
+            raise MultipleReturns(f'Cannot run network because it contains more than one nameless `out`')
         returns = Namespace(**{o.name: o.future.result() for o in outputs})
         if 'return' in returns:
             return vars(returns)['return']
@@ -549,9 +552,12 @@ def into_list():
     return _Fold(append, [])
 
 ######################################################################
+
 class LiquiDataException(Exception): pass
 class SinkMissing            (LiquiDataException): pass
 class NeedAtLeastOneCoroutine(LiquiDataException): pass
+class MultipleReturns        (LiquiDataException): pass
+
 ######################################################################
 
 NamedFuture = namedtuple('NamedFuture', 'name, future')
