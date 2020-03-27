@@ -91,13 +91,12 @@ class flow:
         coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
-        number_of_returns = sum(map(lambda output: 1 if output.name == 'return' else 0, outputs))
-        if number_of_returns > 1:
-            raise MultipleReturns(f'Cannot run network because it contains more than one nameless `out`')
-        returns = Namespace(**{o.name: o.future.result() for o in outputs})
-        if 'return' in returns:
-            return vars(returns)['return']
-        return returns
+        returns = tuple(filter(lambda o: o.name == 'return', outputs))
+        out_ns  = Namespace(**{o.name: o.future.result() for o in outputs})
+        if len(vars(out_ns)) == len(returns) == 1:
+            return vars(out_ns)['return']
+        setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
+        return out_ns
 
 
 ######################################################################

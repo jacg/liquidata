@@ -119,12 +119,23 @@ def test_implicit_collect_into_list_nameless_without_call():
     flow(out)(data) == list(data)
 
 
-def test_more_than_one_nameless_out_disallowed():
-    from reboot import flow, out, MultipleReturns
+def test_more_than_one_anonymous_out():
+    from reboot import flow, out
+    f,g = symbolic_functions('fg')
     data = range(3)
-    net = flow([out], out)
-    with raises(MultipleReturns):
-        net(data)
+    res = flow([f, out], g, out)(data)
+    returns = getattr(res, 'return')
+    assert returns[0] == list(map(f, data))
+    assert returns[1] == list(map(g, data))
+
+
+def test_anonymous_and_named_outs():
+    from reboot import flow, out
+    f,g = symbolic_functions('fg')
+    data = range(3)
+    res = flow([f, out.branch], g, out)(data)
+    assert res.branch == list(map(f, data))
+    assert vars(res)['return'][0] == list(map(g, data))
 
 
 def test_nested_branches():
