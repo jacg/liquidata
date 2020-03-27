@@ -366,7 +366,7 @@ class pipe:
         self._components = components
 
     def fn  (self, **bindings): return pipe._Fn(self._components, bindings)
-    def pipe(self, **bindings): return FlatMap     (self.fn(        **bindings))
+    def pipe(self, **bindings): return FlatMap (self.fn(        **bindings))
 
     class _Fn:
 
@@ -479,10 +479,10 @@ arg = _Arg()
 def decode_implicits(it):
     if isinstance(it, _Component): return it
     if isinstance(it, pipe)      : return it.pipe()
-    if isinstance(it, list     ): return _Branch(*it)
-    if isinstance(it, tuple    ): return _ArgsPut(*it)
-    if isinstance(it, set      ): return _Filter(next(iter(it)))
-    else                        : return _Map(it)
+    if isinstance(it, list     ) : return _Branch(*it)
+    if isinstance(it, tuple    ) : return _ArgsPut(*it)
+    if isinstance(it, set      ) : return _Filter(next(iter(it)))
+    else                         : return _Map(it)
 
 
 def push(source, pipe):
