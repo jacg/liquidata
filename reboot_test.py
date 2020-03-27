@@ -104,19 +104,19 @@ def test_return_value_from_branch():
 def test_implicit_collect_into_list_named():
     from reboot import flow, out
     data = range(3)
-    flow(out.everything)(data).everything == list(data)
+    assert flow(out.everything)(data).everything == list(data)
 
 
 def test_implicit_collect_into_list_nameless_with_call():
     from reboot import flow, out
     data = range(3)
-    flow(out())(data) == list(data)
+    assert flow(out())(data) == list(data)
 
 
 def test_implicit_collect_into_list_nameless_without_call():
     from reboot import flow, out
     data = range(3)
-    flow(out)(data) == list(data)
+    assert flow(out)(data) == list(data)
 
 
 def test_more_than_one_anonymous_out():
