@@ -1,19 +1,14 @@
-from operator   import itemgetter, attrgetter
-from functools  import reduce, wraps
-from contextlib import contextmanager
-from argparse   import Namespace
-from asyncio    import Future
+from operator    import itemgetter, attrgetter
+from functools   import reduce, wraps
 from collections import namedtuple
+from contextlib  import contextmanager
+from argparse    import Namespace
+from asyncio     import Future
 
 import itertools as it
 import copy
 
 
-# TODO: out.X(foldfn)    out(foldfn)  for direct return?
-
-# TODO: return single value rather than namespace, when appropriate (implicit
-#       when only one out? or explicit choice?). Implicit naming of flow's
-#       sink.
 # TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
