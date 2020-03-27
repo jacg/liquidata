@@ -510,3 +510,26 @@ def closing(target):
 ######################################################################
 
 class StopPipeline(Exception): pass
+
+######################################################################
+
+def take(n, **kwds): return Slice(None, n, **kwds)
+def drop(n, **kwds): return Slice(n, None, **kwds)
+
+
+@component
+def until(predicate):
+    def until_loop(downstream):
+        with closing(downstream):
+            while True:
+                args = yield
+                if predicate(*args):
+                    break
+                else:
+                    downstream.send(args)
+            while True:
+                yield
+    return until_loop
+
+
+def while_(predicate): return until(lambda x: not predicate(x))
