@@ -86,7 +86,6 @@ class flow:
         coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
-        print(outputs)
         return Namespace(**{name: future.result() for name, future in outputs})
 
 
@@ -244,6 +243,12 @@ class _On(_Component):
 class _Args(_MultipleNames): pass
 class _Put (_MultipleNames): pass
 
+DEBUG = False
+
+def debug(x):
+    if DEBUG:
+        print(x)
+
 class _ArgsPut(_Component):
 
     def __init__(self, *components):
@@ -251,9 +256,9 @@ class _ArgsPut(_Component):
         self.args = cs.pop(0).names if isinstance(cs[ 0], _Args) else ()
         self.put  = cs.pop( ).names if isinstance(cs[-1], _Put ) else ()
         self.pipe_fn = pipe(*cs).fn()
-        print(f'components: {cs}')
-        print(f'self.args: {self.args}')
-        print(f'self.put: {self.put}')
+        debug(f'components: {cs}')
+        debug(f'self.args: {self.args}')
+        debug(f'self.put: {self.put}')
 
     def coroutine_and_outputs(self, bindings):
 
@@ -282,17 +287,17 @@ class _ArgsPut(_Component):
             with closing(downstream):
                 while True:
                     incoming, = (yield)
-                    print(f'incoming: {incoming}')
+                    debug(f'incoming: {incoming}')
                     args = get_args(incoming)
-                    print(f'argsXXX: {args}')
+                    debug(f'argsXXX: {args}')
                     generated_returns = self.pipe_fn(*args)
-                    print(f'generated_returns: {generated_returns}')
+                    debug(f'generated_returns: {generated_returns}')
                     for returned in generated_returns:
-                        print(f'make_return: {make_return}')
-                        print(f'returned: {returned}')
+                        debug(f'make_return: {make_return}')
+                        debug(f'returned: {returned}')
                         # TODO: eliminate unnecessary first copy?
                         outgoing = make_return(copy.copy(incoming), returned)
-                        print(f'outgoing: {outgoing}')
+                        debug(f'outgoing: {outgoing}')
                         downstream.send((outgoing,))
         return args_put_loop, ()
 
@@ -375,7 +380,6 @@ class Slice(_Component):
     def __init__(self, *args, close_all=False):
         spec = slice(*args)
         start, stop, step = spec.start, spec.stop, spec.step
-        print(f"spec 0: {spec}")
         if start is not None and start <  0: raise ValueError('slice requires start >= 0')
         if stop  is not None and stop  <  0: raise ValueError('slice requires stop >= 0')
         if step  is not None and step  <= 0: raise ValueError('slice requires step > 0')
@@ -385,7 +389,6 @@ class Slice(_Component):
         if stop  is None: stopper = it.count()
         else            : stopper = range((stop - start + step - 1) // step)
         self.spec = slice(start, stop, step)
-        print(f"spec 1: {self.spec}")
         self.stopper = stopper
         self.close_all = close_all
 
