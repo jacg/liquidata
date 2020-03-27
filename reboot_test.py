@@ -75,11 +75,25 @@ def test_integration_1():
 def test_fold_and_return():
     from reboot import flow, out
     data = range(3)
+    net = flow(out(sym_add))
+    assert net(data) == reduce(sym_add, data)
+
+
+def test_fold_and_named_return():
+    from reboot import flow, out
+    data = range(3)
     net = flow(out.total(sym_add))
     assert net(data).total == reduce(sym_add, data)
 
 
 def test_fold_with_initial_value():
+    from reboot import flow, out
+    data = range(3)
+    net = flow(out(sym_add, 99))
+    assert net(data) == reduce(sym_add, data, 99)
+
+
+def test_fold_with_initial_value_named():
     from reboot import flow, out
     data = range(3)
     net = flow(out.total(sym_add, 99))

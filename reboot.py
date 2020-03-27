@@ -94,7 +94,10 @@ class flow:
         coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
-        return Namespace(**{name: future.result() for name, future in outputs})
+        returns = Namespace(**{name: future.result() for name, future in outputs})
+        if 'return' in returns:
+            return vars(returns)['return']
+        return returns
 
 
 ######################################################################
@@ -204,6 +207,9 @@ class _Return(_Component):
             collect_into_list = _Fold(append, [])
             return _Return(self.name, collect_into_list).coroutine_and_outputs(bindings)
 
+        @classmethod
+        def no_name_given(cls, *args, **kwds):
+            return cls('return')(*args, **kwds)
 
 class _Slot(_Component):
 
@@ -300,8 +306,6 @@ class _ArgsPut(_Component):
         return args_put_loop, ()
 
 
-
-
 class _Name:
 
     def __init__(self, constructor):
@@ -310,7 +314,8 @@ class _Name:
     def __getattr__(self, name):
         return self.constructor(name)
 
-
+    def __call__(self, *args, **kwds):
+        return self.constructor.no_name_given(*args, **kwds)
 
 out  = _Name(_Return.Name)
 slot = _Name(_Slot)
