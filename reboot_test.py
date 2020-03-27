@@ -165,7 +165,7 @@ def test_slot_implicit_filter():
 
 
 @TODO
-def test_slot_implicit_filter():
+def test_slot_in_braces():
     from reboot import flow, slot, out
     data = list(range(6))
     f = odd
