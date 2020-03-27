@@ -305,7 +305,7 @@ class _ArgsPut(_Component):
         return args_put_loop, ()
 
 
-class _Name:
+class _Name(_Component):
 
     def __init__(self, constructor):
         self.constructor = constructor
@@ -315,6 +315,9 @@ class _Name:
 
     def __call__(self, *args, **kwds):
         return self.constructor.no_name_given(*args, **kwds)
+
+    def coroutine_and_outputs(self, bindings):
+        return self.constructor.no_name_given().coroutine_and_outputs(bindings)
 
 out  = _Name(_Return.Name)
 slot = _Name(_Slot)

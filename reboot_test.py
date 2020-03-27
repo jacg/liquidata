@@ -124,6 +124,13 @@ def test_implicit_collect_into_list_nameless_with_call():
     assert net(data) == list(data)
 
 
+def test_implicit_collect_into_list_nameless_without_call():
+    from reboot import flow, out
+    data = range(3)
+    net = flow(out)
+    assert net(data) == list(data)
+
+
 def test_nested_branches():
     from reboot import flow, out
     f,g,h,i = symbolic_functions('fghi')
