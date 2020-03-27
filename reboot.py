@@ -3,6 +3,7 @@ from functools  import reduce, wraps
 from contextlib import contextmanager
 from argparse   import Namespace
 from asyncio    import Future
+from collections import namedtuple
 
 import itertools as it
 import copy
@@ -95,7 +96,7 @@ class flow:
         coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
         push(source, coroutine)
         outputs = tuple(outputs)
-        returns = Namespace(**{name: future.result() for name, future in outputs})
+        returns = Namespace(**{o.name: o.future.result() for o in outputs})
         if 'return' in returns:
             return vars(returns)['return']
         return returns
@@ -187,7 +188,7 @@ class _Return(_Component):
     def coroutine_and_outputs(self, bindings):
         future = Future()
         coroutine = self._sink.make_coroutine(future)
-        return coroutine, ((self._name, future),)
+        return coroutine, (NamedFuture(self._name, future),)
 
     class Name(_Component):
 
@@ -556,3 +557,6 @@ def into_list():
 class LiquiDataException(Exception): pass
 class SinkMissing            (LiquiDataException): pass
 class NeedAtLeastOneCoroutine(LiquiDataException): pass
+######################################################################
+
+NamedFuture = namedtuple('NamedFuture', 'name, future')
