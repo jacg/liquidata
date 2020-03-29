@@ -223,6 +223,9 @@ def test_pick_multiple_items():
     assert flow(pick.a  , out)(data) == list(map(itemgetter('a'     ), data))
 
 
+RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
+
+@RETHINK_ARGSPUT
 def test_on_item():
     from reboot import flow, on, out
     names = 'abc'
@@ -278,6 +281,7 @@ def namespace_source(keys='abc', length=3):
     return [{key:f'{key}{i}' for key in keys} for i in indices]
 
 
+@RETHINK_ARGSPUT
 def test_args_single():
     from reboot import flow, args, out
     data = namespace_source()
@@ -285,6 +289,7 @@ def test_args_single():
     assert flow((args.c, f), out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
+@RETHINK_ARGSPUT
 def test_args_many():
     from reboot import flow, args, out
     data = namespace_source()
@@ -293,6 +298,7 @@ def test_args_many():
                                  map(itemgetter('b'), data)))
     assert net(data) == expected
 
+@RETHINK_ARGSPUT
 def test_put_single():
     from reboot import flow, put, out
     data = namespace_source()
@@ -304,6 +310,7 @@ def test_put_single():
     assert net(data) == expected
 
 
+@RETHINK_ARGSPUT
 def test_put_many():
     from reboot import flow, put, out
     data = namespace_source()
@@ -317,6 +324,7 @@ def test_put_many():
     assert net(data) == expected
 
 
+@RETHINK_ARGSPUT
 def test_args_single_put_single():
     from reboot import flow, args, put, out
     data = namespace_source()
@@ -328,6 +336,7 @@ def test_args_single_put_single():
     assert net(data) == expected
 
 
+@RETHINK_ARGSPUT
 def test_args_single_put_many():
     from reboot import flow, args, put, out
     l,r = symbolic_functions('lr')
@@ -342,6 +351,7 @@ def test_args_single_put_many():
     assert net(data) == expected
 
 
+@RETHINK_ARGSPUT
 def test_args_single_filter():
     from reboot import flow, args, out, arg as _
     data = (dict(a=1, b=2),
@@ -353,7 +363,7 @@ def test_args_single_filter():
     assert net(data) == expected
 
 
-@TODO
+@RETHINK_ARGSPUT
 def test_args_many_filter():
     from reboot import flow, args, out
     data = (dict(a=1, b=2),
@@ -366,6 +376,7 @@ def test_args_many_filter():
     assert net(data) == expected
 
 
+@RETHINK_ARGSPUT
 def test_args_single_flatmap():
     from reboot import flow, FlatMap, args, out
     data = (dict(a=1, b=2),
@@ -375,6 +386,7 @@ def test_args_single_flatmap():
     assert net(data) == [1,3,3,3]
 
 
+@RETHINK_ARGSPUT
 def test_args_many_flatmap():
     from reboot import flow, FlatMap, args, out
     data = (dict(a=1, b=9),
