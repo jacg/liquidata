@@ -377,14 +377,13 @@ def test_args_single_put_many():
     assert net(data) == expected
 
 
-@RETHINK_ARGSPUT
 def test_args_single_filter():
-    from reboot import flow, args, out, arg as _
+    from reboot import flow, item, out, arg as _
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
             dict(a=8, b=9))
-    net = flow((args.b, {_ > 2}), out)
+    net = flow(item.b, {_ > 2}, out)
     expected = list(filter(_ > 2, map(itemgetter('b'), data)))
     assert net(data) == expected
 
