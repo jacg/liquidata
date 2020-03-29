@@ -321,6 +321,8 @@ class _Item:
     def __mul__(self, action):
         return (self, star(action))
 
+    __rmul__ = __mul__
+
 
 class _Name(_Component):
 

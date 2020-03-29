@@ -296,10 +296,12 @@ def test_item_as_args_single():
     assert flow(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
-def test_item_star_as_args_many():
+@parametrize('where', 'before after'.split())
+def test_item_star_as_args_many(where):
     from reboot import flow, item, out
     data = namespace_source()
-    net = flow(item.a.b * sym_add, out)
+    if where == 'before': net = flow(item.a.b * sym_add , out)
+    else                : net = flow(sym_add  * item.a.b, out)
     expected = list(map(sym_add, map(itemgetter('a'), data),
                                  map(itemgetter('b'), data)))
     assert net(data) == expected
