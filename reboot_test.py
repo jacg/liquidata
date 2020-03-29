@@ -1,4 +1,4 @@
-from operator  import itemgetter, lt
+from operator  import itemgetter, attrgetter
 from functools import reduce
 from argparse  import Namespace
 
@@ -233,6 +233,18 @@ def test_on_item():
     for d in expected:
         d['a'] = f(d['a'])
     assert net(data) == expected
+
+
+def test_get_single_attr():
+    from reboot import get
+    it = Namespace(a=1, b=2)
+    assert get.a(it) == attrgetter('a')(it)
+
+
+def test_get_single_item():
+    from reboot import get
+    it = dict(a=1, b=2)
+    assert get['a'](it) == itemgetter('a')(it)
 
 
 def namespace_source(keys='abc', length=3):
