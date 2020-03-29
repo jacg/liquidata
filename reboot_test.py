@@ -335,6 +335,23 @@ def test_put_operator_single_pipe(op):
     assert net(data) == expected
 
 
+@parametrize('op', '>> <<'.split())
+def test_put_operator_many(op):
+    from reboot import flow, put, out
+    data = namespace_source()
+    def sum_prod(ns):
+        a,b = itemgetter('a','b')(ns)
+        return sym_add(a,b), sym_mul(a,b)
+    if op == ">>": net = flow(    sum_prod >> put.sum.prod, out)
+    else         : net = flow(put.sum.prod <<     sum_prod, out)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        a,b = itemgetter('a','b')(d)
+        d['sum' ] = sym_add(a,b)
+        d['prod'] = sym_mul(a,b)
+    assert net(data) == expected
+
+
 @RETHINK_ARGSPUT
 def test_put_many():
     from reboot import flow, put, out
