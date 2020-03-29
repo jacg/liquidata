@@ -307,16 +307,6 @@ def test_item_star_as_args_many(where):
     assert net(data) == expected
 
 
-@RETHINK_ARGSPUT
-def test_args_many():
-    from reboot import flow, args, out
-    data = namespace_source()
-    net = flow((args.a.b, sym_add), out)
-    expected = list(map(sym_add, map(itemgetter('a'), data),
-                                 map(itemgetter('b'), data)))
-    assert net(data) == expected
-
-
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single(op):
     from reboot import flow, put, out
