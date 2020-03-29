@@ -325,6 +325,14 @@ class _Get:
             return itemgetter(*self.keys)(it)
 
 
+class _Item:
+
+    def __init__(self, name):
+        self.names = [name]
+
+    def __call__(self, it):
+        return itemgetter(*self.names)(it)
+
 
 class _Name(_Component):
 
@@ -346,6 +354,7 @@ on   = _Name(_On)
 args = _Name(_Args)
 put  = _Name(_Put)
 get  = _Get()
+item = _Name(_Item)
 
 
 class _Fold(_Component):

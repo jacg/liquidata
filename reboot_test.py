@@ -248,6 +248,12 @@ def test_get_single_item():
     assert get['a'](it) == itemgetter('a')(it)
 
 
+def test_item_single():
+    from reboot import item
+    it = dict(a=1, b=2)
+    assert item.a(it) == itemgetter('a')(it)
+
+
 def test_get_multilpe_attr():
     from reboot import get
     it = Namespace(a=1, b=2, c=9, d=4)
