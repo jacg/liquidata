@@ -158,59 +158,11 @@ def test_nested_branches():
     assert res.MM == list(map(i, data))
 
 
-def test_slot_implicit_map():
-    from reboot import flow, slot, out
-    data = list(range(3))
-    f, = symbolic_functions('f')
-    assert flow(slot.A, out)(data, A=f) == list(map(f, data))
-
-
-def test_slot_implicit_filter():
-    from reboot import flow, slot, out
-    data = list(range(6))
-    f = odd
-    assert flow(slot.A, out)(data, A={f}) == list(filter(f, data))
-
-
-@TODO
-def test_slot_in_braces():
-    from reboot import flow, slot, out
-    data = list(range(6))
-    f = odd
-    assert flow({slot.A}, out)(data, A=f) == list(filter(f, data))
-
-
-def test_slot_in_branch():
-    from reboot import flow, slot, out
-    data = list(range(3))
-    f, = symbolic_functions('f')
-    r = flow([slot.A, out.branch], out.main)(data, A=f)
-    assert r.main   ==             data
-    assert r.branch == list(map(f, data))
-
-
-def test_slot_branch():
-    from reboot import flow, slot, out
-    data = list(range(3))
-    f, = symbolic_functions('f')
-    r = flow(slot.A, out.main)(data, A=[f, out.branch])
-    assert r.main   ==             data
-    assert r.branch == list(map(f, data))
-
-
 def test_flat_map():
     from reboot import flow, FlatMap, out
     data = range(4)
     f = range
     assert flow(FlatMap(f), out)(data) == list(it.chain(*map(f, data)))
-
-
-@TODO # TODO also the unnamed version: out(slot.SINK)
-def test_slot_implicit_sink():
-    from reboot import flow, slot, out
-    data = list(range(3))
-    f = sym_add
-    assert flow(out.OUT(slot.SINK))(data, SINK=f).OUT == reduce(f, data)
 
 
 def test_pipe_as_function():
@@ -241,16 +193,6 @@ def test_pipe_on_flatmap():
     pipe_fn = pipe(FlatMap(f)).fn()
     assert pipe_fn(3) == (0,1,2)
     assert pipe_fn(5) == (0,1,2,3,4)
-
-
-def test_pipe_with_slot_as_function():
-    from reboot import pipe, slot
-    f,g,h = symbolic_functions('fgh')
-    pipe = pipe(f, slot.FN)
-    pipe_g = pipe.fn(FN=g)
-    pipe_h = pipe.fn(FN=h)
-    assert pipe_g(6) == (g(f(6)),)
-    assert pipe_h(7) == (h(f(7)),)
 
 
 def test_pipe_as_component():
