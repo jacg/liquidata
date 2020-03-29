@@ -18,7 +18,7 @@ import copy
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
 
-# TODO: Now that get is called slot,  use `get.a.b` as itemgetter('a','b')
+# TODO: Now that get is called slot (which has been removed),  use `get.a.b` as itemgetter('a','b')
 
 # TODO: missing arg-lambda features
 #         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
@@ -49,13 +49,7 @@ import copy
 # TODO: operator module containing curried operators. Names uppercase or with
 #       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
 
-# TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
-
 # TODO: string as implicit pick
-
-# TODO: get inside out
-
-# TODO: call / bind:   bind(1, get.a, key=get.b)(f) -> f(1, a, key=b)
 
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
@@ -73,8 +67,8 @@ class _Pipe:
         if isinstance(last, _Map):
             last.__class__ = _Sink
 
-    def coroutine_and_outputs(self, bindings):
-        cor_out_pairs = tuple(c.coroutine_and_outputs(bindings) for c in self._components)
+    def coroutine_and_outputs(self):
+        cor_out_pairs = tuple(c.coroutine_and_outputs() for c in self._components)
         coroutines = map(itemgetter(0), cor_out_pairs)
         out_groups = map(itemgetter(1), cor_out_pairs)
         return combine_coroutines(coroutines), it.chain(*out_groups)
@@ -85,8 +79,8 @@ class flow:
     def __init__(self, *components):
         self._pipe = _Pipe(components)
 
-    def __call__(self, source, **bindings):
-        coroutine, outputs = self._pipe.coroutine_and_outputs(bindings)
+    def __call__(self, source):
+        coroutine, outputs = self._pipe.coroutine_and_outputs()
         push(source, coroutine)
         outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
@@ -110,7 +104,7 @@ def component(loop):
     def __init__(self, *args):
         self._args = args
 
-    def coroutine_and_outputs(self, bindings):
+    def coroutine_and_outputs(self):
         if loop.__name__ == '_Sink': return coroutine(loop(*self._args))(), ()
         else                       : return coroutine(loop(*self._args))  , ()
 
@@ -164,8 +158,8 @@ class _Branch(_Component):
     def __init__(self, *components):
         self._pipe = _Pipe(components)
 
-    def coroutine_and_outputs(self, bindings):
-        sideways, outputs = self._pipe.coroutine_and_outputs(bindings)
+    def coroutine_and_outputs(self):
+        sideways, outputs = self._pipe.coroutine_and_outputs()
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -182,7 +176,7 @@ class _Return(_Component):
         self._name = name
         self._sink = sink
 
-    def coroutine_and_outputs(self, bindings):
+    def coroutine_and_outputs(self):
         future = Future()
         coroutine = self._sink.make_coroutine(future)
         return coroutine, (NamedFuture(self._name, future),)
@@ -201,8 +195,8 @@ class _Return(_Component):
             # TODO: set as implicit count filter?
             return _Return(self.name, arg)
 
-        def coroutine_and_outputs(self, bindings):
-            return _Return(self.name, into_list()).coroutine_and_outputs(bindings)
+        def coroutine_and_outputs(self):
+            return _Return(self.name, into_list()).coroutine_and_outputs()
 
         @classmethod
         def no_name_given(cls, sink=None, *args, **kwds):
@@ -210,14 +204,6 @@ class _Return(_Component):
                 sink = into_list()
             return cls('return')(sink, *args, **kwds)
 
-
-class _Slot(_Component):
-
-    def __init__(self, name):
-        self.name = name
-
-    def coroutine_and_outputs(self, bindings):
-        return decode_implicits(bindings[self.name]).coroutine_and_outputs(bindings)
 
 class _MultipleNames:
 
@@ -229,8 +215,8 @@ class _MultipleNames:
 
 class _Pick(_MultipleNames, _Component):
 
-    def coroutine_and_outputs(self, bindings):
-        return _Map(itemgetter(*self.names)).coroutine_and_outputs(bindings)
+    def coroutine_and_outputs(self):
+        return _Map(itemgetter(*self.names)).coroutine_and_outputs()
 
 
 class _On(_Component):
@@ -264,7 +250,7 @@ class _ArgsPut(_Component):
         debug(f'self.args: {self.args}')
         debug(f'self.put: {self.put}')
 
-    def coroutine_and_outputs(self, bindings):
+    def coroutine_and_outputs(self):
 
         def attach_each_to_namespace(namespace, returned):
             for name, value in zip(self.put, returned):
@@ -317,11 +303,10 @@ class _Name(_Component):
     def __call__(self, *args, **kwds):
         return self.constructor.no_name_given(*args, **kwds)
 
-    def coroutine_and_outputs(self, bindings):
-        return self.constructor.no_name_given().coroutine_and_outputs(bindings)
+    def coroutine_and_outputs(self):
+        return self.constructor.no_name_given().coroutine_and_outputs()
 
 out  = _Name(_Return.Name)
-slot = _Name(_Slot)
 pick = _Name(_Pick)
 on   = _Name(_On)
 args = _Name(_Args)
@@ -364,14 +349,14 @@ class pipe:
         # TODO: should disallow branches (unless we implement joins)
         self._components = components
 
-    def fn  (self, **bindings): return pipe._Fn(self._components, bindings)
-    def pipe(self, **bindings): return FlatMap (self.fn(        **bindings))
+    def fn  (self): return pipe._Fn(self._components)
+    def pipe(self): return FlatMap (self.fn())
 
     class _Fn:
 
-        def __init__(self, components, bindings):
+        def __init__(self, components):
             self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
-            self._coroutine, _ = self._pipe.coroutine_and_outputs(bindings)
+            self._coroutine, _ = self._pipe.coroutine_and_outputs()
 
         def __call__(self, *args):
             self._returns = []
@@ -399,7 +384,7 @@ class Slice(_Component):
         self.stopper = stopper
         self.close_all = close_all
 
-    def coroutine_and_outputs(self, bindings):
+    def coroutine_and_outputs(self):
         start, stop, step = attrgetter('start', 'stop', 'step')(self.spec)
         stopper, close_all = attrgetter('stopper', 'close_all')(self)
         @coroutine
