@@ -231,7 +231,38 @@ class _On(_Component):
 
 
 class _Args(_MultipleNames): pass
-class _Put (_MultipleNames): pass
+
+
+class _Put (_Component, _MultipleNames):
+
+    def __rrshift__(self, action):
+        self.pipe_fn = pipe(action).fn()
+        return self
+
+    def coroutine_and_outputs(self):
+
+        def attach_each_to_namespace(namespace, returned):
+            for name, value in zip(self.names, returned):
+                namespace[name] = value
+            return namespace
+
+        def attach_it_to_namespace(namespace, it):
+            namespace[self.names[0]] = it
+            return namespace
+
+        if len(self.names) > 1: make_return = attach_each_to_namespace
+        else                  : make_return = attach_it_to_namespace
+
+        @coroutine
+        def put_loop(downstream):
+            with closing(downstream):
+                while True:
+                    incoming_namespace, = (yield)
+                    returns = self.pipe_fn(incoming_namespace)
+                    for returned in returns:
+                        outgoing_namespace = make_return(copy.copy(incoming_namespace), returned)
+                        downstream.send((outgoing_namespace,))
+        return put_loop, ()
 
 DEBUG = False
 

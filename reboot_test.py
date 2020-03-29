@@ -306,6 +306,20 @@ def test_args_many():
                                  map(itemgetter('b'), data)))
     assert net(data) == expected
 
+
+def test_put_operator_single():
+    from reboot import flow, put, out
+    data = namespace_source()
+    f, = symbolic_functions('f')
+    def bf(ns):
+        return f(ns['b'])
+    net = flow(bf >> put.f_of_b, out)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        d['f_of_b'] = f(d['b'])
+    assert net(data) == expected
+
+
 @RETHINK_ARGSPUT
 def test_put_single():
     from reboot import flow, put, out
