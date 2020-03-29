@@ -323,18 +323,6 @@ def test_put_operator_single(op):
 
 
 @RETHINK_ARGSPUT
-def test_put_single():
-    from reboot import flow, put, out
-    data = namespace_source()
-    f, = symbolic_functions('f')
-    net = flow((itemgetter('b'), f, put.xxx), out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['xxx'] = f(d['b'])
-    assert net(data) == expected
-
-
-@RETHINK_ARGSPUT
 def test_put_many():
     from reboot import flow, put, out
     data = namespace_source()
