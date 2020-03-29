@@ -410,13 +410,12 @@ def test_args_single_flatmap():
     assert net(data) == [1,3,3,3]
 
 
-@RETHINK_ARGSPUT
 def test_args_many_flatmap():
-    from reboot import flow, FlatMap, args, out
+    from reboot import flow, FlatMap, item, out
     data = (dict(a=1, b=9),
             dict(a=0, b=8),
             dict(a=3, b=7))
-    net = flow((args.a.b, FlatMap(lambda a,b:a*[b])), out)
+    net = flow(item.a.b * FlatMap(lambda a,b:a*[b]), out)
     assert net(data) == [9,7,7,7]
 
 

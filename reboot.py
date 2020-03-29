@@ -316,6 +316,8 @@ class _Item:
         return itemgetter(*self.names)(it)
 
     def __mul__(self, action):
+        if isinstance(action, FlatMap): # TODO: this is a horrible hack!
+            return (self, FlatMap(star(*action._args)))
         return (self, star(action))
 
     __rmul__ = __mul__
