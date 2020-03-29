@@ -319,6 +319,7 @@ class _Get:
 
         def __getitem__(self, key):
             self.keys.append(key)
+            return self
 
         def __call__(self, it):
             return itemgetter(*self.keys)(it)

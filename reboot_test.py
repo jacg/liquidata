@@ -7,6 +7,7 @@ import itertools as it
 from pytest import mark, raises
 xfail = mark.xfail
 TODO = mark.xfail(reason='TODO')
+GETITEM_FUNDAMENTALLY_BROKEN = xfail(reason="__getitem__ can't distinguish x[a,b] from x[(a,b)]")
 parametrize = mark.parametrize
 
 from hypothesis            import given
@@ -253,6 +254,13 @@ def test_get_multilpe_attr():
     assert get.d.b.c(it) == attrgetter('d', 'b', 'c')(it)
 
 
+@GETITEM_FUNDAMENTALLY_BROKEN
+def test_get_multilpe_item():
+    from reboot import get
+    it = dict(a=1, b=2, c=9, d=4)
+    assert get['d', 'b', 'c'](it) == attrgetter('d', 'b', 'c')(it)
+
+
 def namespace_source(keys='abc', length=3):
     indices = range(length)
     return [{key:f'{key}{i}' for key in keys} for i in indices]
@@ -450,8 +458,7 @@ def test_arg_as_lambda_getitem():
     data = 'abracadabra'
     assert (arg[3])(data) == (lambda x: x[3])(data)
 
-
-@xfail(reason="__getitem__ can't distinguish x[a,b] from x[(a,b)]")
+@GETITEM_FUNDAMENTALLY_BROKEN
 def test_arg_as_lambda_get_multilple_items():
     from reboot import arg
     data = 'abracadabra'
