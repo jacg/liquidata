@@ -401,13 +401,12 @@ def test_args_many_filter():
     assert net(data) == expected
 
 
-@RETHINK_ARGSPUT
 def test_args_single_flatmap():
-    from reboot import flow, FlatMap, args, out
+    from reboot import flow, FlatMap, item, out
     data = (dict(a=1, b=2),
             dict(a=0, b=3),
             dict(a=3, b=1))
-    net = flow((args.a, FlatMap(lambda n:n*[n])), out)
+    net = flow(item.a, FlatMap(lambda n:n*[n]), out)
     assert net(data) == [1,3,3,3]
 
 
