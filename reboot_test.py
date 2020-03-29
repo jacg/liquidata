@@ -289,12 +289,11 @@ def test_star():
     assert flow(item.a.b, star(sym_add), out)(data) == expected
 
 
-@RETHINK_ARGSPUT
-def test_args_single():
-    from reboot import flow, args, out
+def test_item_as_args_single():
+    from reboot import flow, item, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    assert flow((args.c, f), out)(data) == list(map(f, map(itemgetter('c'), data)))
+    assert flow(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
 @RETHINK_ARGSPUT
