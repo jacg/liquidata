@@ -330,6 +330,10 @@ class _Item:
     def __init__(self, name):
         self.names = [name]
 
+    def __getattr__(self, name):
+        self.names.append(name)
+        return self
+
     def __call__(self, it):
         return itemgetter(*self.names)(it)
 

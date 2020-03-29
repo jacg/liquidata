@@ -267,6 +267,12 @@ def test_get_multilpe_item():
     assert get['d', 'b', 'c'](it) == attrgetter('d', 'b', 'c')(it)
 
 
+def test_item_multiple():
+    from reboot import item
+    it = dict(a=1, b=2, c=9, d=4)
+    assert item.d.b.c(it) == itemgetter('d', 'b', 'c')(it)
+
+
 def namespace_source(keys='abc', length=3):
     indices = range(length)
     return [{key:f'{key}{i}' for key in keys} for i in indices]
