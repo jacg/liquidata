@@ -239,6 +239,8 @@ class _Put (_Component, _MultipleNames):
         self.pipe_fn = pipe(action).fn()
         return self
 
+    __lshift__ = __rrshift__
+
     def coroutine_and_outputs(self):
 
         def attach_each_to_namespace(namespace, returned):

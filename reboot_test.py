@@ -307,13 +307,15 @@ def test_args_many():
     assert net(data) == expected
 
 
-def test_put_operator_single():
+@parametrize('op', '>> <<'.split())
+def test_put_operator_single(op):
     from reboot import flow, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
     def bf(ns):
         return f(ns['b'])
-    net = flow(bf >> put.f_of_b, out)
+    if op == ">>": net = flow(bf         >> put.f_of_b, out)
+    else         : net = flow(put.f_of_b << bf        , out)
     expected = [d.copy() for d in data]
     for d in expected:
         d['f_of_b'] = f(d['b'])
