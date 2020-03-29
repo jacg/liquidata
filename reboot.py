@@ -230,9 +230,6 @@ class _On(_Component):
                               [getattr(put, self.name)]))
 
 
-class _Args(_MultipleNames): pass
-
-
 class _Put (_Component, _MultipleNames):
 
     def __rrshift__(self, action):
@@ -341,7 +338,6 @@ class _Name(_Component):
 out  = _Name(_Return.Name)
 pick = _Name(_Pick)
 on   = _Name(_On)
-args = _Name(_Args)
 put  = _Name(_Put)
 get  = _Get()
 item = _Name(_Item)
