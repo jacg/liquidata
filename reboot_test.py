@@ -363,14 +363,13 @@ def test_args_single_put_single():
     assert net(data) == expected
 
 
-@RETHINK_ARGSPUT
 def test_args_single_put_many():
-    from reboot import flow, args, put, out
+    from reboot import flow, item, put, out
     l,r = symbolic_functions('lr')
     def f(x):
         return l(x), r(x)
     data = namespace_source()
-    net = flow((args.c, f, put.l.r), out)
+    net = flow((item.c, f) >> put.l.r, out)
     expected = [d.copy() for d in data]
     for d in expected:
         result = f(d['c'])
