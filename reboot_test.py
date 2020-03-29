@@ -281,6 +281,14 @@ def namespace_source(keys='abc', length=3):
     return [{key:f'{key}{i}' for key in keys} for i in indices]
 
 
+def test_star():
+    from reboot import flow, item, out, star
+    data = namespace_source()
+    expected = list(it.starmap(sym_add, zip(map(itemgetter('a'), data),
+                                            map(itemgetter('b'), data))))
+    assert flow(item.a.b, star(sym_add), out)(data) == expected
+
+
 @RETHINK_ARGSPUT
 def test_args_single():
     from reboot import flow, args, out

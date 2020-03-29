@@ -586,6 +586,12 @@ def into_list():
         return the_list
     return _Fold(append, [])
 
+
+def star(fn):
+    def star(args):
+        return fn(*args)
+    return star
+
 ######################################################################
 
 class LiquiDataException(Exception): pass
