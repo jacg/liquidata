@@ -18,7 +18,7 @@ import copy
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
 
-# TODO: Now that get is called slot,  use `get.a.b` as itemgetter('a','b')
+# TODO: Now that get is called slot (which has been removed),  use `get.a.b` as itemgetter('a','b')
 
 # TODO: missing arg-lambda features
 #         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
@@ -49,13 +49,7 @@ import copy
 # TODO: operator module containing curried operators. Names uppercase or with
 #       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
 
-# TODO: fill slots in pipe.fn at call time: pipe.fn(not only here)(data, but also here)
-
 # TODO: string as implicit pick
-
-# TODO: get inside out
-
-# TODO: call / bind:   bind(1, get.a, key=get.b)(f) -> f(1, a, key=b)
 
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
