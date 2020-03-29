@@ -491,11 +491,11 @@ arg = _Arg()
 # types have implicit interpretations as components
 def decode_implicits(it):
     if isinstance(it, _Component): return it
-    if isinstance(it, pipe)      : return it.pipe()
-    if isinstance(it, list     ) : return _Branch(*it)
-    if isinstance(it, tuple    ) : return  pipe(*it).pipe()
-    if isinstance(it, set      ) : return _Filter( next(iter(it)))
-    if isinstance(it, dict     ) : return _Filter(*next(iter(it.items())))
+    if isinstance(it, pipe      ): return it.pipe()
+    if isinstance(it, list      ): return _Branch(*it)
+    if isinstance(it, tuple     ): return  pipe(*it).pipe()
+    if isinstance(it, set       ): return _Filter( next(iter(it)))
+    if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
     else                         : return _Map(it)
 
 
