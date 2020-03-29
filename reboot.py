@@ -318,6 +318,9 @@ class _Item:
     def __call__(self, it):
         return itemgetter(*self.names)(it)
 
+    def __mul__(self, action):
+        return (self, star(action))
+
 
 class _Name(_Component):
 

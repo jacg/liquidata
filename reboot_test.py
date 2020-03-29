@@ -296,6 +296,15 @@ def test_item_as_args_single():
     assert flow(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
+def test_item_star_as_args_many():
+    from reboot import flow, item, out
+    data = namespace_source()
+    net = flow(item.a.b * sym_add, out)
+    expected = list(map(sym_add, map(itemgetter('a'), data),
+                                 map(itemgetter('b'), data)))
+    assert net(data) == expected
+
+
 @RETHINK_ARGSPUT
 def test_args_many():
     from reboot import flow, args, out
