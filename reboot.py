@@ -239,58 +239,6 @@ def debug(x):
     if DEBUG:
         print(x)
 
-class _ArgsPut(_Component):
-
-    def __init__(self, *components):
-        cs = list(components)
-        self.args = cs.pop(0).names if isinstance(cs[ 0], _Args) else ()
-        self.put  = cs.pop( ).names if isinstance(cs[-1], _Put ) else ()
-        self.pipe_fn = pipe(*cs).fn()
-        debug(f'components: {cs}')
-        debug(f'self.args: {self.args}')
-        debug(f'self.put: {self.put}')
-
-    def coroutine_and_outputs(self):
-
-        def attach_each_to_namespace(namespace, returned):
-            for name, value in zip(self.put, returned):
-                namespace[name] = value
-            return namespace
-        def attach_it_to_namespace(namespace, it):
-            namespace[self.put[0]] = it
-            return namespace
-        def return_directly(_, returned): return returned
-
-        def         wrap_in_tuple(x): return (x              ,)
-        def get_and_wrap_in_tuple(x): return (x[self.args[0]],)
-
-        if   len(self.args)  > 1: get_args = itemgetter(*self.args)
-        elif len(self.args) == 1: get_args = get_and_wrap_in_tuple
-        else                    : get_args =         wrap_in_tuple
-
-        if   len(self.put)  > 1: make_return = attach_each_to_namespace
-        elif len(self.put) == 1: make_return = attach_it_to_namespace
-        else                   : make_return = return_directly
-
-        @coroutine
-        def args_put_loop(downstream):
-            with closing(downstream):
-                while True:
-                    incoming, = (yield)
-                    debug(f'incoming: {incoming}')
-                    args = get_args(incoming)
-                    debug(f'argsXXX: {args}')
-                    generated_returns = self.pipe_fn(*args)
-                    debug(f'generated_returns: {generated_returns}')
-                    for returned in generated_returns:
-                        debug(f'make_return: {make_return}')
-                        debug(f'returned: {returned}')
-                        # TODO: eliminate unnecessary first copy?
-                        outgoing = make_return(copy.copy(incoming), returned)
-                        debug(f'outgoing: {outgoing}')
-                        downstream.send((outgoing,))
-        return args_put_loop, ()
-
 
 class _Get:
 
