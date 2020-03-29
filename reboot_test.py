@@ -353,20 +353,6 @@ def test_put_operator_many(op):
 
 
 @RETHINK_ARGSPUT
-def test_put_many():
-    from reboot import flow, put, out
-    data = namespace_source()
-    l,r = symbolic_functions('lr')
-    def f(x):
-        return l(x), r(x)
-    net = flow((f, put.left.right), out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['left' ], d['right'] = f(d)
-    assert net(data) == expected
-
-
-@RETHINK_ARGSPUT
 def test_args_single_put_single():
     from reboot import flow, args, put, out
     data = namespace_source()
