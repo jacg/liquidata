@@ -322,6 +322,19 @@ def test_put_operator_single(op):
     assert net(data) == expected
 
 
+@parametrize('op', '>> <<'.split())
+def test_put_operator_single_pipe(op):
+    from reboot import flow, put, out, item
+    data = namespace_source()
+    f, = symbolic_functions('f')
+    if op == ">>": net = flow((item.b, f) >> put.f_of_b , out)
+    else         : net = flow(put.f_of_b  << (item.b, f), out)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        d['f_of_b'] = f(d['b'])
+    assert net(data) == expected
+
+
 @RETHINK_ARGSPUT
 def test_put_many():
     from reboot import flow, put, out
