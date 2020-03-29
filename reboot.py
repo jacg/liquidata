@@ -292,6 +292,52 @@ class _ArgsPut(_Component):
         return args_put_loop, ()
 
 
+class _Get:
+
+    def __getattr__(self, name):
+        return _Get.Attr(name)
+
+    def __getitem__(self, key):
+        return _Get.Item(key)
+
+    class Attr:
+
+        def __init__(self, name):
+            self.names = [name]
+
+        def __getattr__(self, name):
+            self.names.append(name)
+            return self
+
+        def __call__(self, it):
+            return attrgetter(*self.names)(it)
+
+    class Item:
+
+        def __init__(self, key):
+            self.keys = [key]
+
+        def __getitem__(self, key):
+            self.keys.append(key)
+            return self
+
+        def __call__(self, it):
+            return itemgetter(*self.keys)(it)
+
+
+class _Item:
+
+    def __init__(self, name):
+        self.names = [name]
+
+    def __getattr__(self, name):
+        self.names.append(name)
+        return self
+
+    def __call__(self, it):
+        return itemgetter(*self.names)(it)
+
+
 class _Name(_Component):
 
     def __init__(self, constructor):
@@ -311,6 +357,8 @@ pick = _Name(_Pick)
 on   = _Name(_On)
 args = _Name(_Args)
 put  = _Name(_Put)
+get  = _Get()
+item = _Name(_Item)
 
 
 class _Fold(_Component):
