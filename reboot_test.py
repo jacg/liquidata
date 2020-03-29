@@ -247,6 +247,12 @@ def test_get_single_item():
     assert get['a'](it) == itemgetter('a')(it)
 
 
+def test_get_multilpe_attr():
+    from reboot import get
+    it = Namespace(a=1, b=2, c=9, d=4)
+    assert get.d.b.c(it) == attrgetter('d', 'b', 'c')(it)
+
+
 def namespace_source(keys='abc', length=3):
     indices = range(length)
     return [{key:f'{key}{i}' for key in keys} for i in indices]

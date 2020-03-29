@@ -307,6 +307,7 @@ class _Get:
 
         def __getattr__(self, name):
             self.names.append(name)
+            return self
 
         def __call__(self, it):
             return attrgetter(*self.names)(it)
