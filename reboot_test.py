@@ -39,54 +39,54 @@ def even(n): return n % 2 == 0
 ###################################################################
 
 def test_trivial():
-    from reboot import flow
+    from reboot import pipe
     data = list(range(10))
     result = []
-    flow(result.append)(data)
+    pipe(result.append)(data)
     assert result == data
 
 
 def test_map():
-    from reboot import flow
+    from reboot import pipe
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    flow(f, result.append)(data)
+    pipe(f, result.append)(data)
     assert result == list(map(f, data))
 
 
 def test_filter():
-    from reboot import flow
+    from reboot import pipe
     data = list(range(10))
     result = []
-    flow({odd}, result.append)(data)
+    pipe({odd}, result.append)(data)
     assert result == list(filter(odd, data))
 
 
 def test_filter_with_key():
-    from reboot import flow, arg as _
+    from reboot import pipe, arg as _
     data = list(range(10))
     result = []
-    flow({odd : _+1}, result.append)(data)
+    pipe({odd : _+1}, result.append)(data)
     assert result == list(filter(even, data))
 
 
 def test_branch():
-    from reboot import flow
+    from reboot import pipe
     data = list(range(10))
     branch, main = [], []
-    flow([branch.append], main.append)(data)
+    pipe([branch.append], main.append)(data)
     assert main   == data
     assert branch == data
 
 
 def test_integration_1():
-    from reboot import flow, arg as _
+    from reboot import pipe, arg as _
     data = range(20)
     f, g, h = square, (_ +  1), (_ +   2)
     a, b, c = odd   , (_ > 50), (_ < 100)
     s, t    = [], []
-    flow(f,
+    pipe(f,
          {a},
          [g, {b}, s.append],
          h,
@@ -97,81 +97,81 @@ def test_integration_1():
 
 
 def test_fold_and_return():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    assert flow(out(sym_add))(data) == reduce(sym_add, data)
+    assert pipe(out(sym_add))(data) == reduce(sym_add, data)
 
 
 def test_fold_and_named_return():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    assert flow(out.total(sym_add))(data).total == reduce(sym_add, data)
+    assert pipe(out.total(sym_add))(data).total == reduce(sym_add, data)
 
 
 def test_fold_with_initial_value():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    assert flow(out(sym_add, 99))(data) == reduce(sym_add, data, 99)
+    assert pipe(out(sym_add, 99))(data) == reduce(sym_add, data, 99)
 
 
 def test_fold_with_initial_value_named():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    net = flow(out.total(sym_add, 99))
+    net = pipe(out.total(sym_add, 99))
     assert net(data).total == reduce(sym_add, data, 99)
 
 
 def test_return_value_from_branch():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    result = flow([out.branch(sym_add)],
+    result = pipe([out.branch(sym_add)],
                    out.main  (sym_mul))(data)
     assert result.main   == reduce(sym_mul, data)
     assert result.branch == reduce(sym_add, data)
 
 
 def test_implicit_collect_into_list_named():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    assert flow(out.everything)(data).everything == list(data)
+    assert pipe(out.everything)(data).everything == list(data)
 
 
 def test_implicit_collect_into_list_nameless_with_call():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    assert flow(out())(data) == list(data)
+    assert pipe(out())(data) == list(data)
 
 
 def test_implicit_collect_into_list_nameless_without_call():
-    from reboot import flow, out
+    from reboot import pipe, out
     data = range(3)
-    assert flow(out)(data) == list(data)
+    assert pipe(out)(data) == list(data)
 
 
 def test_more_than_one_anonymous_out():
-    from reboot import flow, out
+    from reboot import pipe, out
     f,g = symbolic_functions('fg')
     data = range(3)
-    res = flow([f, out], g, out)(data)
+    res = pipe([f, out], g, out)(data)
     returns = getattr(res, 'return')
     assert returns[0] == list(map(f, data))
     assert returns[1] == list(map(g, data))
 
 
 def test_anonymous_and_named_outs():
-    from reboot import flow, out
+    from reboot import pipe, out
     f,g = symbolic_functions('fg')
     data = range(3)
-    res = flow([f, out.branch], g, out)(data)
+    res = pipe([f, out.branch], g, out)(data)
     assert res.branch == list(map(f, data))
     assert vars(res)['return'][0] == list(map(g, data))
 
 
 def test_nested_branches():
-    from reboot import flow, out
+    from reboot import pipe, out
     f,g,h,i = symbolic_functions('fghi')
     data = range(3)
-    res = flow([[f, out.BB], g, out.BM],
+    res = pipe([[f, out.BB], g, out.BM],
                 [h, out.MB], i, out.MM )(data)
     assert res.BB == list(map(f, data))
     assert res.BM == list(map(g, data))
@@ -180,10 +180,10 @@ def test_nested_branches():
 
 
 def test_flat_map():
-    from reboot import flow, FlatMap, out
+    from reboot import pipe, FlatMap, out
     data = range(4)
     f = range
-    assert flow(FlatMap(f), out)(data) == list(it.chain(*map(f, data)))
+    assert pipe(FlatMap(f), out)(data) == list(it.chain(*map(f, data)))
 
 
 def test_pipe_as_function():
@@ -217,42 +217,42 @@ def test_pipe_on_flatmap():
 
 
 def test_pipe_as_component():
-    from reboot import pipe, flow, out
+    from reboot import pipe, pipe, out
     data = range(3,6)
     a,b,f,g = symbolic_functions('abfg')
-    pipe = pipe(f, g)
-    assert flow(a, pipe, b, out)(data) == list(map(b, map(g, map(f, map(a, data)))))
+    a_pipe = pipe(f, g)
+    assert pipe(a, a_pipe, b, out)(data) == list(map(b, map(g, map(f, map(a, data)))))
 
 
 def test_pick_item():
-    from reboot import flow, item as pick, out
+    from reboot import pipe, item as pick, out
     names = 'abc'
     values = range(3)
     f, = symbolic_functions('f')
     data = [dict((name, value) for name in names) for value in values]
-    assert flow(pick.a, f, out)(data) == list(map(f, values))
+    assert pipe(pick.a, f, out)(data) == list(map(f, values))
 
 
 def test_pick_multiple_items():
-    from reboot import flow, item as pick, out
+    from reboot import pipe, item as pick, out
     names = 'abc'
     ops = tuple(symbolic_functions(names))
     values = range(3)
     data = [{name:op(N) for (name, op) in zip(names, ops)} for N in values]
-    assert flow(pick.a.b, out)(data) == list(map(itemgetter('a', 'b'), data))
-    assert flow(pick.a  , out)(data) == list(map(itemgetter('a'     ), data))
+    assert pipe(pick.a.b, out)(data) == list(map(itemgetter('a', 'b'), data))
+    assert pipe(pick.a  , out)(data) == list(map(itemgetter('a'     ), data))
 
 
 RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
 
 #@RETHINK_ARGSPUT
 def test_on_item():
-    from reboot import flow, on, out
+    from reboot import pipe, on, out
     names = 'abc'
     f, = symbolic_functions('f')
     values = range(3)
     data = [{name:N for name in names} for N in values]
-    net = flow(on.a(f), out)
+    net = pipe(on.a(f), out)
     expected = [d.copy() for d in data]
     for d in expected:
         d['a'] = f(d['a'])
@@ -302,26 +302,26 @@ def namespace_source(keys='abc', length=3):
 
 
 def test_star():
-    from reboot import flow, item, out, star
+    from reboot import pipe, item, out, star
     data = namespace_source()
     expected = list(it.starmap(sym_add, zip(map(itemgetter('a'), data),
                                             map(itemgetter('b'), data))))
-    assert flow(item.a.b, star(sym_add), out)(data) == expected
+    assert pipe(item.a.b, star(sym_add), out)(data) == expected
 
 
 def test_item_as_args_single():
-    from reboot import flow, item, out
+    from reboot import pipe, item, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    assert flow(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
+    assert pipe(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
 @parametrize('where', 'before after'.split())
 def test_item_star_as_args_many(where):
-    from reboot import flow, item, out
+    from reboot import pipe, item, out
     data = namespace_source()
-    if where == 'before': net = flow(item.a.b * sym_add , out)
-    else                : net = flow(sym_add  * item.a.b, out)
+    if where == 'before': net = pipe(item.a.b * sym_add , out)
+    else                : net = pipe(sym_add  * item.a.b, out)
     expected = list(map(sym_add, map(itemgetter('a'), data),
                                  map(itemgetter('b'), data)))
     assert net(data) == expected
@@ -329,13 +329,13 @@ def test_item_star_as_args_many(where):
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single(op):
-    from reboot import flow, put, out
+    from reboot import pipe, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
     def bf(ns):
         return f(ns['b'])
-    if op == ">>": net = flow(bf         >> put.f_of_b, out)
-    else         : net = flow(put.f_of_b << bf        , out)
+    if op == ">>": net = pipe(bf         >> put.f_of_b, out)
+    else         : net = pipe(put.f_of_b << bf        , out)
     expected = [d.copy() for d in data]
     for d in expected:
         d['f_of_b'] = f(d['b'])
@@ -344,11 +344,11 @@ def test_put_operator_single(op):
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single_pipe(op):
-    from reboot import flow, put, out, item
+    from reboot import pipe, put, out, item
     data = namespace_source()
     f, = symbolic_functions('f')
-    if op == ">>": net = flow((item.b, f) >> put.f_of_b , out)
-    else         : net = flow(put.f_of_b  << (item.b, f), out)
+    if op == ">>": net = pipe((item.b, f) >> put.f_of_b , out)
+    else         : net = pipe(put.f_of_b  << (item.b, f), out)
     expected = [d.copy() for d in data]
     for d in expected:
         d['f_of_b'] = f(d['b'])
@@ -357,13 +357,13 @@ def test_put_operator_single_pipe(op):
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_many(op):
-    from reboot import flow, put, out
+    from reboot import pipe, put, out
     data = namespace_source()
     def sum_prod(ns):
         a,b = itemgetter('a','b')(ns)
         return sym_add(a,b), sym_mul(a,b)
-    if op == ">>": net = flow(    sum_prod >> put.sum.prod, out)
-    else         : net = flow(put.sum.prod <<     sum_prod, out)
+    if op == ">>": net = pipe(    sum_prod >> put.sum.prod, out)
+    else         : net = pipe(put.sum.prod <<     sum_prod, out)
     expected = [d.copy() for d in data]
     for d in expected:
         a,b = itemgetter('a','b')(d)
@@ -373,10 +373,10 @@ def test_put_operator_many(op):
 
 
 def test_args_single_put_single():
-    from reboot import flow, item, put, out
+    from reboot import pipe, item, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    net = flow((item.b, f) >> put.result, out)
+    net = pipe((item.b, f) >> put.result, out)
     expected = [d.copy() for d in data]
     for d in expected:
         d['result'] = f(d['b'])
@@ -384,12 +384,12 @@ def test_args_single_put_single():
 
 
 def test_args_single_put_many():
-    from reboot import flow, item, put, out
+    from reboot import pipe, item, put, out
     l,r = symbolic_functions('lr')
     def f(x):
         return l(x), r(x)
     data = namespace_source()
-    net = flow((item.c, f) >> put.l.r, out)
+    net = pipe((item.c, f) >> put.l.r, out)
     expected = [d.copy() for d in data]
     for d in expected:
         result = f(d['c'])
@@ -398,7 +398,7 @@ def test_args_single_put_many():
 
 
 def make_test_permutations(): # limit the scope of names used by parametrize
-    from reboot import flow, item, put, out
+    from reboot import pipe, item, put, out
 
     def hard_work(a,b):
         return sym_add(a,b), sym_mul(a,b)
@@ -418,51 +418,51 @@ def make_test_permutations(): # limit the scope of names used by parametrize
                   (put.x.y   << hard_work * item.a.b, out),
                  ))
     def test_start_shift_permutations(spec):
-        assert flow(*spec)(data) == expected
+        assert pipe(*spec)(data) == expected
     return test_start_shift_permutations
 
 test_start_shift_permutations = make_test_permutations()
 
 
 def test_args_single_filter():
-    from reboot import flow, item, out, arg as _
+    from reboot import pipe, item, out, arg as _
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
             dict(a=8, b=9))
-    net = flow(item.b, {_ > 2}, out)
+    net = pipe(item.b, {_ > 2}, out)
     expected = list(filter(_ > 2, map(itemgetter('b'), data)))
     assert net(data) == expected
 
 
 @RETHINK_ARGSPUT
 def test_args_many_filter():
-    from reboot import flow, args, out
+    from reboot import pipe, args, out
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
             dict(a=8, b=9))
-    net = flow((args.a.b, {lt}), out)
+    net = pipe((args.a.b, {lt}), out)
     expected = (dict(a=1, b=2),
                 dict(a=8, b=9))
     assert net(data) == expected
 
 
 def test_args_single_flatmap():
-    from reboot import flow, FlatMap, item, out
+    from reboot import pipe, FlatMap, item, out
     data = (dict(a=1, b=2),
             dict(a=0, b=3),
             dict(a=3, b=1))
-    net = flow(item.a, FlatMap(lambda n:n*[n]), out)
+    net = pipe(item.a, FlatMap(lambda n:n*[n]), out)
     assert net(data) == [1,3,3,3]
 
 
 def test_args_many_flatmap():
-    from reboot import flow, FlatMap, item, out
+    from reboot import pipe, FlatMap, item, out
     data = (dict(a=1, b=9),
             dict(a=0, b=8),
             dict(a=3, b=7))
-    net = flow(item.a.b * FlatMap(lambda a,b:a*[b]), out)
+    net = pipe(item.a.b * FlatMap(lambda a,b:a*[b]), out)
     assert net(data) == [9,7,7,7]
 
 
@@ -477,9 +477,9 @@ slice_arg_nonzero  = one_of(none(), small_ints_nonzero)
               tuples(slice_arg,  slice_arg, slice_arg_nonzero)))
 def test_slice_downstream(spec):
 
-    from reboot import flow, Slice, out
+    from reboot import pipe, Slice, out
     data = list('abcdefghij')
-    result = flow(Slice(*spec), out)(data)
+    result = pipe(Slice(*spec), out)(data)
     specslice = slice(*spec)
     assert result == data[specslice]
     assert result == data[specslice.start : specslice.stop : specslice.step]
@@ -493,13 +493,13 @@ def test_slice_downstream(spec):
 # the data flow.
 @parametrize("close_all", (False, True))
 def test_slice_close_all(close_all):
-    from reboot import Slice, flow, out
+    from reboot import Slice, pipe, out
 
     data = list(range(20))
     n_elements = 5
     the_slice = Slice(n_elements, close_all=close_all)
 
-    result = flow([the_slice, out.branch], out.main)(data)
+    result = pipe([the_slice, out.branch], out.main)(data)
 
     if close_all:
         assert result.branch == data[:n_elements]
@@ -584,28 +584,28 @@ def test_arg_as_lambda_call_keyword_args():
 
 # TODO test close_all for take, drop, until, while_, ...
 def test_take():
-    from reboot import flow, take, out
+    from reboot import pipe, take, out
     data = 'abracadabra'
-    assert ''.join(flow(take(5), out)(data)) == ''.join(data[:5])
+    assert ''.join(pipe(take(5), out)(data)) == ''.join(data[:5])
 
 
 def test_drop():
-    from reboot import flow, drop, out
+    from reboot import pipe, drop, out
     data = 'abracadabra'
-    assert ''.join(flow(drop(5), out)(data)) == ''.join(data[5:])
+    assert ''.join(pipe(drop(5), out)(data)) == ''.join(data[5:])
 
 
 def test_until():
-    from reboot import flow, until, out, arg as _
+    from reboot import pipe, until, out, arg as _
     data = 'abcdXefghi'
     expected = ''.join(it.takewhile(_ != 'X', data))
-    got      = ''.join(flow(until  (_ == 'X'), out)(data))
+    got      = ''.join(pipe(until  (_ == 'X'), out)(data))
     assert got == expected
 
 
 def test_while():
-    from reboot import flow, while_, out, arg as _
+    from reboot import pipe, while_, out, arg as _
     data = 'abcdXefghi'
     expected = ''.join(it.takewhile(_ != 'X', data))
-    got      = ''.join(flow(while_ (_ != 'X'), out)(data))
+    got      = ''.join(pipe(while_ (_ != 'X'), out)(data))
     assert got == expected

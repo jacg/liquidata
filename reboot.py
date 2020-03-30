@@ -57,28 +57,21 @@ import copy
 
 # TODO: monads?
 
-class _Pipe:
 
-    def __init__(self, components):
-        self._components = tuple(map(decode_implicits, components))
-        last = self._components[-1]
-        if isinstance(last, _Map):
-            last.__class__ = _Sink
+class pipe:
+
+    def __init__(self, *components):
+        self._components = components
 
     def coroutine_and_outputs(self):
-        cor_out_pairs = tuple(c.coroutine_and_outputs() for c in self._components)
+        decoded_components = map(decode_implicits, self._components)
+        cor_out_pairs = tuple(c.coroutine_and_outputs() for c in decoded_components)
         coroutines = map(itemgetter(0), cor_out_pairs)
         out_groups = map(itemgetter(1), cor_out_pairs)
         return combine_coroutines(coroutines), it.chain(*out_groups)
 
-
-class flow:
-
-    def __init__(self, *components):
-        self._pipe = _Pipe(components)
-
     def __call__(self, source):
-        coroutine, outputs = self._pipe.coroutine_and_outputs()
+        coroutine, outputs = self.ensure_capped().coroutine_and_outputs()
         push(source, coroutine)
         outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
@@ -88,6 +81,27 @@ class flow:
         setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
         return out_ns
 
+    def fn  (self): return pipe._Fn(self._components)
+    def pipe(self): return FlatMap (self.fn())
+
+    def ensure_capped(self):
+        *cs, last = self._components
+        last = decode_implicits(last, sink=True)
+        return pipe(*cs, last)
+
+    class _Fn:
+
+        def __init__(self, components):
+            self._pipe = pipe(*it.chain(components, [_Sink(self.accept_result)]))
+            self._coroutine, _ = self._pipe.coroutine_and_outputs()
+
+        def __call__(self, *args):
+            self._returns = []
+            self._coroutine.send(args)
+            return tuple(self._returns)
+
+        def accept_result(self, item):
+            self._returns.append(item)
 
 ######################################################################
 #    Component types                                                 #
@@ -154,10 +168,10 @@ def _Filter(predicate, key=None):
 class _Branch(_Component):
 
     def __init__(self, *components):
-        self._pipe = _Pipe(components)
+        self._pipe = pipe(*components)
 
     def coroutine_and_outputs(self):
-        sideways, outputs = self._pipe.coroutine_and_outputs()
+        sideways, outputs = self._pipe.ensure_capped().coroutine_and_outputs()
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -365,30 +379,6 @@ class _Fold(_Component):
         return reduce_loop(future)
 
 
-class pipe:
-
-    def __init__(self, *components):
-        # TODO: should disallow branches (unless we implement joins)
-        self._components = components
-
-    def fn  (self): return pipe._Fn(self._components)
-    def pipe(self): return FlatMap (self.fn())
-
-    class _Fn:
-
-        def __init__(self, components):
-            self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
-            self._coroutine, _ = self._pipe.coroutine_and_outputs()
-
-        def __call__(self, *args):
-            self._returns = []
-            self._coroutine.send(args)
-            return tuple(self._returns)
-
-        def accept_result(self, item):
-            self._returns.append(item)
-
-
 class Slice(_Component):
 
     def __init__(self, *args, close_all=False):
@@ -482,13 +472,14 @@ arg = _Arg()
 
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
-def decode_implicits(it):
+def decode_implicits(it, sink=False):
     if isinstance(it, _Component): return it
     if isinstance(it, pipe      ): return it.pipe()
     if isinstance(it, list      ): return _Branch(*it)
     if isinstance(it, tuple     ): return  pipe(*it).pipe()
     if isinstance(it, set       ): return _Filter( next(iter(it)))
     if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
+    if sink                      : return _Sink(it)
     else                         : return _Map(it)
 
 
