@@ -89,6 +89,29 @@ class flow:
         return out_ns
 
 
+class pipe:
+
+    def __init__(self, *components):
+        # TODO: should disallow branches (unless we implement joins)
+        self._components = components
+
+    def fn  (self): return pipe._Fn(self._components)
+    def pipe(self): return FlatMap (self.fn())
+
+    class _Fn:
+
+        def __init__(self, components):
+            self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
+            self._coroutine, _ = self._pipe.coroutine_and_outputs()
+
+        def __call__(self, *args):
+            self._returns = []
+            self._coroutine.send(args)
+            return tuple(self._returns)
+
+        def accept_result(self, item):
+            self._returns.append(item)
+
 ######################################################################
 #    Component types                                                 #
 ######################################################################
@@ -363,30 +386,6 @@ class _Fold(_Component):
             finally:
                 future.set_result(accumulator)
         return reduce_loop(future)
-
-
-class pipe:
-
-    def __init__(self, *components):
-        # TODO: should disallow branches (unless we implement joins)
-        self._components = components
-
-    def fn  (self): return pipe._Fn(self._components)
-    def pipe(self): return FlatMap (self.fn())
-
-    class _Fn:
-
-        def __init__(self, components):
-            self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
-            self._coroutine, _ = self._pipe.coroutine_and_outputs()
-
-        def __call__(self, *args):
-            self._returns = []
-            self._coroutine.send(args)
-            return tuple(self._returns)
-
-        def accept_result(self, item):
-            self._returns.append(item)
 
 
 class Slice(_Component):
