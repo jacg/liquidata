@@ -62,8 +62,8 @@ class _Pipe:
     def __init__(self, components):
         self._components = tuple(map(decode_implicits, components))
         last = self._components[-1]
-        if isinstance(last, _Map):
-            last.__class__ = _Sink
+        # if isinstance(last, _Map):
+        #     last.__class__ = _Sink
 
     def coroutine_and_outputs(self):
         cor_out_pairs = tuple(c.coroutine_and_outputs() for c in self._components)
