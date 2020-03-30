@@ -17,6 +17,26 @@ from hypothesis.strategies import integers
 from hypothesis.strategies import none
 from hypothesis.strategies import one_of, sampled_from
 
+###################################################################
+# Guinea pig functions for use in graphs constructed in the tests #
+###################################################################
+
+def symbolic_apply(f ): return lambda x   : f'{f}({x})'
+def symbolic_binop(op): return lambda l, r: f'({l} {op} {r})'
+def symbolic_functions(names): return map(symbolic_apply, names)
+sym_add = symbolic_binop('+')
+sym_mul = symbolic_binop('*')
+
+def square(n): return n * n
+def mulN(N): return lambda x: x * N
+def addN(N): return lambda x: x + N
+def  gtN(N): return lambda x: x > N
+def  ltN(N): return lambda x: x < N
+
+def odd (n): return n % 2 != 0
+def even(n): return n % 2 == 0
+
+###################################################################
 
 def test_trivial():
     from reboot import flow
@@ -205,7 +225,7 @@ def test_pipe_as_component():
 
 
 def test_pick_item():
-    from reboot import flow, pick, out
+    from reboot import flow, item as pick, out
     names = 'abc'
     values = range(3)
     f, = symbolic_functions('f')
@@ -214,7 +234,7 @@ def test_pick_item():
 
 
 def test_pick_multiple_items():
-    from reboot import flow, pick, out
+    from reboot import flow, item as pick, out
     names = 'abc'
     ops = tuple(symbolic_functions(names))
     values = range(3)
@@ -223,6 +243,9 @@ def test_pick_multiple_items():
     assert flow(pick.a  , out)(data) == list(map(itemgetter('a'     ), data))
 
 
+RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
+
+#@RETHINK_ARGSPUT
 def test_on_item():
     from reboot import flow, on, out
     names = 'abc'
@@ -278,50 +301,82 @@ def namespace_source(keys='abc', length=3):
     return [{key:f'{key}{i}' for key in keys} for i in indices]
 
 
-def test_args_single():
-    from reboot import flow, args, out
+def test_star():
+    from reboot import flow, item, out, star
+    data = namespace_source()
+    expected = list(it.starmap(sym_add, zip(map(itemgetter('a'), data),
+                                            map(itemgetter('b'), data))))
+    assert flow(item.a.b, star(sym_add), out)(data) == expected
+
+
+def test_item_as_args_single():
+    from reboot import flow, item, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    assert flow((args.c, f), out)(data) == list(map(f, map(itemgetter('c'), data)))
+    assert flow(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
 
 
-def test_args_many():
-    from reboot import flow, args, out
+@parametrize('where', 'before after'.split())
+def test_item_star_as_args_many(where):
+    from reboot import flow, item, out
     data = namespace_source()
-    net = flow((args.a.b, sym_add), out)
+    if where == 'before': net = flow(item.a.b * sym_add , out)
+    else                : net = flow(sym_add  * item.a.b, out)
     expected = list(map(sym_add, map(itemgetter('a'), data),
                                  map(itemgetter('b'), data)))
     assert net(data) == expected
 
-def test_put_single():
+
+@parametrize('op', '>> <<'.split())
+def test_put_operator_single(op):
     from reboot import flow, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    net = flow((itemgetter('b'), f, put.xxx), out)
+    def bf(ns):
+        return f(ns['b'])
+    if op == ">>": net = flow(bf         >> put.f_of_b, out)
+    else         : net = flow(put.f_of_b << bf        , out)
     expected = [d.copy() for d in data]
     for d in expected:
-        d['xxx'] = f(d['b'])
+        d['f_of_b'] = f(d['b'])
     assert net(data) == expected
 
 
-def test_put_many():
-    from reboot import flow, put, out
+@parametrize('op', '>> <<'.split())
+def test_put_operator_single_pipe(op):
+    from reboot import flow, put, out, item
     data = namespace_source()
-    l,r = symbolic_functions('lr')
-    def f(x):
-        return l(x), r(x)
-    net = flow((f, put.left.right), out)
+    f, = symbolic_functions('f')
+    if op == ">>": net = flow((item.b, f) >> put.f_of_b , out)
+    else         : net = flow(put.f_of_b  << (item.b, f), out)
     expected = [d.copy() for d in data]
     for d in expected:
-        d['left' ], d['right'] = f(d)
+        d['f_of_b'] = f(d['b'])
+    assert net(data) == expected
+
+
+@parametrize('op', '>> <<'.split())
+def test_put_operator_many(op):
+    from reboot import flow, put, out
+    data = namespace_source()
+    def sum_prod(ns):
+        a,b = itemgetter('a','b')(ns)
+        return sym_add(a,b), sym_mul(a,b)
+    if op == ">>": net = flow(    sum_prod >> put.sum.prod, out)
+    else         : net = flow(put.sum.prod <<     sum_prod, out)
+    expected = [d.copy() for d in data]
+    for d in expected:
+        a,b = itemgetter('a','b')(d)
+        d['sum' ] = sym_add(a,b)
+        d['prod'] = sym_mul(a,b)
     assert net(data) == expected
 
 
 def test_args_single_put_single():
-    from reboot import flow, args, put, out
+    from reboot import flow, item, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    net = flow((args.b, f, put.result), out)
+    net = flow((item.b, f) >> put.result, out)
     expected = [d.copy() for d in data]
     for d in expected:
         d['result'] = f(d['b'])
@@ -329,12 +384,12 @@ def test_args_single_put_single():
 
 
 def test_args_single_put_many():
-    from reboot import flow, args, put, out
+    from reboot import flow, item, put, out
     l,r = symbolic_functions('lr')
     def f(x):
         return l(x), r(x)
     data = namespace_source()
-    net = flow((args.c, f, put.l.r), out)
+    net = flow((item.c, f) >> put.l.r, out)
     expected = [d.copy() for d in data]
     for d in expected:
         result = f(d['c'])
@@ -342,18 +397,45 @@ def test_args_single_put_many():
     assert net(data) == expected
 
 
+def make_test_permutations(): # limit the scope of names used by parametrize
+    from reboot import flow, item, put, out
+
+    def hard_work(a,b):
+        return sym_add(a,b), sym_mul(a,b)
+
+    data = namespace_source()
+
+    expected = [d.copy() for d in data]
+    for d in expected:
+        a,b = itemgetter('a','b')(d)
+        x,y = hard_work(a,b)
+        d['x'] = x
+        d['y'] = y
+
+    @parametrize('spec',
+                 ((item.a.b  *  hard_work >> put.x.y, out),
+                  (hard_work *  item.a.b  >> put.x.y, out),
+                  (put.x.y   << hard_work * item.a.b, out),
+                 ))
+    def test_start_shift_permutations(spec):
+        assert flow(*spec)(data) == expected
+    return test_start_shift_permutations
+
+test_start_shift_permutations = make_test_permutations()
+
+
 def test_args_single_filter():
-    from reboot import flow, args, out, arg as _
+    from reboot import flow, item, out, arg as _
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
             dict(a=8, b=9))
-    net = flow((args.b, {_ > 2}), out)
+    net = flow(item.b, {_ > 2}, out)
     expected = list(filter(_ > 2, map(itemgetter('b'), data)))
     assert net(data) == expected
 
 
-@TODO
+@RETHINK_ARGSPUT
 def test_args_many_filter():
     from reboot import flow, args, out
     data = (dict(a=1, b=2),
@@ -367,20 +449,20 @@ def test_args_many_filter():
 
 
 def test_args_single_flatmap():
-    from reboot import flow, FlatMap, args, out
+    from reboot import flow, FlatMap, item, out
     data = (dict(a=1, b=2),
             dict(a=0, b=3),
             dict(a=3, b=1))
-    net = flow((args.a, FlatMap(lambda n:n*[n])), out)
+    net = flow(item.a, FlatMap(lambda n:n*[n]), out)
     assert net(data) == [1,3,3,3]
 
 
 def test_args_many_flatmap():
-    from reboot import flow, FlatMap, args, out
+    from reboot import flow, FlatMap, item, out
     data = (dict(a=1, b=9),
             dict(a=0, b=8),
             dict(a=3, b=7))
-    net = flow((args.a.b, FlatMap(lambda a,b:a*[b])), out)
+    net = flow(item.a.b * FlatMap(lambda a,b:a*[b]), out)
     assert net(data) == [9,7,7,7]
 
 
@@ -527,22 +609,3 @@ def test_while():
     expected = ''.join(it.takewhile(_ != 'X', data))
     got      = ''.join(flow(while_ (_ != 'X'), out)(data))
     assert got == expected
-
-###################################################################
-# Guinea pig functions for use in graphs constructed in the tests #
-###################################################################
-
-def symbolic_apply(f ): return lambda x   : f'{f}({x})'
-def symbolic_binop(op): return lambda l, r: f'({l} {op} {r})'
-def symbolic_functions(names): return map(symbolic_apply, names)
-sym_add = symbolic_binop('+')
-sym_mul = symbolic_binop('*')
-
-def square(n): return n * n
-def mulN(N): return lambda x: x * N
-def addN(N): return lambda x: x + N
-def  gtN(N): return lambda x: x > N
-def  ltN(N): return lambda x: x < N
-
-def odd (n): return n % 2 != 0
-def even(n): return n % 2 == 0

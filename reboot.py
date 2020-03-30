@@ -42,14 +42,12 @@ import copy
 #       [Give it a mutate option? Don't bother, just switch to persistent data
 #       structures]
 
-# TODO: `pick.x, f` works. Think about what `pick.x(f)` could mean.
-
 # TODO: args-put syntax for turning atomic stream into namespace
 
 # TODO: operator module containing curried operators. Names uppercase or with
 #       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
 
-# TODO: string as implicit pick
+# TODO: string as implicit `item`: ... I like this less and less
 
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
@@ -213,83 +211,54 @@ class _MultipleNames:
     def __getattr__(self, name):
         return type(self)(*self.names, name)
 
-class _Pick(_MultipleNames, _Component):
-
-    def coroutine_and_outputs(self):
-        return _Map(itemgetter(*self.names)).coroutine_and_outputs()
-
 
 class _On(_Component):
 
     def __init__(self, name):
         self.name = name
 
-    def __call__(self, *ARGS):
-        return tuple(it.chain([getattr(args, self.name)],
-                              ARGS,
-                              [getattr(put, self.name)]))
+    def __call__(self, *components):
+        return (getattr(item, self.name), components) >> getattr(put, self.name)
 
 
-class _Args(_MultipleNames): pass
-class _Put (_MultipleNames): pass
+class _Put (_Component, _MultipleNames):
+
+    def __rrshift__(self, action):
+        self.pipe_fn = pipe(action).fn()
+        return self
+
+    __lshift__ = __rrshift__
+
+    def coroutine_and_outputs(self):
+
+        def attach_each_to_namespace(namespace, returned):
+            for name, value in zip(self.names, returned):
+                namespace[name] = value
+            return namespace
+
+        def attach_it_to_namespace(namespace, it):
+            namespace[self.names[0]] = it
+            return namespace
+
+        if len(self.names) > 1: make_return = attach_each_to_namespace
+        else                  : make_return = attach_it_to_namespace
+
+        @coroutine
+        def put_loop(downstream):
+            with closing(downstream):
+                while True:
+                    incoming_namespace, = (yield)
+                    returns = self.pipe_fn(incoming_namespace)
+                    for returned in returns:
+                        outgoing_namespace = make_return(copy.copy(incoming_namespace), returned)
+                        downstream.send((outgoing_namespace,))
+        return put_loop, ()
 
 DEBUG = False
 
 def debug(x):
     if DEBUG:
         print(x)
-
-class _ArgsPut(_Component):
-
-    def __init__(self, *components):
-        cs = list(components)
-        self.args = cs.pop(0).names if isinstance(cs[ 0], _Args) else ()
-        self.put  = cs.pop( ).names if isinstance(cs[-1], _Put ) else ()
-        self.pipe_fn = pipe(*cs).fn()
-        debug(f'components: {cs}')
-        debug(f'self.args: {self.args}')
-        debug(f'self.put: {self.put}')
-
-    def coroutine_and_outputs(self):
-
-        def attach_each_to_namespace(namespace, returned):
-            for name, value in zip(self.put, returned):
-                namespace[name] = value
-            return namespace
-        def attach_it_to_namespace(namespace, it):
-            namespace[self.put[0]] = it
-            return namespace
-        def return_directly(_, returned): return returned
-
-        def         wrap_in_tuple(x): return (x              ,)
-        def get_and_wrap_in_tuple(x): return (x[self.args[0]],)
-
-        if   len(self.args)  > 1: get_args = itemgetter(*self.args)
-        elif len(self.args) == 1: get_args = get_and_wrap_in_tuple
-        else                    : get_args =         wrap_in_tuple
-
-        if   len(self.put)  > 1: make_return = attach_each_to_namespace
-        elif len(self.put) == 1: make_return = attach_it_to_namespace
-        else                   : make_return = return_directly
-
-        @coroutine
-        def args_put_loop(downstream):
-            with closing(downstream):
-                while True:
-                    incoming, = (yield)
-                    debug(f'incoming: {incoming}')
-                    args = get_args(incoming)
-                    debug(f'argsXXX: {args}')
-                    generated_returns = self.pipe_fn(*args)
-                    debug(f'generated_returns: {generated_returns}')
-                    for returned in generated_returns:
-                        debug(f'make_return: {make_return}')
-                        debug(f'returned: {returned}')
-                        # TODO: eliminate unnecessary first copy?
-                        outgoing = make_return(copy.copy(incoming), returned)
-                        debug(f'outgoing: {outgoing}')
-                        downstream.send((outgoing,))
-        return args_put_loop, ()
 
 
 class _Get:
@@ -337,6 +306,13 @@ class _Item:
     def __call__(self, it):
         return itemgetter(*self.names)(it)
 
+    def __mul__(self, action):
+        if isinstance(action, FlatMap): # TODO: this is a horrible hack!
+            return (self, FlatMap(star(*action._args)))
+        return (self, star(action))
+
+    __rmul__ = __mul__
+
 
 class _Name(_Component):
 
@@ -353,9 +329,7 @@ class _Name(_Component):
         return self.constructor.no_name_given().coroutine_and_outputs()
 
 out  = _Name(_Return.Name)
-pick = _Name(_Pick)
 on   = _Name(_On)
-args = _Name(_Args)
 put  = _Name(_Put)
 get  = _Get()
 item = _Name(_Item)
@@ -510,11 +484,11 @@ arg = _Arg()
 # types have implicit interpretations as components
 def decode_implicits(it):
     if isinstance(it, _Component): return it
-    if isinstance(it, pipe)      : return it.pipe()
-    if isinstance(it, list     ) : return _Branch(*it)
-    if isinstance(it, tuple    ) : return _ArgsPut(*it)
-    if isinstance(it, set      ) : return _Filter( next(iter(it)))
-    if isinstance(it, dict     ) : return _Filter(*next(iter(it.items())))
+    if isinstance(it, pipe      ): return it.pipe()
+    if isinstance(it, list      ): return _Branch(*it)
+    if isinstance(it, tuple     ): return  pipe(*it).pipe()
+    if isinstance(it, set       ): return _Filter( next(iter(it)))
+    if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
     else                         : return _Map(it)
 
 
@@ -585,6 +559,12 @@ def into_list():
         the_list.append(element)
         return the_list
     return _Fold(append, [])
+
+
+def star(fn):
+    def star(args):
+        return fn(*args)
+    return star
 
 ######################################################################
 
