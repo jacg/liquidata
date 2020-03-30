@@ -225,7 +225,7 @@ def test_pipe_as_component():
 
 
 def test_pick_item():
-    from reboot import flow, pick, out
+    from reboot import flow, item as pick, out
     names = 'abc'
     values = range(3)
     f, = symbolic_functions('f')
@@ -234,7 +234,7 @@ def test_pick_item():
 
 
 def test_pick_multiple_items():
-    from reboot import flow, pick, out
+    from reboot import flow, item as pick, out
     names = 'abc'
     ops = tuple(symbolic_functions(names))
     values = range(3)
