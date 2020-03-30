@@ -61,10 +61,11 @@ import copy
 class pipe:
 
     def __init__(self, *components):
-        self._components = tuple(map(decode_implicits, components))
+        self._components = components
 
     def coroutine_and_outputs(self):
-        cor_out_pairs = tuple(c.coroutine_and_outputs() for c in self._components)
+        decoded_components = map(decode_implicits, self._components)
+        cor_out_pairs = tuple(c.coroutine_and_outputs() for c in decoded_components)
         coroutines = map(itemgetter(0), cor_out_pairs)
         out_groups = map(itemgetter(1), cor_out_pairs)
         return combine_coroutines(coroutines), it.chain(*out_groups)
