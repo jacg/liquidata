@@ -39,59 +39,59 @@ def even(n): return n % 2 == 0
 ###################################################################
 
 def test_trivial():
-    from reboot import pipe
+    from reboot import pipe, _Sink
     data = list(range(10))
     result = []
-    pipe(result.append)(data)
+    pipe(_Sink(result.append))(data)
     assert result == data
 
 
 def test_map():
-    from reboot import pipe
+    from reboot import pipe, _Sink
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
-    pipe(f, result.append)(data)
+    pipe(f, _Sink(result.append))(data)
     assert result == list(map(f, data))
 
 
 def test_filter():
-    from reboot import pipe
+    from reboot import pipe, _Sink
     data = list(range(10))
     result = []
-    pipe({odd}, result.append)(data)
+    pipe({odd}, _Sink(result.append))(data)
     assert result == list(filter(odd, data))
 
 
 def test_filter_with_key():
-    from reboot import pipe, arg as _
+    from reboot import pipe, arg as _, _Sink
     data = list(range(10))
     result = []
-    pipe({odd : _+1}, result.append)(data)
+    pipe({odd : _+1}, _Sink(result.append))(data)
     assert result == list(filter(even, data))
 
 
 def test_branch():
-    from reboot import pipe
+    from reboot import pipe, _Sink
     data = list(range(10))
     branch, main = [], []
-    pipe([branch.append], main.append)(data)
+    pipe([_Sink(branch.append)], _Sink(main.append))(data)
     assert main   == data
     assert branch == data
 
 
 def test_integration_1():
-    from reboot import pipe, arg as _
+    from reboot import pipe, arg as _, _Sink
     data = range(20)
     f, g, h = square, (_ +  1), (_ +   2)
     a, b, c = odd   , (_ > 50), (_ < 100)
     s, t    = [], []
     pipe(f,
          {a},
-         [g, {b}, s.append],
+         [g, {b}, _Sink(s.append)],
          h,
          {c},
-         t.append)(data)
+         _Sink(t.append))(data)
     assert s == list(filter(b, map(g, filter(a, map(f, data)))))
     assert t == list(filter(c, map(h, filter(a, map(f, data)))))
 
