@@ -75,10 +75,10 @@ class _Pipe:
 class flow:
 
     def __init__(self, *components):
-        self._pipe = _Pipe(components)
+        self._components = components
 
     def __call__(self, source):
-        coroutine, outputs = self._pipe.coroutine_and_outputs()
+        coroutine, outputs = _Pipe(self._components).coroutine_and_outputs()
         push(source, coroutine)
         outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
