@@ -245,7 +245,7 @@ def test_pick_multiple_items():
 
 RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
 
-@RETHINK_ARGSPUT
+#@RETHINK_ARGSPUT
 def test_on_item():
     from reboot import flow, on, out
     names = 'abc'

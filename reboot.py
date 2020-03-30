@@ -217,10 +217,8 @@ class _On(_Component):
     def __init__(self, name):
         self.name = name
 
-    def __call__(self, *ARGS):
-        return tuple(it.chain([getattr(args, self.name)],
-                              ARGS,
-                              [getattr(put, self.name)]))
+    def __call__(self, *components):
+        return (getattr(item, self.name), components) >> getattr(put, self.name)
 
 
 class _Put (_Component, _MultipleNames):
