@@ -42,14 +42,12 @@ import copy
 #       [Give it a mutate option? Don't bother, just switch to persistent data
 #       structures]
 
-# TODO: `pick.x, f` works. Think about what `pick.x(f)` could mean.
-
 # TODO: args-put syntax for turning atomic stream into namespace
 
 # TODO: operator module containing curried operators. Names uppercase or with
 #       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
 
-# TODO: string as implicit pick
+# TODO: string as implicit `item`: ... I like this less and less
 
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
@@ -213,11 +211,6 @@ class _MultipleNames:
     def __getattr__(self, name):
         return type(self)(*self.names, name)
 
-class _Pick(_MultipleNames, _Component):
-
-    def coroutine_and_outputs(self):
-        return _Map(itemgetter(*self.names)).coroutine_and_outputs()
-
 
 class _On(_Component):
 
@@ -338,7 +331,6 @@ class _Name(_Component):
         return self.constructor.no_name_given().coroutine_and_outputs()
 
 out  = _Name(_Return.Name)
-pick = _Name(_Pick)
 on   = _Name(_On)
 put  = _Name(_Put)
 get  = _Get()
