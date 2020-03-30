@@ -57,13 +57,11 @@ import copy
 
 # TODO: monads?
 
-class _Pipe:
 
-    def __init__(self, components):
+class pipe:
+
+    def __init__(self, *components):
         self._components = tuple(map(decode_implicits, components))
-        last = self._components[-1]
-        # if isinstance(last, _Map):
-        #     last.__class__ = _Sink
 
     def coroutine_and_outputs(self):
         cor_out_pairs = tuple(c.coroutine_and_outputs() for c in self._components)
@@ -71,14 +69,8 @@ class _Pipe:
         out_groups = map(itemgetter(1), cor_out_pairs)
         return combine_coroutines(coroutines), it.chain(*out_groups)
 
-
-class pipe:
-
-    def __init__(self, *components):
-        self._components = components
-
     def __call__(self, source):
-        coroutine, outputs = _Pipe(self._components).coroutine_and_outputs()
+        coroutine, outputs = self.coroutine_and_outputs()
         push(source, coroutine)
         outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
@@ -94,7 +86,7 @@ class pipe:
     class _Fn:
 
         def __init__(self, components):
-            self._pipe = _Pipe(it.chain(components, [_Sink(self.accept_result)]))
+            self._pipe = pipe(*it.chain(components, [_Sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs()
 
         def __call__(self, *args):
@@ -170,7 +162,7 @@ def _Filter(predicate, key=None):
 class _Branch(_Component):
 
     def __init__(self, *components):
-        self._pipe = _Pipe(components)
+        self._pipe = pipe(*components)
 
     def coroutine_and_outputs(self):
         sideways, outputs = self._pipe.coroutine_and_outputs()
