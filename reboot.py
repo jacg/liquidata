@@ -73,6 +73,10 @@ class pipe:
     def __call__(self, source):
         coroutine, outputs = self.ensure_capped().coroutine_and_outputs()
         push(source, coroutine)
+        return self.collect_returns(outputs)
+
+    @staticmethod
+    def collect_returns(outputs):
         outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
         out_ns  = Namespace(**{o.name: o.future.result() for o in outputs})
