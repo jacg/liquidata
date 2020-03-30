@@ -72,7 +72,7 @@ class _Pipe:
         return combine_coroutines(coroutines), it.chain(*out_groups)
 
 
-class flow:
+class pipe:
 
     def __init__(self, *components):
         self._components = components
@@ -87,13 +87,6 @@ class flow:
             return vars(out_ns)['return']
         setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
         return out_ns
-
-
-class pipe:
-
-    def __init__(self, *components):
-        # TODO: should disallow branches (unless we implement joins)
-        self._components = components
 
     def fn  (self): return pipe._Fn(self._components)
     def pipe(self): return FlatMap (self.fn())
