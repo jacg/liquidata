@@ -71,7 +71,7 @@ class pipe:
         return combine_coroutines(coroutines), it.chain(*out_groups)
 
     def __call__(self, source):
-        coroutine, outputs = self.coroutine_and_outputs()
+        coroutine, outputs = self.ensure_capped().coroutine_and_outputs()
         push(source, coroutine)
         outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
@@ -83,6 +83,11 @@ class pipe:
 
     def fn  (self): return pipe._Fn(self._components)
     def pipe(self): return FlatMap (self.fn())
+
+    def ensure_capped(self):
+        *cs, last = self._components
+        last = decode_implicits(last, sink=True)
+        return pipe(*cs, last)
 
     class _Fn:
 
@@ -166,7 +171,7 @@ class _Branch(_Component):
         self._pipe = pipe(*components)
 
     def coroutine_and_outputs(self):
-        sideways, outputs = self._pipe.coroutine_and_outputs()
+        sideways, outputs = self._pipe.ensure_capped().coroutine_and_outputs()
         @coroutine
         def branch_loop(downstream):
             with closing(sideways), closing(downstream):
@@ -467,13 +472,14 @@ arg = _Arg()
 
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
-def decode_implicits(it):
+def decode_implicits(it, sink=False):
     if isinstance(it, _Component): return it
     if isinstance(it, pipe      ): return it.pipe()
     if isinstance(it, list      ): return _Branch(*it)
     if isinstance(it, tuple     ): return  pipe(*it).pipe()
     if isinstance(it, set       ): return _Filter( next(iter(it)))
     if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
+    if sink                      : return _Sink(it)
     else                         : return _Map(it)
 
 
