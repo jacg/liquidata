@@ -397,6 +397,33 @@ def test_args_single_put_many():
     assert net(data) == expected
 
 
+def make_test_permutations(): # limit the scope of names used by parametrize
+    from reboot import flow, item, put, out
+
+    def hard_work(a,b):
+        return sym_add(a,b), sym_mul(a,b)
+
+    data = namespace_source()
+
+    expected = [d.copy() for d in data]
+    for d in expected:
+        a,b = itemgetter('a','b')(d)
+        x,y = hard_work(a,b)
+        d['x'] = x
+        d['y'] = y
+
+    @parametrize('spec',
+                 ((item.a.b  *  hard_work >> put.x.y, out),
+                  (hard_work *  item.a.b  >> put.x.y, out),
+                  (put.x.y   << hard_work * item.a.b, out),
+                 ))
+    def test_start_shift_permutations(spec):
+        assert flow(*spec)(data) == expected
+    return test_start_shift_permutations
+
+test_start_shift_permutations = make_test_permutations()
+
+
 def test_args_single_filter():
     from reboot import flow, item, out, arg as _
     data = (dict(a=1, b=2),
