@@ -3,7 +3,6 @@ from functools   import reduce, wraps
 from collections import namedtuple
 from contextlib  import contextmanager
 from argparse    import Namespace
-from asyncio     import Future
 
 import itertools as it
 import copy
@@ -63,26 +62,24 @@ class pipe:
     def __init__(self, *components):
         self._components = components
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, outputs):
         decoded_components = map(decode_implicits, self._components)
-        cor_out_pairs = tuple(c.coroutine_and_outputs() for c in decoded_components)
-        coroutines = map(itemgetter(0), cor_out_pairs)
-        out_groups = map(itemgetter(1), cor_out_pairs)
-        return combine_coroutines(coroutines), it.chain(*out_groups)
+        coroutines = (c.coroutine_and_outputs(outputs) for c in decoded_components)
+        return combine_coroutines(coroutines)
 
     def __call__(self, source):
-        coroutine, outputs = self.ensure_capped().coroutine_and_outputs()
+        outputs = []
+        coroutine = self.ensure_capped().coroutine_and_outputs(outputs)
         push(source, coroutine)
         return self.collect_returns(outputs)
 
     @staticmethod
     def collect_returns(outputs):
-        outputs = tuple(outputs)
         returns = tuple(filter(lambda o: o.name == 'return', outputs))
-        out_ns  = Namespace(**{o.name: o.future.result() for o in outputs})
+        out_ns  = Namespace(**{o.name: o.value for o in outputs})
         if len(vars(out_ns)) == len(returns) == 1:
             return vars(out_ns)['return']
-        setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
+        setattr(out_ns, 'return', tuple(r.value for r in returns))
         return out_ns
 
     def fn  (self): return pipe._Fn(self._components)
@@ -97,7 +94,7 @@ class pipe:
 
         def __init__(self, components):
             self._pipe = pipe(*it.chain(components, [_Sink(self.accept_result)]))
-            self._coroutine, _ = self._pipe.coroutine_and_outputs()
+            self._coroutine = self._pipe.coroutine_and_outputs([])
 
         def __call__(self, *args):
             self._returns = []
@@ -120,9 +117,9 @@ def component(loop):
     def __init__(self, *args):
         self._args = args
 
-    def coroutine_and_outputs(self):
-        if loop.__name__ == '_Sink': return coroutine(loop(*self._args))(), ()
-        else                       : return coroutine(loop(*self._args))  , ()
+    def coroutine_and_outputs(self, outputs):
+        if loop.__name__ == '_Sink': return coroutine(loop(*self._args))()
+        else                       : return coroutine(loop(*self._args))
 
     ns = dict(__init__=__init__, coroutine_and_outputs=coroutine_and_outputs)
 
@@ -174,16 +171,16 @@ class _Branch(_Component):
     def __init__(self, *components):
         self._pipe = pipe(*components)
 
-    def coroutine_and_outputs(self):
-        sideways, outputs = self._pipe.ensure_capped().coroutine_and_outputs()
+    def coroutine_and_outputs(self, outputs):
+        sideways = self._pipe.ensure_capped().coroutine_and_outputs(outputs)
         @coroutine
         def branch_loop(downstream):
-            with closing(sideways), closing(downstream):
+            with closing(downstream), closing(sideways):
                 while True:
                     args = yield
                     sideways  .send(args)
                     downstream.send(args)
-        return branch_loop, outputs
+        return branch_loop
 
 
 class _Return(_Component):
@@ -192,10 +189,9 @@ class _Return(_Component):
         self._name = name
         self._sink = sink
 
-    def coroutine_and_outputs(self):
-        future = Future()
-        coroutine = self._sink.make_coroutine(future)
-        return coroutine, (NamedFuture(self._name, future),)
+    def coroutine_and_outputs(self, outputs):
+        coroutine = self._sink.make_coroutine(outputs, self._name)
+        return coroutine
 
     class Name(_Component):
 
@@ -211,8 +207,8 @@ class _Return(_Component):
             # TODO: set as implicit count filter?
             return _Return(self.name, arg)
 
-        def coroutine_and_outputs(self):
-            return _Return(self.name, into_list()).coroutine_and_outputs()
+        def coroutine_and_outputs(self, outputs):
+            return _Return(self.name, into_list()).coroutine_and_outputs(outputs)
 
         @classmethod
         def no_name_given(cls, sink=None, *args, **kwds):
@@ -247,7 +243,7 @@ class _Put (_Component, _MultipleNames):
 
     __lshift__ = __rrshift__
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, outputs):
 
         def attach_each_to_namespace(namespace, returned):
             for name, value in zip(self.names, returned):
@@ -270,7 +266,7 @@ class _Put (_Component, _MultipleNames):
                     for returned in returns:
                         outgoing_namespace = make_return(copy.copy(incoming_namespace), returned)
                         downstream.send((outgoing_namespace,))
-        return put_loop, ()
+        return put_loop
 
 DEBUG = False
 
@@ -343,8 +339,8 @@ class _Name(_Component):
     def __call__(self, *args, **kwds):
         return self.constructor.no_name_given(*args, **kwds)
 
-    def coroutine_and_outputs(self):
-        return self.constructor.no_name_given().coroutine_and_outputs()
+    def coroutine_and_outputs(self, outputs):
+        return self.constructor.no_name_given().coroutine_and_outputs(outputs)
 
 out  = _Name(_Return.Name)
 on   = _Name(_On)
@@ -362,10 +358,10 @@ class _Fold(_Component):
         self._fn = fn
         self._initial = initial
 
-    def make_coroutine(self, future):
+    def make_coroutine(self, outputs, name):
         binary_function = self._fn
         @coroutine
-        def reduce_loop(future):
+        def reduce_loop():
             if self._initial is None:
                 try:
                     accumulator, = (yield)
@@ -379,8 +375,8 @@ class _Fold(_Component):
                 while True:
                     accumulator = binary_function(accumulator, *(yield))
             finally:
-                future.set_result(accumulator)
-        return reduce_loop(future)
+                outputs.append(NamedValue(name, accumulator))
+        return reduce_loop()
 
 
 class Slice(_Component):
@@ -400,7 +396,7 @@ class Slice(_Component):
         self.stopper = stopper
         self.close_all = close_all
 
-    def coroutine_and_outputs(self):
+    def coroutine_and_outputs(self, outputs):
         start, stop, step = attrgetter('start', 'stop', 'step')(self.spec)
         stopper, close_all = attrgetter('stopper', 'close_all')(self)
         @coroutine
@@ -416,7 +412,7 @@ class Slice(_Component):
                 if close_all: raise StopPipeline
                 while True:
                     yield
-        return slice_loop, ()
+        return slice_loop
 
 
 class _Arg:
@@ -569,4 +565,4 @@ class NeedAtLeastOneCoroutine(LiquiDataException): pass
 
 ######################################################################
 
-NamedFuture = namedtuple('NamedFuture', 'name, future')
+NamedValue = namedtuple('NamedValue', 'name, value')
