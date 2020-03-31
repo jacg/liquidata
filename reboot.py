@@ -251,11 +251,11 @@ class _Put (_Component, _MultipleNames):
 
         def attach_each_to_namespace(namespace, returned):
             for name, value in zip(self.names, returned):
-                namespace[name] = value
+                setattr(namespace, name, value)
             return namespace
 
         def attach_it_to_namespace(namespace, it):
-            namespace[self.names[0]] = it
+            setattr(namespace, self.names[0], it)
             return namespace
 
         if len(self.names) > 1: make_return = attach_each_to_namespace
@@ -298,6 +298,13 @@ class _Get:
 
         def __call__(self, it):
             return attrgetter(*self.names)(it)
+
+        def __mul__(self, action):
+            if isinstance(action, FlatMap): # TODO: this is a horrible hack!
+                return (self, FlatMap(star(*action._args)))
+            return (self, star(action))
+
+        __rmul__ = __mul__
 
     class Item:
 
