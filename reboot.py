@@ -10,6 +10,8 @@ import copy
 
 
 
+# TODO: make `star` (and consequently `*`) work reliably for all components
+
 # TODO: count-filter: implicit {} in out: out.NAME({predicate}) -> .passed & .stopped
 
 # TODO: send down one branch or other depending on predicate. dispatch, match, divert, split
@@ -17,8 +19,6 @@ import copy
 # TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
-
-# TODO: Now that get is called slot (which has been removed),  use `get.a.b` as itemgetter('a','b')
 
 # TODO: missing arg-lambda features
 #         arg.a > 3;          arg[0] > 3;          arg.a > arg.b          arg.a  ; arg.a.b  arg[0,1]
@@ -38,16 +38,13 @@ import copy
 
 # TODO: A [::] syntax for slice? Can we do better than `slice[start:stop:step]`? what about close_all?
 
-# TODO: Extend `args` & `put` to work on namedtuples, Namespaces, sequences.
-#       [Give it a mutate option? Don't bother, just switch to persistent data
-#       structures]
+# TODO: `get` and `item` distinguish between namespaces and dict; put assumes
+#       namespaces. Give `put` a sibling? Make put detect automatically?
 
-# TODO: args-put syntax for turning atomic stream into namespace
+# TODO: utility for turning atomic stream into namespace
 
 # TODO: operator module containing curried operators. Names uppercase or with
 #       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
-
-# TODO: string as implicit `item`: ... I like this less and less
 
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
@@ -236,7 +233,7 @@ class _On(_Component):
         self.name = name
 
     def __call__(self, *components):
-        return (getattr(item, self.name), components) >> getattr(put, self.name)
+        return (getattr(get, self.name), components) >> getattr(put, self.name)
 
 
 class _Put (_Component, _MultipleNames):
@@ -251,11 +248,11 @@ class _Put (_Component, _MultipleNames):
 
         def attach_each_to_namespace(namespace, returned):
             for name, value in zip(self.names, returned):
-                namespace[name] = value
+                setattr(namespace, name, value)
             return namespace
 
         def attach_it_to_namespace(namespace, it):
-            namespace[self.names[0]] = it
+            setattr(namespace, self.names[0], it)
             return namespace
 
         if len(self.names) > 1: make_return = attach_each_to_namespace
@@ -298,6 +295,13 @@ class _Get:
 
         def __call__(self, it):
             return attrgetter(*self.names)(it)
+
+        def __mul__(self, action):
+            if isinstance(action, FlatMap): # TODO: this is a horrible hack!
+                return (self, FlatMap(star(*action._args)))
+            return (self, star(action))
+
+        __rmul__ = __mul__
 
     class Item:
 

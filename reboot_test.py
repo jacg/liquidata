@@ -1,6 +1,7 @@
 from operator  import itemgetter, attrgetter
 from functools import reduce
 from argparse  import Namespace
+from copy      import copy
 
 import itertools as it
 
@@ -245,17 +246,16 @@ def test_pick_multiple_items():
 
 RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
 
-#@RETHINK_ARGSPUT
 def test_on_item():
     from reboot import pipe, on, out
     names = 'abc'
     f, = symbolic_functions('f')
     values = range(3)
-    data = [{name:N for name in names} for N in values]
+    data = [Namespace(**{name:N for name in names}) for N in values]
     net = pipe(on.a(f), out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['a'] = f(d['a'])
+    expected = [copy(n) for n in data]
+    for n in expected:
+        n.a = f(n.a)
     assert net(data) == expected
 
 
@@ -298,32 +298,32 @@ def test_item_multiple():
 
 def namespace_source(keys='abc', length=3):
     indices = range(length)
-    return [{key:f'{key}{i}' for key in keys} for i in indices]
+    return [Namespace(**{key:f'{key}{i}' for key in keys}) for i in indices]
 
 
 def test_star():
-    from reboot import pipe, item, out, star
+    from reboot import pipe, get, out, star
     data = namespace_source()
-    expected = list(it.starmap(sym_add, zip(map(itemgetter('a'), data),
-                                            map(itemgetter('b'), data))))
-    assert pipe(item.a.b, star(sym_add), out)(data) == expected
+    expected = list(it.starmap(sym_add, zip(map(attrgetter('a'), data),
+                                            map(attrgetter('b'), data))))
+    assert pipe(get.a.b, star(sym_add), out)(data) == expected
 
 
 def test_item_as_args_single():
-    from reboot import pipe, item, out
+    from reboot import pipe, get, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    assert pipe(item.c, f, out)(data) == list(map(f, map(itemgetter('c'), data)))
+    assert pipe(get.c, f, out)(data) == list(map(f, map(attrgetter('c'), data)))
 
 
 @parametrize('where', 'before after'.split())
 def test_item_star_as_args_many(where):
-    from reboot import pipe, item, out
+    from reboot import pipe, get, out
     data = namespace_source()
-    if where == 'before': net = pipe(item.a.b * sym_add , out)
-    else                : net = pipe(sym_add  * item.a.b, out)
-    expected = list(map(sym_add, map(itemgetter('a'), data),
-                                 map(itemgetter('b'), data)))
+    if where == 'before': net = pipe(get.a.b * sym_add, out)
+    else                : net = pipe(sym_add * get.a.b, out)
+    expected = list(map(sym_add, map(attrgetter('a'), data),
+                                 map(attrgetter('b'), data)))
     assert net(data) == expected
 
 
@@ -333,25 +333,25 @@ def test_put_operator_single(op):
     data = namespace_source()
     f, = symbolic_functions('f')
     def bf(ns):
-        return f(ns['b'])
+        return f(ns.b)
     if op == ">>": net = pipe(bf         >> put.f_of_b, out)
     else         : net = pipe(put.f_of_b << bf        , out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['f_of_b'] = f(d['b'])
+    expected = [copy(n) for n in data]
+    for n in expected:
+        n.f_of_b = f(n.b)
     assert net(data) == expected
 
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single_pipe(op):
-    from reboot import pipe, put, out, item
+    from reboot import pipe, put, out, get
     data = namespace_source()
     f, = symbolic_functions('f')
-    if op == ">>": net = pipe((item.b, f) >> put.f_of_b , out)
-    else         : net = pipe(put.f_of_b  << (item.b, f), out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['f_of_b'] = f(d['b'])
+    if op == ">>": net = pipe((get.b, f) >> put.f_of_b , out)
+    else         : net = pipe(put.f_of_b  << (get.b, f), out)
+    expected = [copy(n) for n in data]
+    for n in expected:
+        n.f_of_b = f(n.b)
     assert net(data) == expected
 
 
@@ -360,62 +360,61 @@ def test_put_operator_many(op):
     from reboot import pipe, put, out
     data = namespace_source()
     def sum_prod(ns):
-        a,b = itemgetter('a','b')(ns)
+        a,b = ns.a, ns.b
         return sym_add(a,b), sym_mul(a,b)
     if op == ">>": net = pipe(    sum_prod >> put.sum.prod, out)
     else         : net = pipe(put.sum.prod <<     sum_prod, out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        a,b = itemgetter('a','b')(d)
-        d['sum' ] = sym_add(a,b)
-        d['prod'] = sym_mul(a,b)
+    expected = [copy(n) for n in data]
+    for n in expected:
+        a, b   = n.a, n.b
+        n.sum  = sym_add(a,b)
+        n.prod = sym_mul(a,b)
     assert net(data) == expected
 
 
 def test_args_single_put_single():
-    from reboot import pipe, item, put, out
+    from reboot import pipe, get, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
-    net = pipe((item.b, f) >> put.result, out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['result'] = f(d['b'])
+    net = pipe((get.b, f) >> put.result, out)
+    expected = [copy(n) for n in data]
+    for n in expected:
+        n.result = f(n.b)
     assert net(data) == expected
 
 
 def test_args_single_put_many():
-    from reboot import pipe, item, put, out
+    from reboot import pipe, get, put, out
     l,r = symbolic_functions('lr')
     def f(x):
         return l(x), r(x)
     data = namespace_source()
-    net = pipe((item.c, f) >> put.l.r, out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        result = f(d['c'])
-        d['l'], d['r'] = result
+    net = pipe((get.c, f) >> put.l.r, out)
+    expected = [copy(n) for n in data]
+    for n in expected:
+        result = f(n.c)
+        n.l, n.r = result
     assert net(data) == expected
 
 
 def make_test_permutations(): # limit the scope of names used by parametrize
-    from reboot import pipe, item, put, out
+    from reboot import pipe, get, put, out
 
     def hard_work(a,b):
         return sym_add(a,b), sym_mul(a,b)
 
     data = namespace_source()
 
-    expected = [d.copy() for d in data]
-    for d in expected:
-        a,b = itemgetter('a','b')(d)
-        x,y = hard_work(a,b)
-        d['x'] = x
-        d['y'] = y
+    expected = [copy(n) for n in data]
+    for n in expected:
+        x,y = hard_work(n.a, n.b)
+        n.x = x
+        n.y = y
 
     @parametrize('spec',
-                 ((item.a.b  *  hard_work >> put.x.y, out),
-                  (hard_work *  item.a.b  >> put.x.y, out),
-                  (put.x.y   << hard_work * item.a.b, out),
+                 ((get.a.b   *  hard_work >> put.x.y, out),
+                  (hard_work *  get.a.b   >> put.x.y, out),
+                  (put.x.y   << hard_work *  get.a.b, out),
                  ))
     def test_start_shift_permutations(spec):
         assert pipe(*spec)(data) == expected
@@ -425,13 +424,14 @@ test_start_shift_permutations = make_test_permutations()
 
 
 def test_args_single_filter():
-    from reboot import pipe, item, out, arg as _
-    data = (dict(a=1, b=2),
-            dict(a=3, b=3),
-            dict(a=2, b=1),
-            dict(a=8, b=9))
-    net = pipe(item.b, {_ > 2}, out)
-    expected = list(filter(_ > 2, map(itemgetter('b'), data)))
+    from reboot import pipe, get, out, arg as _
+    ds = (dict(a=1, b=2),
+          dict(a=3, b=3),
+          dict(a=2, b=1),
+          dict(a=8, b=9))
+    data = [Namespace(**d) for d in ds]
+    net = pipe(get.b, {_ > 2}, out)
+    expected = list(filter(_ > 2, map(attrgetter('b'), data)))
     assert net(data) == expected
 
 
@@ -449,20 +449,22 @@ def test_args_many_filter():
 
 
 def test_args_single_flatmap():
-    from reboot import pipe, FlatMap, item, out
-    data = (dict(a=1, b=2),
-            dict(a=0, b=3),
-            dict(a=3, b=1))
-    net = pipe(item.a, FlatMap(lambda n:n*[n]), out)
+    from reboot import pipe, FlatMap, get, out
+    ds = (dict(a=1, b=2),
+          dict(a=0, b=3),
+          dict(a=3, b=1))
+    data = [Namespace(**d) for d in ds]
+    net = pipe(get.a, FlatMap(lambda n: n*[n]), out)
     assert net(data) == [1,3,3,3]
 
 
 def test_args_many_flatmap():
-    from reboot import pipe, FlatMap, item, out
-    data = (dict(a=1, b=9),
-            dict(a=0, b=8),
-            dict(a=3, b=7))
-    net = pipe(item.a.b * FlatMap(lambda a,b:a*[b]), out)
+    from reboot import pipe, FlatMap, get, out
+    ds = (dict(a=1, b=9),
+          dict(a=0, b=8),
+          dict(a=3, b=7))
+    data = [Namespace(**d) for d in ds]
+    net = pipe(get.a.b * FlatMap(lambda a,b:a*[b]), out)
     assert net(data) == [9,7,7,7]
 
 
