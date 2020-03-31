@@ -246,17 +246,16 @@ def test_pick_multiple_items():
 
 RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
 
-#@RETHINK_ARGSPUT
 def test_on_item():
     from reboot import pipe, on, out
     names = 'abc'
     f, = symbolic_functions('f')
     values = range(3)
-    data = [{name:N for name in names} for N in values]
+    data = [Namespace(**{name:N for name in names}) for N in values]
     net = pipe(on.a(f), out)
-    expected = [d.copy() for d in data]
-    for d in expected:
-        d['a'] = f(d['a'])
+    expected = [copy(n) for n in data]
+    for n in expected:
+        n.a = f(n.a)
     assert net(data) == expected
 
 

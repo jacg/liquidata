@@ -236,7 +236,7 @@ class _On(_Component):
         self.name = name
 
     def __call__(self, *components):
-        return (getattr(item, self.name), components) >> getattr(put, self.name)
+        return (getattr(get, self.name), components) >> getattr(put, self.name)
 
 
 class _Put (_Component, _MultipleNames):
