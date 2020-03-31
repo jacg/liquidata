@@ -360,13 +360,13 @@ def test_put_operator_many(op):
     from reboot import pipe, put, out
     data = namespace_source()
     def sum_prod(ns):
-        a,b = attrgetter('a','b')(ns)
+        a,b = ns.a, ns.b
         return sym_add(a,b), sym_mul(a,b)
     if op == ">>": net = pipe(    sum_prod >> put.sum.prod, out)
     else         : net = pipe(put.sum.prod <<     sum_prod, out)
     expected = [copy(n) for n in data]
     for n in expected:
-        a,b = attrgetter('a','b')(n)
+        a, b   = n.a, n.b
         n.sum  = sym_add(a,b)
         n.prod = sym_mul(a,b)
     assert net(data) == expected
@@ -407,8 +407,7 @@ def make_test_permutations(): # limit the scope of names used by parametrize
 
     expected = [copy(n) for n in data]
     for n in expected:
-        a,b = attrgetter('a','b')(n)
-        x,y = hard_work(a,b)
+        x,y = hard_work(n.a, n.b)
         n.x = x
         n.y = y
 
