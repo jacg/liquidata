@@ -309,6 +309,17 @@ def test_star():
     assert pipe(get.a.b, star(sym_add), out)(data) == expected
 
 
+def test_star_implicit_sink():
+    from reboot import pipe, get, star
+    data = namespace_source()
+    result = []
+    def store_sum(x,y):
+        result.append(sym_add(x,y))
+    pipe(get.a.b, star(store_sum))(data)
+    expected = [sym_add(ns.a, ns.b) for ns in data]
+    assert result == expected
+
+
 def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
