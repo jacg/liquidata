@@ -336,10 +336,13 @@ class _Item:
     __rmul__ = __mul__
 
 
-def _NAME(the_name):
-    def name(item):
-        return Namespace(**{the_name: item})
-    return name
+class _NAME(_MultipleNames):
+
+    def __call__(self, *items):
+        if len(self.names) != 1:
+            items = items[0]
+        assert len(self.names) == len(items)
+        return Namespace(**{n: i for (n,i) in zip(self.names, items)})
 
 
 class _Name(_Component):

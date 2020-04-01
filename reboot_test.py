@@ -327,10 +327,18 @@ def test_item_star_as_args_many(where):
     assert net(data) == expected
 
 
-def test_name():
+def test_name_single():
     from reboot import pipe, name, out
     data = range(3)
     assert pipe(name.x, out)(data) == list(Namespace(x=it) for it in data)
+
+
+def test_name_multiple():
+    from reboot import pipe, name, out
+    data = ((1,2,3), (4,5,6))
+    got = pipe(name.a.b.c, out)(data)
+    expected = list(Namespace(a=a, b=b, c=c) for (a,b,c) in data)
+    assert got == expected
 
 
 @parametrize('op', '>> <<'.split())
