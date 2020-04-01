@@ -131,7 +131,11 @@ def component(loop):
         if loop.__name__ == '_Sink': return coroutine(loop(*self._args))(), ()
         else                       : return coroutine(loop(*self._args))  , ()
 
-    ns = dict(__init__=__init__, coroutine_and_outputs=coroutine_and_outputs)
+    def star(self):
+        first, *rest = self._args
+        return type(self)(_star(first), *rest)
+
+    ns = dict(__init__=__init__, coroutine_and_outputs=coroutine_and_outputs, star=star)
 
     return type(loop.__name__, (_Component,), ns)
 
@@ -573,11 +577,14 @@ def star(fn):
     fn = decode_implicits(fn)
     if isinstance(fn, _Map):
         fn = fn._args[0]
-    if isinstance(fn, (FlatMap, _Filter)): # TODO: this is a horrible hack!
-        return type(fn)(star(*fn._args))
-    def star_(args):
+    if isinstance(fn, (FlatMap, _Filter)):
+        return fn.star()
+    return _star(fn)
+
+def _star(fn):
+    def star(args):
         return fn(*args)
-    return star_
+    return star
 
 ######################################################################
 
