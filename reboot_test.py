@@ -342,6 +342,13 @@ def test_get_star_filter():
     assert got == list((n.a, n.b) for n in data if n.a > n.b)
 
 
+def test_star_key_filter():
+    from reboot import pipe, get, star, out
+    data = [Namespace(a=a, b=b) for (a,b) in ((2,3), (3,2), (3,3), (9,1))]
+    got = pipe({star(gt) : get.a.b}, out)(data)
+    assert got == list(n for n in data if n.a > n.b)
+
+
 def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
