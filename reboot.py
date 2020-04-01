@@ -166,6 +166,8 @@ def FlatMap(fn):
                     downstream.send((item,))
     return flatmap_loop
 
+def flatmap(fn):
+    return (fn, join)
 
 @component
 def join():
