@@ -301,7 +301,7 @@ def namespace_source(keys='abc', length=3):
     return [Namespace(**{key:f'{key}{i}' for key in keys}) for i in indices]
 
 
-def test_star():
+def test_star_map():
     from reboot import pipe, get, out, star
     data = namespace_source()
     expected = list(it.starmap(sym_add, zip(map(attrgetter('a'), data),
