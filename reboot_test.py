@@ -397,7 +397,7 @@ def test_put_operator_many(op):
     assert net(data) == expected
 
 
-def test_args_single_put_single():
+def test_get_single_put_single():
     from reboot import pipe, get, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
@@ -408,7 +408,7 @@ def test_args_single_put_single():
     assert net(data) == expected
 
 
-def test_args_single_put_many():
+def test_get_single_put_many():
     from reboot import pipe, get, put, out
     l,r = symbolic_functions('lr')
     def f(x):
@@ -448,7 +448,7 @@ def make_test_permutations(): # limit the scope of names used by parametrize
 test_start_shift_permutations = make_test_permutations()
 
 
-def test_args_single_filter():
+def test_get_single_filter():
     from reboot import pipe, get, out, arg as _
     ds = (dict(a=1, b=2),
           dict(a=3, b=3),
@@ -461,19 +461,19 @@ def test_args_single_filter():
 
 
 @RETHINK_ARGSPUT
-def test_args_many_filter():
-    from reboot import pipe, args, out
+def test_get_many_filter():
+    from reboot import pipe, get, out
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
             dict(a=8, b=9))
-    net = pipe((args.a.b, {lt}), out)
+    net = pipe((get.a.b, {lt}), out)
     expected = (dict(a=1, b=2),
                 dict(a=8, b=9))
     assert net(data) == expected
 
 
-def test_args_single_flatmap():
+def test_get_single_flatmap():
     from reboot import pipe, FlatMap, get, out
     ds = (dict(a=1, b=2),
           dict(a=0, b=3),
@@ -483,7 +483,7 @@ def test_args_single_flatmap():
     assert net(data) == [1,3,3,3]
 
 
-def test_args_many_flatmap():
+def test_get_many_flatmap():
     from reboot import pipe, FlatMap, get, out
     ds = (dict(a=1, b=9),
           dict(a=0, b=8),
