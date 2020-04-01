@@ -349,6 +349,15 @@ def test_star_key_filter():
     assert got == list(n for n in data if n.a > n.b)
 
 
+def test_star_pipe():
+    from reboot import pipe, get, star, out
+    data = namespace_source()
+    a,b,f = symbolic_functions('abf')
+    subpipe = pipe(sym_add, f)
+    got = pipe(get.a.b, star(subpipe), out)(data)
+    assert got == [ f(sym_add(n.a, n.b)) for n in data ]
+
+
 def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
