@@ -573,10 +573,8 @@ def star(fn):
     fn = decode_implicits(fn)
     if isinstance(fn, _Map):
         fn = fn._args[0]
-    if isinstance(fn, _Filter): # TODO: this is a horrible hack!
-        return _Filter(star(*fn._args))
-    if isinstance(fn, FlatMap): # TODO: this is a horrible hack!
-        return FlatMap(star(*fn._args))
+    if isinstance(fn, (FlatMap, _Filter)): # TODO: this is a horrible hack!
+        return type(fn)(star(*fn._args))
     def star_(args):
         return fn(*args)
     return star_
