@@ -358,6 +358,15 @@ def test_star_pipe():
     assert got == [ f(sym_add(n.a, n.b)) for n in data ]
 
 
+def test_get_star_pipe():
+    from reboot import pipe, get, out
+    data = namespace_source()
+    a,b,f = symbolic_functions('abf')
+    subpipe = pipe(sym_add, f)
+    got = pipe(get.a.b * subpipe, out)(data)
+    assert got == [ f(sym_add(n.a, n.b)) for n in data ]
+
+
 def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
