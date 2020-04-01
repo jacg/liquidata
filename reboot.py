@@ -316,14 +316,7 @@ class _Get:
             return itemgetter(*self.keys)(it)
 
 
-class _Item:
-
-    def __init__(self, name):
-        self.names = [name]
-
-    def __getattr__(self, name):
-        self.names.append(name)
-        return self
+class _Item(_MultipleNames):
 
     def __call__(self, it):
         return itemgetter(*self.names)(it)
@@ -334,6 +327,15 @@ class _Item:
         return (self, star(action))
 
     __rmul__ = __mul__
+
+
+class _NAME(_MultipleNames):
+
+    def __call__(self, *items):
+        if len(self.names) != 1:
+            items = items[0]
+        assert len(self.names) == len(items)
+        return Namespace(**{n: i for (n,i) in zip(self.names, items)})
 
 
 class _Name(_Component):
@@ -355,6 +357,7 @@ on   = _Name(_On)
 put  = _Name(_Put)
 get  = _Get()
 item = _Name(_Item)
+name = _Name(_NAME)
 
 
 class _Fold(_Component):
