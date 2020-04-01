@@ -327,6 +327,12 @@ def test_item_star_as_args_many(where):
     assert net(data) == expected
 
 
+def test_name():
+    from reboot import pipe, name, out
+    data = range(3)
+    assert pipe(name.x, out)(data) == list(Namespace(x=it) for it in data)
+
+
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single(op):
     from reboot import pipe, put, out

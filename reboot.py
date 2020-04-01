@@ -336,6 +336,12 @@ class _Item:
     __rmul__ = __mul__
 
 
+def _NAME(the_name):
+    def name(item):
+        return Namespace(**{the_name: item})
+    return name
+
+
 class _Name(_Component):
 
     def __init__(self, constructor):
@@ -355,6 +361,7 @@ on   = _Name(_On)
 put  = _Name(_Put)
 get  = _Get()
 item = _Name(_Item)
+name = _Name(_NAME)
 
 
 class _Fold(_Component):
