@@ -341,6 +341,17 @@ def test_name_multiple():
     assert got == expected
 
 
+def test_chaining_splitting_and_naming():
+    from reboot import pipe, name, out
+    data = range(3)
+    f, g, h = symbolic_functions('fgh')
+    def split(x):
+        return f(x), g(x), h(x)
+    got = pipe(split, name.a.b.c, out)(data)
+    expected = list(Namespace(a=f(x), b=g(x), c=h(x)) for x in data)
+    assert got == expected
+
+
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single(op):
     from reboot import pipe, put, out
