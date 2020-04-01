@@ -180,6 +180,11 @@ def test_nested_branches():
     assert res.MM == list(map(i, data))
 
 
+def test_join():
+    from reboot import pipe, join, out
+    assert pipe(join, out)(('abc', 'd', '', 'efgh')) == list('abcdefgh')
+
+
 def test_flat_map():
     from reboot import pipe, FlatMap, out
     data = range(4)

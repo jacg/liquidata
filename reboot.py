@@ -168,6 +168,18 @@ def FlatMap(fn):
 
 
 @component
+def join():
+    def join_loop(downstream):
+        with closing(downstream):
+            while True:
+                upstream, = yield
+                for item in upstream:
+                    downstream.send((item,))
+    return join_loop
+join = join()
+
+
+@component
 def _Filter(predicate, key=None):
     if key is None:
         key = lambda x:x
