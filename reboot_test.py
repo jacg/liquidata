@@ -328,6 +328,13 @@ def test_star_flatmap():
     assert got == expected
 
 
+def test_star_filter():
+    from reboot import pipe, star, out
+    data = [(2,3), (3,2), (3,3), (9,1)]
+    got = pipe(star({gt}), out)(data)
+    assert got == list((a,b) for (a,b) in data if a > b)
+
+
 def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
