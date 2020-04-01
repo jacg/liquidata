@@ -574,9 +574,11 @@ def into_list():
 
 
 def star(fn):
-    def star(args):
+    if isinstance(fn, FlatMap): # TODO: this is a horrible hack!
+        return FlatMap(star(*fn._args))
+    def star_(args):
         return fn(*args)
-    return star
+    return star_
 
 ######################################################################
 

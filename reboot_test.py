@@ -320,6 +320,14 @@ def test_star_implicit_sink():
     assert result == expected
 
 
+def test_star_flatmap():
+    from reboot import pipe, get, star, FlatMap, out
+    data = namespace_source()
+    got = pipe(get.a.b, star(FlatMap(lambda a,b: (a,b))), out)(data)
+    expected = list(it.chain(*((ns.a, ns.b) for ns in data)))
+    assert got == expected
+
+
 def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
