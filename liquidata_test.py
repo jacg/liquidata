@@ -40,7 +40,7 @@ def even(n): return n % 2 == 0
 ###################################################################
 
 def test_trivial():
-    from reboot import pipe
+    from liquidata import pipe
     data = list(range(10))
     result = []
     pipe(result.append)(data)
@@ -48,7 +48,7 @@ def test_trivial():
 
 
 def test_map():
-    from reboot import pipe
+    from liquidata import pipe
     data = list(range(10))
     f, = symbolic_functions('f')
     result = []
@@ -57,7 +57,7 @@ def test_map():
 
 
 def test_filter():
-    from reboot import pipe
+    from liquidata import pipe
     data = list(range(10))
     result = []
     pipe({odd}, result.append)(data)
@@ -65,7 +65,7 @@ def test_filter():
 
 
 def test_filter_with_key():
-    from reboot import pipe, arg as _
+    from liquidata import pipe, arg as _
     data = list(range(10))
     result = []
     pipe({odd : _+1}, result.append)(data)
@@ -73,7 +73,7 @@ def test_filter_with_key():
 
 
 def test_branch():
-    from reboot import pipe
+    from liquidata import pipe
     data = list(range(10))
     branch, main = [], []
     pipe([branch.append], main.append)(data)
@@ -82,7 +82,7 @@ def test_branch():
 
 
 def test_integration_1():
-    from reboot import pipe, arg as _
+    from liquidata import pipe, arg as _
     data = range(20)
     f, g, h = square, (_ +  1), (_ +   2)
     a, b, c = odd   , (_ > 50), (_ < 100)
@@ -98,32 +98,32 @@ def test_integration_1():
 
 
 def test_fold_and_return():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     assert pipe(out(sym_add))(data) == reduce(sym_add, data)
 
 
 def test_fold_and_named_return():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     assert pipe(out.total(sym_add))(data).total == reduce(sym_add, data)
 
 
 def test_fold_with_initial_value():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     assert pipe(out(sym_add, 99))(data) == reduce(sym_add, data, 99)
 
 
 def test_fold_with_initial_value_named():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     net = pipe(out.total(sym_add, 99))
     assert net(data).total == reduce(sym_add, data, 99)
 
 
 def test_return_value_from_branch():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     result = pipe([out.branch(sym_add)],
                    out.main  (sym_mul))(data)
@@ -132,25 +132,25 @@ def test_return_value_from_branch():
 
 
 def test_implicit_collect_into_list_named():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     assert pipe(out.everything)(data).everything == list(data)
 
 
 def test_implicit_collect_into_list_nameless_with_call():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     assert pipe(out())(data) == list(data)
 
 
 def test_implicit_collect_into_list_nameless_without_call():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     data = range(3)
     assert pipe(out)(data) == list(data)
 
 
 def test_more_than_one_anonymous_out():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     f,g = symbolic_functions('fg')
     data = range(3)
     res = pipe([f, out], g, out)(data)
@@ -160,7 +160,7 @@ def test_more_than_one_anonymous_out():
 
 
 def test_anonymous_and_named_outs():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     f,g = symbolic_functions('fg')
     data = range(3)
     res = pipe([f, out.branch], g, out)(data)
@@ -169,7 +169,7 @@ def test_anonymous_and_named_outs():
 
 
 def test_nested_branches():
-    from reboot import pipe, out
+    from liquidata import pipe, out
     f,g,h,i = symbolic_functions('fghi')
     data = range(3)
     res = pipe([[f, out.BB], g, out.BM],
@@ -181,33 +181,33 @@ def test_nested_branches():
 
 
 def test_join():
-    from reboot import pipe, join, out
+    from liquidata import pipe, join, out
     assert pipe(join, out)(('abc', 'd', '', 'efgh')) == list('abcdefgh')
 
 
 def test_flat():
-    from reboot import pipe, flat, out
+    from liquidata import pipe, flat, out
     data = range(4)
     f = range
     assert pipe(flat(f), out)(data) == list(it.chain(*map(f, data)))
 
 
 def test_pipe_as_function():
-    from reboot import pipe
+    from liquidata import pipe
     f,g = symbolic_functions('fg')
     pipe_fn = pipe(f,g).fn()
     assert pipe_fn(6) == (g(f(6)),)
 
 
 def test_pipe_as_multi_arg_function():
-    from reboot import pipe
+    from liquidata import pipe
     f, = symbolic_functions('f')
     pipe_fn = pipe(sym_add, f).fn()
     assert pipe_fn(6,7) == (f(sym_add(6,7)),)
 
 
 def test_pipe_on_filter():
-    from reboot import pipe
+    from liquidata import pipe
     f = odd
     pipe_fn = pipe({f}).fn()
     assert pipe_fn(3) == (3,)
@@ -215,7 +215,7 @@ def test_pipe_on_filter():
 
 
 def test_pipe_on_flat():
-    from reboot import pipe, flat
+    from liquidata import pipe, flat
     f = range
     pipe_fn = pipe(flat(f)).fn()
     assert pipe_fn(3) == (0,1,2)
@@ -223,7 +223,7 @@ def test_pipe_on_flat():
 
 
 def test_pipe_as_component():
-    from reboot import pipe, pipe, out
+    from liquidata import pipe, pipe, out
     data = range(3,6)
     a,b,f,g = symbolic_functions('abfg')
     a_pipe = pipe(f, g)
@@ -231,7 +231,7 @@ def test_pipe_as_component():
 
 
 def test_pick_item():
-    from reboot import pipe, item as pick, out
+    from liquidata import pipe, item as pick, out
     names = 'abc'
     values = range(3)
     f, = symbolic_functions('f')
@@ -240,7 +240,7 @@ def test_pick_item():
 
 
 def test_pick_multiple_items():
-    from reboot import pipe, item as pick, out
+    from liquidata import pipe, item as pick, out
     names = 'abc'
     ops = tuple(symbolic_functions(names))
     values = range(3)
@@ -252,7 +252,7 @@ def test_pick_multiple_items():
 RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
 
 def test_on():
-    from reboot import pipe, on, out
+    from liquidata import pipe, on, out
     names = 'abc'
     f, = symbolic_functions('f')
     values = range(3)
@@ -265,38 +265,38 @@ def test_on():
 
 
 def test_get_single_attr():
-    from reboot import get
+    from liquidata import get
     it = Namespace(a=1, b=2)
     assert get.a(it) == attrgetter('a')(it)
 
 
 def test_get_single_item():
-    from reboot import get
+    from liquidata import get
     it = dict(a=1, b=2)
     assert get['a'](it) == itemgetter('a')(it)
 
 
 def test_item_single():
-    from reboot import item
+    from liquidata import item
     it = dict(a=1, b=2)
     assert item.a(it) == itemgetter('a')(it)
 
 
 def test_get_multilpe_attr():
-    from reboot import get
+    from liquidata import get
     it = Namespace(a=1, b=2, c=9, d=4)
     assert get.d.b.c(it) == attrgetter('d', 'b', 'c')(it)
 
 
 @GETITEM_FUNDAMENTALLY_BROKEN
 def test_get_multilpe_get_item():
-    from reboot import get
+    from liquidata import get
     it = dict(a=1, b=2, c=9, d=4)
     assert get['d', 'b', 'c'](it) == attrgetter('d', 'b', 'c')(it)
 
 
 def test_item_multiple():
-    from reboot import item
+    from liquidata import item
     it = dict(a=1, b=2, c=9, d=4)
     assert item.d.b.c(it) == itemgetter('d', 'b', 'c')(it)
 
@@ -307,7 +307,7 @@ def namespace_source(keys='abc', length=3):
 
 
 def test_star_map():
-    from reboot import pipe, get, out, star
+    from liquidata import pipe, get, out, star
     data = namespace_source()
     expected = list(it.starmap(sym_add, zip(map(attrgetter('a'), data),
                                             map(attrgetter('b'), data))))
@@ -315,7 +315,7 @@ def test_star_map():
 
 
 def test_star_implicit_sink():
-    from reboot import pipe, get, star
+    from liquidata import pipe, get, star
     data = namespace_source()
     result = []
     def store_sum(x,y):
@@ -326,7 +326,7 @@ def test_star_implicit_sink():
 
 
 def test_star_flat():
-    from reboot import pipe, get, star, flat, out
+    from liquidata import pipe, get, star, flat, out
     data = namespace_source()
     got = pipe(get.a.b, star(flat(lambda a,b: (a,b))), out)(data)
     expected = list(it.chain(*((ns.a, ns.b) for ns in data)))
@@ -334,28 +334,28 @@ def test_star_flat():
 
 
 def test_star_filter():
-    from reboot import pipe, star, out
+    from liquidata import pipe, star, out
     data = [(2,3), (3,2), (3,3), (9,1)]
     got = pipe(star({gt}), out)(data)
     assert got == list((a,b) for (a,b) in data if a > b)
 
 
 def test_get_star_filter():
-    from reboot import pipe, get, star, out
+    from liquidata import pipe, get, star, out
     data = [Namespace(a=a, b=b) for (a,b) in ((2,3), (3,2), (3,3), (9,1))]
     got = pipe(get.a.b * {gt}, out)(data)
     assert got == list((n.a, n.b) for n in data if n.a > n.b)
 
 
 def test_star_key_filter():
-    from reboot import pipe, get, star, out
+    from liquidata import pipe, get, star, out
     data = [Namespace(a=a, b=b) for (a,b) in ((2,3), (3,2), (3,3), (9,1))]
     got = pipe({star(gt) : get.a.b}, out)(data)
     assert got == list(n for n in data if n.a > n.b)
 
 
 def test_star_pipe():
-    from reboot import pipe, get, star, out
+    from liquidata import pipe, get, star, out
     data = namespace_source()
     a,b,f = symbolic_functions('abf')
     subpipe = pipe(sym_add, f)
@@ -364,7 +364,7 @@ def test_star_pipe():
 
 
 def test_get_star_pipe():
-    from reboot import pipe, get, out
+    from liquidata import pipe, get, out
     data = namespace_source()
     a,b,f = symbolic_functions('abf')
     subpipe = pipe(sym_add, f)
@@ -373,7 +373,7 @@ def test_get_star_pipe():
 
 
 def test_get_star_implicit_pipe():
-    from reboot import pipe, get, out
+    from liquidata import pipe, get, out
     data = namespace_source()
     a,b,f = symbolic_functions('abf')
     got = pipe(get.a.b * (sym_add, f), out)(data)
@@ -381,7 +381,7 @@ def test_get_star_implicit_pipe():
 
 
 def test_star_implicit_pipe():
-    from reboot import pipe, get, star, out
+    from liquidata import pipe, get, star, out
     data = namespace_source()
     a,b,f = symbolic_functions('abf')
     got = pipe(get.a.b,  star((sym_add, f)), out)(data)
@@ -389,7 +389,7 @@ def test_star_implicit_pipe():
 
 
 def test_get_as_args_single():
-    from reboot import pipe, get, out
+    from liquidata import pipe, get, out
     data = namespace_source()
     f, = symbolic_functions('f')
     assert pipe(get.c, f, out)(data) == list(map(f, map(attrgetter('c'), data)))
@@ -397,7 +397,7 @@ def test_get_as_args_single():
 
 @parametrize('where', 'before after'.split())
 def test_get_star_as_args_many(where):
-    from reboot import pipe, get, out
+    from liquidata import pipe, get, out
     data = namespace_source()
     if where == 'before': net = pipe(get.a.b * sym_add, out)
     else                : net = pipe(sym_add * get.a.b, out)
@@ -407,13 +407,13 @@ def test_get_star_as_args_many(where):
 
 
 def test_name_single():
-    from reboot import pipe, name, out
+    from liquidata import pipe, name, out
     data = range(3)
     assert pipe(name.x, out)(data) == list(Namespace(x=it) for it in data)
 
 
 def test_name_multiple():
-    from reboot import pipe, name, out
+    from liquidata import pipe, name, out
     data = ((1,2,3), (4,5,6))
     got = pipe(name.a.b.c, out)(data)
     expected = list(Namespace(a=a, b=b, c=c) for (a,b,c) in data)
@@ -421,7 +421,7 @@ def test_name_multiple():
 
 
 def test_chaining_splitting_and_naming():
-    from reboot import pipe, name, out
+    from liquidata import pipe, name, out
     data = range(3)
     f, g, h = symbolic_functions('fgh')
     def split(x):
@@ -433,7 +433,7 @@ def test_chaining_splitting_and_naming():
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single(op):
-    from reboot import pipe, put, out
+    from liquidata import pipe, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
     def bf(ns):
@@ -448,7 +448,7 @@ def test_put_operator_single(op):
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_single_pipe(op):
-    from reboot import pipe, put, out, get
+    from liquidata import pipe, put, out, get
     data = namespace_source()
     f, = symbolic_functions('f')
     if op == ">>": net = pipe((get.b, f) >> put.f_of_b , out)
@@ -461,7 +461,7 @@ def test_put_operator_single_pipe(op):
 
 @parametrize('op', '>> <<'.split())
 def test_put_operator_many(op):
-    from reboot import pipe, put, out
+    from liquidata import pipe, put, out
     data = namespace_source()
     def sum_prod(ns):
         a,b = ns.a, ns.b
@@ -477,7 +477,7 @@ def test_put_operator_many(op):
 
 
 def test_get_single_put_single():
-    from reboot import pipe, get, put, out
+    from liquidata import pipe, get, put, out
     data = namespace_source()
     f, = symbolic_functions('f')
     net = pipe((get.b, f) >> put.result, out)
@@ -488,7 +488,7 @@ def test_get_single_put_single():
 
 
 def test_get_single_put_many():
-    from reboot import pipe, get, put, out
+    from liquidata import pipe, get, put, out
     l,r = symbolic_functions('lr')
     def f(x):
         return l(x), r(x)
@@ -502,7 +502,7 @@ def test_get_single_put_many():
 
 
 def make_test_permutations(): # limit the scope of names used by parametrize
-    from reboot import pipe, get, put, out
+    from liquidata import pipe, get, put, out
 
     def hard_work(a,b):
         return sym_add(a,b), sym_mul(a,b)
@@ -528,7 +528,7 @@ test_start_shift_permutations = make_test_permutations()
 
 
 def test_get_single_filter():
-    from reboot import pipe, get, out, arg as _
+    from liquidata import pipe, get, out, arg as _
     ds = (dict(a=1, b=2),
           dict(a=3, b=3),
           dict(a=2, b=1),
@@ -541,7 +541,7 @@ def test_get_single_filter():
 
 @RETHINK_ARGSPUT
 def test_get_many_filter():
-    from reboot import pipe, get, out
+    from liquidata import pipe, get, out
     data = (dict(a=1, b=2),
             dict(a=3, b=3),
             dict(a=2, b=1),
@@ -553,7 +553,7 @@ def test_get_many_filter():
 
 
 def test_get_single_flat():
-    from reboot import pipe, flat, get, out
+    from liquidata import pipe, flat, get, out
     ds = (dict(a=1, b=2),
           dict(a=0, b=3),
           dict(a=3, b=1))
@@ -563,7 +563,7 @@ def test_get_single_flat():
 
 
 def test_get_many_flat():
-    from reboot import pipe, flat, get, out
+    from liquidata import pipe, flat, get, out
     ds = (dict(a=1, b=9),
           dict(a=0, b=8),
           dict(a=3, b=7))
@@ -583,7 +583,7 @@ slice_arg_nonzero  = one_of(none(), small_ints_nonzero)
               tuples(slice_arg,  slice_arg, slice_arg_nonzero)))
 def test_slice_downstream(spec):
 
-    from reboot import pipe, Slice, out
+    from liquidata import pipe, Slice, out
     data = list('abcdefghij')
     result = pipe(Slice(*spec), out)(data)
     specslice = slice(*spec)
@@ -599,7 +599,7 @@ def test_slice_downstream(spec):
 # the data flow.
 @parametrize("close_all", (False, True))
 def test_slice_close_all(close_all):
-    from reboot import Slice, pipe, out
+    from liquidata import Slice, pipe, out
 
     data = list(range(20))
     n_elements = 5
@@ -623,7 +623,7 @@ def test_slice_close_all(close_all):
               (None, None,  0),
              ))
 def test_slice_raises_ValueError(args):
-    from reboot import Slice
+    from liquidata import Slice
     with raises(ValueError):
         Slice(*args)
 
@@ -634,7 +634,7 @@ binops = sampled_from((eq, ne, lt, gt, le, ge, add, sub, mul, floordiv, truediv)
 @given(binops, integers(), integers())
 def test_arg_as_lambda_binary(op, lhs, rhs):
     assume(op not in (truediv, floordiv) or rhs != 0)
-    from reboot import arg
+    from liquidata import arg
 
     a  =           op(arg, rhs)
     ar =           op(lhs, arg)
@@ -649,60 +649,60 @@ unops = sampled_from((neg, pos, abs))
 
 @given(unops, integers())
 def test_arg_as_lambda_binary(op, operand):
-    from reboot import arg
+    from liquidata import arg
     assert op(arg)(operand) == op(operand)
 
 
 def test_arg_as_lambda_getitem():
-    from reboot import arg
+    from liquidata import arg
     data = 'abracadabra'
     assert (arg[3])(data) == (lambda x: x[3])(data)
 
 @GETITEM_FUNDAMENTALLY_BROKEN
 def test_arg_as_lambda_get_multilple_items():
-    from reboot import arg
+    from liquidata import arg
     data = 'abracadabra'
     assert (arg[3,9,4])(data) == (lambda x: (x[3], x[9], x[4]))(data)
 
 
 def test_arg_as_lambda_getattr():
-    from reboot import arg
+    from liquidata import arg
     data = Namespace(a=1, b=2)
     assert (arg.a)(data) == (lambda x: x.a)(data)
 
 
 def test_arg_as_lambda_call_single_arg():
-    from reboot import arg
+    from liquidata import arg
     def square(x):
         return x * x
     assert (arg(3))(square) == (lambda x: x(3))(square)
 
 
 def test_arg_as_lambda_call_two_args():
-    from reboot import arg
+    from liquidata import arg
     assert (arg(2,3))(add) == (lambda x: x(2,3))(add)
 
 
 def test_arg_as_lambda_call_keyword_args():
-    from reboot import arg
+    from liquidata import arg
     assert (arg(a=6, b=7))(dict) == (lambda x: x(a=6, b=7))(dict)
 
 
 # TODO test close_all for take, drop, until, while_, ...
 def test_take():
-    from reboot import pipe, take, out
+    from liquidata import pipe, take, out
     data = 'abracadabra'
     assert ''.join(pipe(take(5), out)(data)) == ''.join(data[:5])
 
 
 def test_drop():
-    from reboot import pipe, drop, out
+    from liquidata import pipe, drop, out
     data = 'abracadabra'
     assert ''.join(pipe(drop(5), out)(data)) == ''.join(data[5:])
 
 
 def test_until():
-    from reboot import pipe, until, out, arg as _
+    from liquidata import pipe, until, out, arg as _
     data = 'abcdXefghi'
     expected = ''.join(it.takewhile(_ != 'X', data))
     got      = ''.join(pipe(until  (_ == 'X'), out)(data))
@@ -710,7 +710,7 @@ def test_until():
 
 
 def test_while():
-    from reboot import pipe, while_, out, arg as _
+    from liquidata import pipe, while_, out, arg as _
     data = 'abcdXefghi'
     expected = ''.join(it.takewhile(_ != 'X', data))
     got      = ''.join(pipe(while_ (_ != 'X'), out)(data))
