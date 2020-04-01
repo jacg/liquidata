@@ -180,11 +180,16 @@ def test_nested_branches():
     assert res.MM == list(map(i, data))
 
 
-def test_flat_map():
-    from reboot import pipe, FlatMap, out
+def test_join():
+    from reboot import pipe, join, out
+    assert pipe(join, out)(('abc', 'd', '', 'efgh')) == list('abcdefgh')
+
+
+def test_flat():
+    from reboot import pipe, flat, out
     data = range(4)
     f = range
-    assert pipe(FlatMap(f), out)(data) == list(it.chain(*map(f, data)))
+    assert pipe(flat(f), out)(data) == list(it.chain(*map(f, data)))
 
 
 def test_pipe_as_function():
@@ -209,10 +214,10 @@ def test_pipe_on_filter():
     assert pipe_fn(4) == ()
 
 
-def test_pipe_on_flatmap():
-    from reboot import pipe, FlatMap
+def test_pipe_on_flat():
+    from reboot import pipe, flat
     f = range
-    pipe_fn = pipe(FlatMap(f)).fn()
+    pipe_fn = pipe(flat(f)).fn()
     assert pipe_fn(3) == (0,1,2)
     assert pipe_fn(5) == (0,1,2,3,4)
 
@@ -320,10 +325,10 @@ def test_star_implicit_sink():
     assert result == expected
 
 
-def test_star_flatmap():
-    from reboot import pipe, get, star, FlatMap, out
+def test_star_flat():
+    from reboot import pipe, get, star, flat, out
     data = namespace_source()
-    got = pipe(get.a.b, star(FlatMap(lambda a,b: (a,b))), out)(data)
+    got = pipe(get.a.b, star(flat(lambda a,b: (a,b))), out)(data)
     expected = list(it.chain(*((ns.a, ns.b) for ns in data)))
     assert got == expected
 
@@ -547,23 +552,23 @@ def test_get_many_filter():
     assert net(data) == expected
 
 
-def test_get_single_flatmap():
-    from reboot import pipe, FlatMap, get, out
+def test_get_single_flat():
+    from reboot import pipe, flat, get, out
     ds = (dict(a=1, b=2),
           dict(a=0, b=3),
           dict(a=3, b=1))
     data = [Namespace(**d) for d in ds]
-    net = pipe(get.a, FlatMap(lambda n: n*[n]), out)
+    net = pipe(get.a, flat(lambda n: n*[n]), out)
     assert net(data) == [1,3,3,3]
 
 
-def test_get_many_flatmap():
-    from reboot import pipe, FlatMap, get, out
+def test_get_many_flat():
+    from reboot import pipe, flat, get, out
     ds = (dict(a=1, b=9),
           dict(a=0, b=8),
           dict(a=3, b=7))
     data = [Namespace(**d) for d in ds]
-    net = pipe(get.a.b * FlatMap(lambda a,b:a*[b]), out)
+    net = pipe(get.a.b * flat(lambda a,b:a*[b]), out)
     assert net(data) == [9,7,7,7]
 
 
