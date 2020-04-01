@@ -38,7 +38,7 @@ import copy
 
 # TODO, dropwhile / since / after
 
-# TODO: Find public name for FlatMap
+# TODO: Find public name for flat
 
 # TODO: find public interface for Slice
 
@@ -93,7 +93,7 @@ class pipe:
         return out_ns
 
     def fn  (self): return pipe._Fn(self._components)
-    def pipe(self): return FlatMap (self.fn())
+    def pipe(self): return flat (self.fn())
 
     def ensure_capped(self):
         *cs, last = self._components
@@ -158,13 +158,13 @@ def _Map(fn):
 
 
 @component
-def FlatMap(fn):
-    def flatmap_loop(downstream):
+def flat(fn):
+    def flat_loop(downstream):
         with closing(downstream):
             while True:
                 for item in fn(*(yield)):
                     downstream.send((item,))
-    return flatmap_loop
+    return flat_loop
 
 
 @component
@@ -589,7 +589,7 @@ def star(fn):
     fn = decode_implicits(fn)
     if isinstance(fn, _Map):
         fn = fn._args[0]
-    if isinstance(fn, (FlatMap, _Filter)):
+    if isinstance(fn, (flat, _Filter)):
         return fn.star()
     return _star(fn)
 
