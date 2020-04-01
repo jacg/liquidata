@@ -246,7 +246,7 @@ def test_pick_multiple_items():
 
 RETHINK_ARGSPUT = xfail(reason='Transitioning to operators')
 
-def test_on_item():
+def test_on():
     from reboot import pipe, on, out
     names = 'abc'
     f, = symbolic_functions('f')
@@ -284,7 +284,7 @@ def test_get_multilpe_attr():
 
 
 @GETITEM_FUNDAMENTALLY_BROKEN
-def test_get_multilpe_item():
+def test_get_multilpe_get_item():
     from reboot import get
     it = dict(a=1, b=2, c=9, d=4)
     assert get['d', 'b', 'c'](it) == attrgetter('d', 'b', 'c')(it)
@@ -309,7 +309,7 @@ def test_star():
     assert pipe(get.a.b, star(sym_add), out)(data) == expected
 
 
-def test_item_as_args_single():
+def test_get_as_args_single():
     from reboot import pipe, get, out
     data = namespace_source()
     f, = symbolic_functions('f')
@@ -317,7 +317,7 @@ def test_item_as_args_single():
 
 
 @parametrize('where', 'before after'.split())
-def test_item_star_as_args_many(where):
+def test_get_star_as_args_many(where):
     from reboot import pipe, get, out
     data = namespace_source()
     if where == 'before': net = pipe(get.a.b * sym_add, out)
