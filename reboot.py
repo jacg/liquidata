@@ -12,6 +12,12 @@ import copy
 
 # TODO: make `star` (and consequently `*`) work reliably for all components
 
+# TODO: named branches: out.X([...])
+
+# TODO: add `keep` and `lose` as explicit names for filter and its complement
+
+# TODO: grouping utilities
+
 # TODO: count-filter: implicit {} in out: out.NAME({predicate}) -> .passed & .stopped
 
 # TODO: send down one branch or other depending on predicate. dispatch, match, divert, split
@@ -51,6 +57,10 @@ import copy
 
 # TODO: option to pipe.fn to assume that the pipe is a map, and therefore
 # return the first (hopefully existent and only) thing yielded.
+
+# TODO: typecheck: an alternative to __call__ which, rather than compiling and
+#       composing coroutines, tries to perform typechecking on the composition
+#       of the components.
 
 # TODO: monads?
 
