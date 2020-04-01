@@ -186,7 +186,7 @@ def test_join():
 
 
 def test_flat_map():
-    from reboot import pipe, flatmap as FlatMap, out
+    from reboot import pipe, FlatMap, out
     data = range(4)
     f = range
     assert pipe(FlatMap(f), out)(data) == list(it.chain(*map(f, data)))
@@ -215,7 +215,7 @@ def test_pipe_on_filter():
 
 
 def test_pipe_on_flatmap():
-    from reboot import pipe, flatmap as FlatMap
+    from reboot import pipe, FlatMap
     f = range
     pipe_fn = pipe(FlatMap(f)).fn()
     assert pipe_fn(3) == (0,1,2)
@@ -326,7 +326,7 @@ def test_star_implicit_sink():
 
 
 def test_star_flatmap():
-    from reboot import pipe, get, star, flatmap as FlatMap, out
+    from reboot import pipe, get, star, FlatMap, out
     data = namespace_source()
     got = pipe(get.a.b, star(FlatMap(lambda a,b: (a,b))), out)(data)
     expected = list(it.chain(*((ns.a, ns.b) for ns in data)))
@@ -553,7 +553,7 @@ def test_get_many_filter():
 
 
 def test_get_single_flatmap():
-    from reboot import pipe, flatmap as FlatMap, get, out
+    from reboot import pipe, FlatMap, get, out
     ds = (dict(a=1, b=2),
           dict(a=0, b=3),
           dict(a=3, b=1))
@@ -563,7 +563,7 @@ def test_get_single_flatmap():
 
 
 def test_get_many_flatmap():
-    from reboot import pipe, flatmap as FlatMap, get, out
+    from reboot import pipe, FlatMap, get, out
     ds = (dict(a=1, b=9),
           dict(a=0, b=8),
           dict(a=3, b=7))
