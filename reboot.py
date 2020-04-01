@@ -307,8 +307,6 @@ class _Get:
             return attrgetter(*self.names)(it)
 
         def __mul__(self, action):
-            if isinstance(action, FlatMap): # TODO: this is a horrible hack!
-                return (self, FlatMap(star(*action._args)))
             return (self, star(action))
 
         __rmul__ = __mul__
@@ -332,8 +330,6 @@ class _Item(_MultipleNames):
         return itemgetter(*self.names)(it)
 
     def __mul__(self, action):
-        if isinstance(action, FlatMap): # TODO: this is a horrible hack!
-            return (self, FlatMap(star(*action._args)))
         return (self, star(action))
 
     __rmul__ = __mul__
