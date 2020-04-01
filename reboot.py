@@ -316,14 +316,7 @@ class _Get:
             return itemgetter(*self.keys)(it)
 
 
-class _Item:
-
-    def __init__(self, name):
-        self.names = [name]
-
-    def __getattr__(self, name):
-        self.names.append(name)
-        return self
+class _Item(_MultipleNames):
 
     def __call__(self, it):
         return itemgetter(*self.names)(it)
