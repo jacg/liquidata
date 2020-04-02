@@ -240,6 +240,10 @@ component returns more than one value:
 `hilo` returns two values, `hilo >> put.hi.lo` binds them to two separate names
 in the namespace.
 
+# `on`
+
+TODO
+
 # Nested pipes
 
 Pipes can be used as components inside other pipes:
