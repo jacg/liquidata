@@ -168,11 +168,25 @@ def test_pipe_as_function():
     assert pipe_fn(6) == (g(f(6)),)
 
 
+def test_pipe_as_safe_function():
+    from liquidata import pipe
+    f,g = symbolic_functions('fg')
+    pipe_fn = pipe(f,g).safe()
+    assert pipe_fn(6) == g(f(6))
+
+
 def test_pipe_as_multi_arg_function():
     from liquidata import pipe
     f, = symbolic_functions('f')
     pipe_fn = pipe(sym_add, f).fn()
     assert pipe_fn(6,7) == (f(sym_add(6,7)),)
+
+
+def test_pipe_as_safe_multi_arg_function():
+    from liquidata import pipe
+    f, = symbolic_functions('f')
+    pipe_fn = pipe(sym_add, f).safe()
+    assert pipe_fn(6,7) == f(sym_add(6,7))
 
 
 def test_pipe_as_function_on_filter():
@@ -183,12 +197,28 @@ def test_pipe_as_function_on_filter():
     assert pipe_fn(4) == ()
 
 
+def test_pipe_as_safe_function_on_filter():
+    from liquidata import pipe, Void
+    f = odd
+    pipe_fn = pipe({f}).safe()
+    assert pipe_fn(3) == 3
+    assert pipe_fn(4) == Void
+
+
 def test_pipe_as_function_on_flat():
     from liquidata import pipe, flat
     f = range
     pipe_fn = pipe(flat(f)).fn()
     assert pipe_fn(3) == (0,1,2)
     assert pipe_fn(5) == (0,1,2,3,4)
+
+
+def test_pipe_as_safe_function_on_flat():
+    from liquidata import pipe, flat, Many
+    f = range
+    pipe_fn = pipe(flat(f)).safe()
+    assert pipe_fn(3) == Many((0,1,2))
+    assert pipe_fn(5) == Many((0,1,2,3,4))
 
 
 def test_Void_str():

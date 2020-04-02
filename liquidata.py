@@ -94,6 +94,14 @@ class pipe:
 
     def fn  (self): return pipe._Fn(self._components)
     def pipe(self): return flat (self.fn())
+    def safe(self):
+        fn = self.fn()
+        def safe(*args):
+            result = fn(*args)
+            if len(result) == 1: return result[0]
+            if len(result)  > 1: return Many(result)
+            else               : return Void
+        return safe
 
     def ensure_capped(self):
         last = self._components[-1]
