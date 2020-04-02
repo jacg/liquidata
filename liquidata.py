@@ -92,16 +92,16 @@ class pipe:
         setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
         return out_ns
 
-    def fn  (self): return pipe._Fn(self._components)
-    def pipe(self): return flat (self.fn())
-    def safe(self):
-        fn = self.fn()
-        def safe(*args):
-            result = fn(*args)
+    def _fn (self): return pipe._Fn(self._components)
+    def pipe(self): return     flat(self._fn())
+    def fn(self):
+        the_function = self._fn()
+        def fn(*args):
+            result = the_function(*args)
             if len(result) == 1: return result[0]
             if len(result)  > 1: return Many(result)
             else               : return Void
-        return safe
+        return fn
 
     def ensure_capped(self):
         last = self._components[-1]
@@ -275,7 +275,7 @@ class _On(_Component):
 class _Put (_Component, _MultipleNames):
 
     def __rrshift__(self, action):
-        self.pipe_fn = pipe(action).fn()
+        self.pipe_fn = pipe(action)._fn()
         return self
 
     __lshift__ = __rrshift__
