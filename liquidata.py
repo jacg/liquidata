@@ -607,4 +607,22 @@ class NeedAtLeastOneCoroutine(LiquiDataException): pass
 
 ######################################################################
 
+class Void:
+
+    def __str__(self):
+        return 'Void'
+
+    __repr__ = __str__
+
+Void = Void()
+
+
+class Many(tuple):
+
+    def __str__(self):
+        return f'Many{tuple(self)}'
+
+    def __repr__(self):
+        return f'Many({tuple(self)})'
+
 NamedFuture = namedtuple('NamedFuture', 'name, future')

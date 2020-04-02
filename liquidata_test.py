@@ -191,6 +191,26 @@ def test_pipe_as_function_on_flat():
     assert pipe_fn(5) == (0,1,2,3,4)
 
 
+def test_Void_str():
+    from liquidata import Void
+    assert str(Void) == 'Void'
+
+
+def test_Void_repr():
+    from liquidata import Void
+    assert repr(Void) == 'Void'
+
+
+def test_Many_str():
+    from liquidata import Many
+    assert str(Many((1,2,3))) == 'Many(1, 2, 3)'
+
+
+def test_Many_repr():
+    from liquidata import Many
+    assert repr(Many((1,2,3))) == 'Many((1, 2, 3))'
+
+
 def test_pipe_as_component():
     from liquidata import pipe, pipe
     data = range(3,6)
