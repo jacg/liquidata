@@ -96,14 +96,15 @@ class pipe:
     def pipe(self): return flat (self.fn())
 
     def ensure_capped(self):
-        *cs, last = self._components
-        last = decode_implicits(last, sink=True)
-        return pipe(*cs, last)
+        last = self._components[-1]
+        is_capped = (isinstance(last, (sink, _Return, _Return.Name)) or
+                     isinstance(last, _Name) and last.constructor == _Return.Name)
+        return self if is_capped else pipe(*self._components, out)
 
     class _Fn:
 
         def __init__(self, components):
-            self._pipe = pipe(*it.chain(components, [_Sink(self.accept_result)]))
+            self._pipe = pipe(*it.chain(components, [sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs()
 
         def __call__(self, *args):
@@ -128,8 +129,8 @@ def component(loop):
         self._args = args
 
     def coroutine_and_outputs(self):
-        if loop.__name__ == '_Sink': return coroutine(loop(*self._args))(), ()
-        else                       : return coroutine(loop(*self._args))  , ()
+        if loop.__name__ == 'sink': return coroutine(loop(*self._args))(), ()
+        else                      : return coroutine(loop(*self._args))  , ()
 
     def star(self):
         first, *rest = self._args
@@ -141,7 +142,7 @@ def component(loop):
 
 
 @component
-def _Sink(fn):
+def sink(fn):
     def sink_loop():
         while True:
             fn(*(yield))
@@ -207,6 +208,7 @@ class _Branch(_Component):
                     sideways  .send(args)
                     downstream.send(args)
         return branch_loop, outputs
+
 
 
 class _Return(_Component):
@@ -505,14 +507,13 @@ arg = _Arg()
 
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
-def decode_implicits(it, sink=False):
+def decode_implicits(it):
     if isinstance(it, _Component): return it
     if isinstance(it, pipe      ): return it.pipe()
     if isinstance(it, list      ): return _Branch(*it)
     if isinstance(it, tuple     ): return  pipe(*it).pipe()
     if isinstance(it, set       ): return _Filter( next(iter(it)))
     if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
-    if sink                      : return _Sink(it)
     else                         : return _Map(it)
 
 
