@@ -2,8 +2,8 @@
 
 ## Guinea pig functions
 
-In the examples that follow, we will use
-
+In the examples that follow, we will use some small pre-defined functions, such
+as:
 
 ```python
 {{#include ../../../quickstart_test.py:guinea_pigs}}
@@ -26,7 +26,8 @@ Use `pipe` to create data flows. In its most basic usage
 
 ## Equivalence to `map`
 
-In this form, it just a concise way of mapping multiple functions over a stream of data:
+So far, it just a concise way of mapping multiple functions over a stream of
+data:
 
 ```python
 {{#include ../../../quickstart_test.py:equivalence_to_multiple_maps}}
@@ -45,17 +46,23 @@ To use a function as a filtering predicate, rather than a mapping, wrap it in br
 
 ## Concatenation: `join` and `flat`
 
+`join` is a component which accepts iterable values from downstream, and sends
+the items they contain, downstream, one by one:
+
 ```python
 {{#include ../../../quickstart_test.py:join}}
 ```
+
+`flat(...)` is a utility for creating mapping components with an internal
+`join`.
 
 # Folds
 
 By default, data reaching the end of the pipe is collected into a list, which is
 returned once the input is exhausted. You can override this default collection
-behaviour by providing a binary function to be used to fold the data together.
-To indicate that the function is to be used to fold together the data for
-output, wrap it in `out(...)`.
+behaviour by providing a binary function to be used to fold the data together,
+before returning. To indicate that the function is to be used to fold together
+the data for output, wrap it in `out(...)`.
 
 This is equivalent to `functools.reduce`:
 
@@ -85,7 +92,7 @@ print them out, write them to files, send them across a network ...
 # Branches
 
 It is possible to bifurcate the flow. Grouping some components together in
-square brackets (`[...]`) creates a branch:
+square brackets (`[...]`) creates a branch containing those components:
 
 ```python
 {{#include ../../../quickstart_test.py:branch}}
@@ -116,12 +123,133 @@ return a namespace containing the names `side` and `main`.
 
 TODO
 
+```python
+{{#include ../../../quickstart_test.py:spy}}
+```
 
-# Namespaces
+# Compound flows
+
+So far, we have been sending streams of single values down the pipes. We also
+used branches (`[...]`) to bifurcate the flow.
+
+An alternative approach to bifurcation is to send namespaces, rather than single
+values, through the pipes. Each name in the namespace can be thought of as a
+separate pipe.
+
+The important contrast between these two approaches to branching is that:
+
+- synchronization:
+
+  + `[]`-branches are independent: filters (`{}`), `join` (and `flat`) will cause
+    different numbers of items to reach the end of each branch.
+
+  + the branches represented by namespaces are synchronized: the same number of
+    items reach their ends, even if they contain filters or `join`s.
+
+- merging:
+
+  + namespace branches can easily be made to feed items into a single component.
+    This is not really feasible with `[]`-branches.
+
+`liquidata` provides a number of utilities for working with namespaces in the
+flow: `name`, `get` and `put`.
+
 # name
+
+`name` can be used to create namespaces out of single values, or sequences of values:
+
+```python
+{{#include ../../../quickstart_test.py:name_single}}
+```
+
 # get
-# put
+
+`get` plays two roles:
+
++ a more concise version of `operator.attrgetter`
++ a pipeline version of Python's stardard argument expansion syntax:
+  `fn(*args)`.
+
+Here it is as a drop-in replacement for `attrgetter`:
+
+```python
+{{#include ../../../quickstart_test.py:get_as_attrgetter}}
+```
+
+where `abc012` is the following sequence of namespaces
+
+```python
+{{#include ../../../quickstart_test.py:abc012}}
+```
+
+which will be used in many of the subsequent examples.
+
+Here is `get` combined with the `*` operator, acting like Python's
+argument-expanding `*`:
+
+```python
+{{#include ../../../quickstart_test.py:get_as_star}}
+```
+
+`get` picked two values out of the namespace, and `*` passed them as *separate*
+arguments to `sym_add`.
+
+It is worth emphasizing the important difference between
+
+```python
+get.a.b , f   # f((a,b))
+get.a.b * f   # f( a,b )
+```
+
+# `star`
+
+The `*` in the above example is an operator defined on `get`. When you need to
+expand a tuple of arguments flowing through the pipe into a component, without
+the use of `get`, you can use `star`:
+
+```python
+{{#include ../../../quickstart_test.py:star}}
+```
+
+# `put`
+
+`put` is used to place the outputs of a component into the namespace which came
+from upstream, under specified names.
+
+```python
+{{#include ../../../quickstart_test.py:put}}
+```
+
+The incoming namespaces contained the names `a` and `b` only. `put.ab` *added*
+the name `ab` to the namespace, binding it to the result of `mul` being applied
+to the `a` and `b` already present in the namespace.
+
++ `a` and `b` are 2 synchronized branches.
+
++ `get.a.b * mul` joins these two branches together.
+
++ `mul >> put.ab` creates a new synchronized branch named `ab`.
+
+`put` can create more than one name at a time. This is appropriate when the
+component returns more than one value:
+
+```python
+{{#include ../../../quickstart_test.py:multiple_put}}
+```
+
+`hilo` returns two values, `hilo >> put.hi.lo` binds them to two separate names
+in the namespace.
+
+# Nested pipes
+
+Pipes can be used as components inside other pipes:
+
+```python
+{{#include ../../../quickstart_test.py:nested_pipes}}
+```
+
 # Use as function
+
 
 
 # Introduction

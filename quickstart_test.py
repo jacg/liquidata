@@ -14,8 +14,8 @@ def test_quickstart():
     # ANCHOR_END: guinea_pigs
 
     # ANCHOR: function_composition
-    flow = pipe(f, g, h)
-    assert flow(range(3)) == ['h(g(f(0)))', 'h(g(f(1)))', 'h(g(f(2)))']
+    doit = pipe(f, g, h)
+    assert doit(range(3)) == ['h(g(f(0)))', 'h(g(f(1)))', 'h(g(f(2)))']
     # ANCHOR_END: function_composition
     # ANCHOR: equivalence_to_multiple_maps
     piped  = pipe(    f,     g,     h)(range(10))
@@ -78,4 +78,73 @@ def test_quickstart():
     #pipe(f,  spy.X , g)
     # ANCHOR_END: spy
 
-    assert abc == 3
+    # ANCHOR: name_single
+    # Make a namespace containing one name out of a single value
+    one = pipe(name.x)(range(3))
+    two = list(Namespace(x=n) for n in range(3))
+    assert one == two
+
+    # Make a namespace containing two names, out of a 2-tuple
+    data = [(1,2), (3,4), (9,8)]
+    one = pipe(name.a.b)(data)
+    two = list(Namespace(a=a, b=b) for (a,b) in data)
+    assert one == two
+    # ANCHOR_END: name_single
+
+    # ANCHOR: get_as_attrgetter
+    ns = name.a.b.c('xyz')
+    assert get.b  (ns) == attrgetter('b')     (ns)
+    assert get.a.c(ns) == attrgetter('a', 'c')(ns)
+
+    expected = [('a0', 'c0'), ('a1', 'c1'), ('a2', 'c2')]
+    assert pipe(    get    .a   .c)  (abc012) == expected
+    assert pipe(attrgetter('a', 'c'))(abc012) == expected
+    # ANCHOR_END: get_as_attrgetter
+
+    # ANCHOR: abc012
+    assert abc012 == [Namespace(a='a0', b='b0', c='c0'),
+                      Namespace(a='a1', b='b1', c='c1'),
+                      Namespace(a='a2', b='b2', c='c2')]
+    # ANCHOR_END: abc012
+
+    # ANCHOR: get_as_star
+    assert sym_add(2,3) == '(2 + 3)'
+
+    assert pipe(get.a.b * sym_add)(abc012) == ['(a0 + b0)', '(a1 + b1)', '(a2 + b2)']
+    # ANCHOR_END: get_as_star
+
+    # ANCHOR: star
+    data = [(1,2), (3,4), (9,8)]
+    assert pipe(star(sym_add))(data) == ['(1 + 2)', '(3 + 4)', '(9 + 8)']
+    # ANCHOR_END: star
+
+    # ANCHOR: put
+    data = pipe(name.a.b)([(1,2), (3,4), (9,8)])
+
+    result = pipe(get.a.b * mul >> put.ab)(data)
+
+    assert pipe(get.a )(result) == [1  , 3  , 9  ]
+    assert pipe(get.b )(result) == [  2,   4,   8]
+    assert pipe(get.ab)(result) == [1*2, 3*4, 9*8]
+    # ANCHOR_END: put
+
+    # ANCHOR: multiple_put
+    data = pipe(name.a.b)([(1,2), (3,4), (9,8)])
+
+    def hilo(a,b):
+        return max(a,b), min(a,b)
+
+    result = pipe(get.a.b * hilo >> put.hi.lo)(data)
+
+    assert pipe(get.a )(result) == [1  , 3  , 9  ]
+    assert pipe(get.b )(result) == [  2,   4,   8]
+
+    assert pipe(get.hi)(result) == [  2,   4, 9  ]
+    assert pipe(get.lo)(result) == [1  , 3  ,   8]
+    # ANCHOR_END: multiple_put
+
+    # ANCHOR: nested_pipes
+    inner = pipe(   f, g    )
+    outer = pipe(a, inner, b)
+    assert outer(range(3)) == pipe(a, f, g, b)(range(3))
+    # ANCHOR_END: nested_pipes
