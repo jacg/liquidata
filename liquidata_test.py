@@ -18,24 +18,7 @@ from hypothesis.strategies import integers
 from hypothesis.strategies import none
 from hypothesis.strategies import one_of, sampled_from
 
-###################################################################
-# Guinea pig functions for use in graphs constructed in the tests #
-###################################################################
-
-def symbolic_apply(f ): return lambda x   : f'{f}({x})'
-def symbolic_binop(op): return lambda l, r: f'({l} {op} {r})'
-def symbolic_functions(names): return map(symbolic_apply, names)
-sym_add = symbolic_binop('+')
-sym_mul = symbolic_binop('*')
-
-def square(n): return n * n
-def mulN(N): return lambda x: x * N
-def addN(N): return lambda x: x + N
-def  gtN(N): return lambda x: x > N
-def  ltN(N): return lambda x: x < N
-
-def odd (n): return n % 2 != 0
-def even(n): return n % 2 == 0
+from testhelpers import *
 
 ###################################################################
 
@@ -285,11 +268,6 @@ def test_item_multiple():
     from liquidata import item
     it = dict(a=1, b=2, c=9, d=4)
     assert item.d.b.c(it) == itemgetter('d', 'b', 'c')(it)
-
-
-def namespace_source(keys='abc', length=3):
-    indices = range(length)
-    return [Namespace(**{key:f'{key}{i}' for key in keys}) for i in indices]
 
 
 def test_star_map():
