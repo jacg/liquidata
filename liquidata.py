@@ -103,7 +103,7 @@ class pipe:
     class _Fn:
 
         def __init__(self, components):
-            self._pipe = pipe(*it.chain(components, [_Sink(self.accept_result)]))
+            self._pipe = pipe(*it.chain(components, [Sink(self.accept_result)]))
             self._coroutine, _ = self._pipe.coroutine_and_outputs()
 
         def __call__(self, *args):
@@ -128,8 +128,8 @@ def component(loop):
         self._args = args
 
     def coroutine_and_outputs(self):
-        if loop.__name__ == '_Sink': return coroutine(loop(*self._args))(), ()
-        else                       : return coroutine(loop(*self._args))  , ()
+        if loop.__name__ == 'Sink': return coroutine(loop(*self._args))(), ()
+        else                      : return coroutine(loop(*self._args))  , ()
 
     def star(self):
         first, *rest = self._args
@@ -141,7 +141,7 @@ def component(loop):
 
 
 @component
-def _Sink(fn):
+def Sink(fn):
     def sink_loop():
         while True:
             fn(*(yield))
@@ -512,7 +512,7 @@ def decode_implicits(it, sink_=False):
     if isinstance(it, tuple     ): return  pipe(*it).pipe()
     if isinstance(it, set       ): return _Filter( next(iter(it)))
     if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
-    if sink_                     : return _Sink(it)
+    if sink_                     : return  Sink(it)
     else                         : return _Map(it)
 
 
