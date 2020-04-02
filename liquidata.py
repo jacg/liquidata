@@ -10,6 +10,10 @@ import copy
 
 
 
+# TODO: f * get.x >> put.y should work: that is `get.<single name>` should work with `*`
+
+# TODO: pipe.fn(RETURN_STRATEGY)  Exception or tuple
+
 # TODO: make `star` (and consequently `*`) work reliably for all components
 
 # TODO: named branches: out.X([...])
@@ -23,6 +27,8 @@ import copy
 # TODO: send down one branch or other depending on predicate. dispatch, match, divert, split
 
 # TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
+
+# TODO: automatic reinitialization of pipe.fn() after exception or other close.
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
 
@@ -43,6 +49,12 @@ import copy
 # TODO: find public interface for Slice
 
 # TODO: A [::] syntax for slice? Can we do better than `slice[start:stop:step]`? what about close_all?
+
+# TODO: pipe(source(s), f) == pipe(f)(s)
+
+# TODO: Give user choice whether sink or out is the default at end of pipe.
+#       - pipe(source(s), ...) ; pipe(...)(s)
+#       - pipe vs flow or some other name
 
 # TODO: `get` and `item` distinguish between namespaces and dict; put assumes
 #       namespaces. Give `put` a sibling? Make put detect automatically?
