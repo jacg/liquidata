@@ -97,7 +97,7 @@ class pipe:
 
     def ensure_capped(self):
         *cs, last = self._components
-        last = decode_implicits(last, sink=True)
+        last = decode_implicits(last, sink_=True)
         return pipe(*cs, last)
 
     class _Fn:
@@ -505,14 +505,14 @@ arg = _Arg()
 
 # Most component names don't have to be used explicitly, because plain python
 # types have implicit interpretations as components
-def decode_implicits(it, sink=False):
+def decode_implicits(it, sink_=False):
     if isinstance(it, _Component): return it
     if isinstance(it, pipe      ): return it.pipe()
     if isinstance(it, list      ): return _Branch(*it)
     if isinstance(it, tuple     ): return  pipe(*it).pipe()
     if isinstance(it, set       ): return _Filter( next(iter(it)))
     if isinstance(it, dict      ): return _Filter(*next(iter(it.items())))
-    if sink                      : return _Sink(it)
+    if sink_                     : return _Sink(it)
     else                         : return _Map(it)
 
 
