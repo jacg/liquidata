@@ -175,7 +175,7 @@ def test_pipe_as_multi_arg_function():
     assert pipe_fn(6,7) == (f(sym_add(6,7)),)
 
 
-def test_pipe_on_filter():
+def test_pipe_as_function_on_filter():
     from liquidata import pipe
     f = odd
     pipe_fn = pipe({f}).fn()
@@ -183,7 +183,7 @@ def test_pipe_on_filter():
     assert pipe_fn(4) == ()
 
 
-def test_pipe_on_flat():
+def test_pipe_as_function_on_flat():
     from liquidata import pipe, flat
     f = range
     pipe_fn = pipe(flat(f)).fn()
