@@ -1,3 +1,129 @@
+# Quickstart
+
+## Guinea pig functions
+
+In the examples that follow, we will use
+
+
+```python
+{{#include ../../../quickstart_test.py:guinea_pigs}}
+```
+
+## Function composition and iteration
+
+Use `pipe` to create data flows. In its most basic usage
+
+```python
+{{#include ../../../quickstart_test.py:function_composition}}
+```
+
++ `pipe` composes functions.
++ `pipe` returns a callable.
++ That callable accepts an iterable argument
++ It feeds the contents of its argument through the sequence of functions in the
+  pipe.
++ It returns a list of the values that reach the end of the pipe
+
+## Equivalence to `map`
+
+In this form, it just a concise way of mapping multiple functions over a stream of data:
+
+```python
+{{#include ../../../quickstart_test.py:equivalence_to_multiple_maps}}
+```
+
+Note the reversal of the order in which the functions are specified (`f`-`g`-`h`
+vs `h`-`g`-`f`).
+
+## Filtering
+
+To use a function as a filtering predicate, rather than a mapping, wrap it in braces (`{  }`):
+
+```python
+{{#include ../../../quickstart_test.py:filter}}
+```
+
+## Concatenation: `join` and `flat`
+
+```python
+{{#include ../../../quickstart_test.py:join}}
+```
+
+# Folds
+
+By default, data reaching the end of the pipe is collected into a list, which is
+returned once the input is exhausted. You can override this default collection
+behaviour by providing a binary function to be used to fold the data together.
+To indicate that the function is to be used to fold together the data for
+output, wrap it in `out(...)`.
+
+This is equivalent to `functools.reduce`:
+
+```python
+{{#include ../../../quickstart_test.py:fold}}
+```
+
+A default or initial value can be provided, just like with `functools.reduce`:
+
+```python
+{{#include ../../../quickstart_test.py:fold_with_initial}}
+```
+
+# Side-effects
+
+Instead of returning the data reaching the end of the pipe, it is possible to
+use it to perform side-effects. This is done by providing a unary side-effecting
+function and wrapping it in `sink(...)`:
+
+```python
+{{#include ../../../quickstart_test.py:side_effects}}
+```
+
+In this case we're just appending the values to a list. In real life you might
+print them out, write them to files, send them across a network ...
+
+# Branches
+
+It is possible to bifurcate the flow. Grouping some components together in
+square brackets (`[...]`) creates a branch:
+
+```python
+{{#include ../../../quickstart_test.py:branch}}
+```
+
+# Named outputs
+
+In the last example, data reaching the end of the main pipe was returned, while
+the side-branch sent the data down a side-effecting sink.
+
+It is possible to have the network return multiple values from various
+end-points in the graph. In order to make it clear which output corresponds to
+which branch, it's a good idea to name the outputs. This is done with
+`out.<name>`:
+
+```python
+{{#include ../../../quickstart_test.py:named_outs}}
+```
+
+As soon as multiple outputs are present in a network, the function created by
+`pipe` returns a namespace containing all the return values, rather than a
+single return value.
+
+In this example the two named outs (`out.side` and `out.main`) caused `pipe` to
+return a namespace containing the names `side` and `main`.
+
+# Spies
+
+TODO
+
+
+# Namespaces
+# name
+# get
+# put
+# Use as function
+
+
 # Introduction
 
 For now, I'll just write everything here, then, as it takes shape, we can decide
