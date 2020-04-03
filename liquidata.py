@@ -76,6 +76,13 @@ import copy
 
 class pipe:
 
+    def __new__(cls, *components):
+        self = super().__new__(cls)
+        if isinstance(components[0], source):
+            self.__init__(*components[1:])
+            return self(components[0].it)
+        return self
+
     def __init__(self, *components):
         self._components = components
 
@@ -138,6 +145,12 @@ class pipe:
 ######################################################################
 #    Component types                                                 #
 ######################################################################
+
+class source:
+
+    def __init__(self, iterable):
+        self.it = iterable
+
 
 class _Component:
     pass

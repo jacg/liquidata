@@ -29,6 +29,12 @@ def test_map():
     f, = symbolic_functions('f')
     assert pipe(f)(data) == list(map(f, data))
 
+def test_source():
+    from liquidata import pipe, source
+    data = list(range(10))
+    f, = symbolic_functions('f')
+    assert pipe(source(data), f) == list(map(f, data))
+
 
 def test_filter():
     from liquidata import pipe
