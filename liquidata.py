@@ -55,8 +55,7 @@ import copy
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
 
-# TODO: option to pipe.fn to assume that the pipe is a map, and therefore
-# return the first (hopefully existent and only) thing yielded.
+# TODO: add pipe.fn(Exception) alongside pipe.fn() and pipe.fn(tuple)
 
 # TODO: typecheck: an alternative to __call__ which, rather than compiling and
 #       composing coroutines, tries to perform typechecking on the composition
@@ -92,8 +91,19 @@ class pipe:
         setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
         return out_ns
 
-    def fn  (self): return pipe._Fn(self._components)
-    def pipe(self): return flat (self.fn())
+    def pipe(self):
+        return flat(self.fn(tuple))
+
+    def fn(self, many=None):
+        the_function = pipe._Fn(self._components)
+        if many is tuple:
+            return the_function
+        def fn(*args):
+            result = the_function(*args)
+            if len(result) == 1: return result[0]
+            if len(result)  > 1: return Many(result)
+            else               : return Void
+        return fn
 
     def ensure_capped(self):
         last = self._components[-1]
@@ -267,7 +277,7 @@ class _On(_Component):
 class _Put (_Component, _MultipleNames):
 
     def __rrshift__(self, action):
-        self.pipe_fn = pipe(action).fn()
+        self.pipe_fn = pipe(action).fn(tuple)
         return self
 
     __lshift__ = __rrshift__
@@ -606,5 +616,17 @@ class SinkMissing            (LiquiDataException): pass
 class NeedAtLeastOneCoroutine(LiquiDataException): pass
 
 ######################################################################
+
+class Many(tuple):
+
+    def __str__(self):
+        if self: return f'Many{tuple(self)}'
+        else   : return 'Void'
+
+    def __repr__(self):
+        if self: return f'Many({tuple(self)})'
+        else   : return 'Void'
+
+Void = Many()
 
 NamedFuture = namedtuple('NamedFuture', 'name, future')

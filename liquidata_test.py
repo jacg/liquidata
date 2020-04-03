@@ -164,31 +164,81 @@ def test_flat():
 def test_pipe_as_function():
     from liquidata import pipe
     f,g = symbolic_functions('fg')
-    pipe_fn = pipe(f,g).fn()
+    pipe_fn = pipe(f,g).fn(tuple)
     assert pipe_fn(6) == (g(f(6)),)
+
+
+def test_pipe_as_safe_function():
+    from liquidata import pipe
+    f,g = symbolic_functions('fg')
+    pipe_fn = pipe(f,g).fn()
+    assert pipe_fn(6) == g(f(6))
 
 
 def test_pipe_as_multi_arg_function():
     from liquidata import pipe
     f, = symbolic_functions('f')
-    pipe_fn = pipe(sym_add, f).fn()
+    pipe_fn = pipe(sym_add, f).fn(tuple)
     assert pipe_fn(6,7) == (f(sym_add(6,7)),)
 
 
-def test_pipe_on_filter():
+def test_pipe_as_safe_multi_arg_function():
+    from liquidata import pipe
+    f, = symbolic_functions('f')
+    pipe_fn = pipe(sym_add, f).fn()
+    assert pipe_fn(6,7) == f(sym_add(6,7))
+
+
+def test_pipe_as_function_on_filter():
     from liquidata import pipe
     f = odd
-    pipe_fn = pipe({f}).fn()
+    pipe_fn = pipe({f}).fn(tuple)
     assert pipe_fn(3) == (3,)
     assert pipe_fn(4) == ()
 
 
-def test_pipe_on_flat():
+def test_pipe_as_safe_function_on_filter():
+    from liquidata import pipe, Void
+    f = odd
+    pipe_fn = pipe({f}).fn()
+    assert pipe_fn(3) == 3
+    assert pipe_fn(4) == Void
+
+
+def test_pipe_as_function_on_flat():
     from liquidata import pipe, flat
     f = range
-    pipe_fn = pipe(flat(f)).fn()
+    pipe_fn = pipe(flat(f)).fn(tuple)
     assert pipe_fn(3) == (0,1,2)
     assert pipe_fn(5) == (0,1,2,3,4)
+
+
+def test_pipe_as_safe_function_on_flat():
+    from liquidata import pipe, flat, Many
+    f = range
+    pipe_fn = pipe(flat(f)).fn()
+    assert pipe_fn(3) == Many((0,1,2))
+    assert pipe_fn(5) == Many((0,1,2,3,4))
+
+
+def test_Void_str():
+    from liquidata import Void
+    assert str(Void) == 'Void'
+
+
+def test_Void_repr():
+    from liquidata import Void
+    assert repr(Void) == 'Void'
+
+
+def test_Many_str():
+    from liquidata import Many
+    assert str(Many((1,2,3))) == 'Many(1, 2, 3)'
+
+
+def test_Many_repr():
+    from liquidata import Many
+    assert repr(Many((1,2,3))) == 'Many((1, 2, 3))'
 
 
 def test_pipe_as_component():
