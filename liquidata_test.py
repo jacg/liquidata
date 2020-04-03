@@ -164,7 +164,7 @@ def test_flat():
 def test_pipe_as_function():
     from liquidata import pipe
     f,g = symbolic_functions('fg')
-    pipe_fn = pipe(f,g)._fn()
+    pipe_fn = pipe(f,g).fn(tuple)
     assert pipe_fn(6) == (g(f(6)),)
 
 
@@ -178,7 +178,7 @@ def test_pipe_as_safe_function():
 def test_pipe_as_multi_arg_function():
     from liquidata import pipe
     f, = symbolic_functions('f')
-    pipe_fn = pipe(sym_add, f)._fn()
+    pipe_fn = pipe(sym_add, f).fn(tuple)
     assert pipe_fn(6,7) == (f(sym_add(6,7)),)
 
 
@@ -192,7 +192,7 @@ def test_pipe_as_safe_multi_arg_function():
 def test_pipe_as_function_on_filter():
     from liquidata import pipe
     f = odd
-    pipe_fn = pipe({f})._fn()
+    pipe_fn = pipe({f}).fn(tuple)
     assert pipe_fn(3) == (3,)
     assert pipe_fn(4) == ()
 
@@ -208,7 +208,7 @@ def test_pipe_as_safe_function_on_filter():
 def test_pipe_as_function_on_flat():
     from liquidata import pipe, flat
     f = range
-    pipe_fn = pipe(flat(f))._fn()
+    pipe_fn = pipe(flat(f)).fn(tuple)
     assert pipe_fn(3) == (0,1,2)
     assert pipe_fn(5) == (0,1,2,3,4)
 

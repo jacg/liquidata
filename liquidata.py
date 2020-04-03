@@ -92,10 +92,13 @@ class pipe:
         setattr(out_ns, 'return', tuple(r.future.result() for r in returns))
         return out_ns
 
-    def _fn (self): return pipe._Fn(self._components)
-    def pipe(self): return     flat(self._fn())
-    def fn(self):
-        the_function = self._fn()
+    def pipe(self):
+        return flat(self.fn(tuple))
+
+    def fn(self, many=None):
+        the_function = pipe._Fn(self._components)
+        if many is tuple:
+            return the_function
         def fn(*args):
             result = the_function(*args)
             if len(result) == 1: return result[0]
@@ -275,7 +278,7 @@ class _On(_Component):
 class _Put (_Component, _MultipleNames):
 
     def __rrshift__(self, action):
-        self.pipe_fn = pipe(action)._fn()
+        self.pipe_fn = pipe(action).fn(tuple)
         return self
 
     __lshift__ = __rrshift__
