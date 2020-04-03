@@ -10,8 +10,6 @@ import copy
 
 
 
-# TODO: f * get.x >> put.y should work: that is `get.<single name>` should work with `*`
-
 # TODO: pipe.fn(RETURN_STRATEGY)  Exception or tuple
 
 # TODO: make `star` (and consequently `*`) work reliably for all components
@@ -347,7 +345,9 @@ class _Get:
             return attrgetter(*self.names)(it)
 
         def __mul__(self, action):
-            return (self, star(action))
+            if len(self.names) == 1:
+                return (self,      action )
+            return     (self, star(action))
 
         __rmul__ = __mul__
 
@@ -369,8 +369,7 @@ class _Item(_MultipleNames):
     def __call__(self, it):
         return itemgetter(*self.names)(it)
 
-    def __mul__(self, action):
-        return (self, star(action))
+    __mul__ = _Get.Attr.__mul__
 
     __rmul__ = __mul__
 

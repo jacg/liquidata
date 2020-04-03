@@ -347,6 +347,21 @@ def test_star_flat():
     assert got == expected
 
 
+def test_get_star_single():
+    from liquidata import pipe, get
+    f, = symbolic_functions('f')
+    data = namespace_source()
+    expected = [f(n.b) for n in data]
+    assert pipe(get.b * f)(data) == expected
+
+
+def test_get_star_multiple():
+    from liquidata import pipe, get
+    data = namespace_source()
+    expected = [sym_add(n.c, n.a) for n in data]
+    assert pipe(get.c.a * sym_add)(data) == expected
+
+
 def test_star_filter():
     from liquidata import pipe, star
     data = [(2,3), (3,2), (3,3), (9,1)]
