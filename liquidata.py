@@ -146,7 +146,13 @@ class pipe:
 #    Component types                                                 #
 ######################################################################
 
-class source:
+class _Source(type):
+
+    def __rrshift__(cls, other):
+        return cls(other)
+
+
+class source(metaclass=_Source):
 
     def __init__(self, iterable):
         self.it = iterable

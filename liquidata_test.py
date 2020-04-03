@@ -36,6 +36,13 @@ def test_source():
     assert pipe(source(data), f) == list(map(f, data))
 
 
+def test_source_rshift():
+    from liquidata import pipe, source
+    data = list(range(10))
+    f, = symbolic_functions('f')
+    assert pipe(data >> source, f) == list(map(f, data))
+
+
 def test_filter():
     from liquidata import pipe
     data = list(range(10))
