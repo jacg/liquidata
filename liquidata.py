@@ -347,7 +347,9 @@ class _Get:
             return attrgetter(*self.names)(it)
 
         def __mul__(self, action):
-            return (self, star(action))
+            if len(self.names) == 1:
+                return (self, lambda x: (x,), star(action))
+            return     (self,                 star(action))
 
         __rmul__ = __mul__
 
