@@ -371,8 +371,7 @@ class _Item(_MultipleNames):
     def __call__(self, it):
         return itemgetter(*self.names)(it)
 
-    def __mul__(self, action):
-        return (self, star(action))
+    __mul__ = _Get.Attr.__mul__
 
     __rmul__ = __mul__
 
