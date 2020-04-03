@@ -10,8 +10,6 @@ import copy
 
 
 
-# TODO: f * get.x >> put.y should work: that is `get.<single name>` should work with `*`
-
 # TODO: pipe.fn(RETURN_STRATEGY)  Exception or tuple
 
 # TODO: make `star` (and consequently `*`) work reliably for all components
