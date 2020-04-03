@@ -151,6 +151,8 @@ class _Source(type):
     def __rrshift__(cls, other):
         return cls(other)
 
+    __lshift__ = __rrshift__
+
 
 class source(metaclass=_Source):
 
