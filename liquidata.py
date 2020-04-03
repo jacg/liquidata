@@ -55,8 +55,7 @@ import copy
 # TODO: spy(side-effect),  spy.X(result-sink) as synonyms for
 #          [side-effect], [out.X(result-sink)] ????
 
-# TODO: option to pipe.fn to assume that the pipe is a map, and therefore
-# return the first (hopefully existent and only) thing yielded.
+# TODO: add pipe.fn(Exception) alongside pipe.fn() and pipe.fn(tuple)
 
 # TODO: typecheck: an alternative to __call__ which, rather than compiling and
 #       composing coroutines, tries to perform typechecking on the composition
