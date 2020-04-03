@@ -143,8 +143,40 @@ def test_quickstart():
     assert pipe(get.lo)(result) == [1  , 3  ,   8]
     # ANCHOR_END: multiple_put
 
+    # ANCHOR: get_put_after
+    inner = pipe(   f, g    )
+    outer = pipe(a, inner, b)
+    assert outer(range(3)) == pipe(a, f, g, b)(range(3))
+    # ANCHOR_END: get_put_after
+
     # ANCHOR: nested_pipes
     inner = pipe(   f, g    )
     outer = pipe(a, inner, b)
     assert outer(range(3)) == pipe(a, f, g, b)(range(3))
     # ANCHOR_END: nested_pipes
+
+    # ANCHOR: as_function
+    fn = pipe(f, g).fn()
+    assert fn(1) == 'g(f(1))'
+    assert fn(2) == 'g(f(2))'
+    # ANCHOR_END: as_function
+
+    # ANCHOR: as_function_multiple
+    fn = pipe({odd}, f).fn()
+    assert fn(3) == 'f(3)'
+    assert fn(4) == Void
+
+    fn = pipe(range, join, f).fn()
+    assert fn(0) == Void
+    assert fn(1) == 'f(0)'
+    assert fn(3) == Many(('f(0)', 'f(1)', 'f(2)'))
+    # ANCHOR_END: as_function_multiple
+
+    # ANCHOR: many_and_void
+    assert         Many((1,2,3)) == (1,2,3) == tuple((1,2,3))
+    assert Void == Many(       ) == ()      == tuple(       )
+
+    assert isinstance(Many(), tuple)
+    assert isinstance(Void  , tuple)
+    assert isinstance(Void  , Many)
+    # ANCHOR_END: many_and_void

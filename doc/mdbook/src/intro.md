@@ -44,6 +44,8 @@ To use a function as a filtering predicate, rather than a mapping, wrap it in br
 {{#include ../../../quickstart_test.py:filter}}
 ```
 
+TODO key filters
+
 ## Concatenation: `join` and `flat`
 
 `join` is a component which accepts iterable values from downstream, and sends
@@ -240,6 +242,9 @@ component returns more than one value:
 `hilo` returns two values, `hilo >> put.hi.lo` binds them to two separate names
 in the namespace.
 
+
+
+
 # `on`
 
 TODO
@@ -254,7 +259,37 @@ Pipes can be used as components inside other pipes:
 
 # Use as function
 
+The emphasis of `liquidata` is lazy streaming. But `pipe` can be used as a
+convenient tool for function composition. `pipe`'s `fn` method returns a
+function, which sends its argument through the pipe as a single item, and
+returns the result:
 
+```python
+{{#include ../../../quickstart_test.py:as_function}}
+```
+
+However, if there are filters or `join`s in the pipe, a single input may produce
+either zero or multiple outputs:
+
+```python
+{{#include ../../../quickstart_test.py:as_function_multiple}}
+```
+
++ A single value is simply returned.
+
++ Multiple values are returned wrapped in `Many`.
+
++ If no values are produced, the function returns `Void`
+
+```python
+{{#include ../../../quickstart_test.py:many_and_void}}
+```
+
++ `Many` is a subclass of `tuple`.
+
++ `Void` is just the empty instance of `Many`
+
+# Resetting functions (and pipes?) after exceptions and other closes.
 
 # Introduction
 
