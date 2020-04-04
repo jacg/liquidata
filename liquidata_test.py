@@ -136,6 +136,12 @@ def test_toplevel_into():
     assert pipe(into(set))(data) == set(data)
 
 
+def test_toplevel_named_into():
+    from liquidata import pipe, out, into
+    data = 'abracadabra'
+    assert pipe(into.X(set))(data).X == set(data)
+
+
 def test_return_value_from_branch():
     from liquidata import pipe, out
     data = range(3)
