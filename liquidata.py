@@ -448,7 +448,7 @@ class _Fold(_Component):
     def make_coroutine(self, future):
         binary_function = self._fn
         @coroutine
-        def reduce_loop(future):
+        def fold_loop(future):
             if self._initial is None:
                 try:
                     accumulator, = (yield)
@@ -462,7 +462,7 @@ class _Fold(_Component):
                     accumulator = binary_function(accumulator, *(yield))
             finally:
                 future.set_result(self._container(accumulator))
-        return reduce_loop(future)
+        return fold_loop(future)
 
 
 class Slice(_Component):
