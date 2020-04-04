@@ -278,11 +278,10 @@ class _Return(_Component):
             self.name = name
 
         def __call__(self, arg, initial=None, key=None):
-            if isinstance(arg, set):
-                arg = _CountFilter(arg, key=key)
-            if not isinstance(arg, _Component):
-                # TODO: issue warning/error if initial is not None
-                arg = _Fold(arg, initial=initial)
+            if       isinstance(arg, set       ): arg = _CountFilter(arg, key=key)
+            elif     isinstance(arg, into      ): arg = into_consumer(arg.consumer)
+            elif not isinstance(arg, _Component): arg = _Fold(arg, initial=initial)
+            # TODO: issue warning/error if initial is not None
             # TODO: set as implicit count filter?
             return _Return(self.name, arg)
 
