@@ -263,8 +263,14 @@ class into:
 
 class _Return(_Component):
 
-    def __init__(self, name, sink=None):
+    def __init__(self, name, sink=None, initial=None, key=None):
         self._name = name
+
+        if       isinstance(sink, set       ): sink = _CountFilter(sink, key=key)
+        elif     isinstance(sink, into      ): sink = into_consumer(sink.consumer)
+        elif not isinstance(sink, _Component): sink = _Fold(sink, initial=initial)
+        # TODO: issue warning/error if initial is not None
+        # TODO: set as implicit count filter?
         self._sink = sink
 
     def coroutine_and_outputs(self):
@@ -277,21 +283,14 @@ class _Return(_Component):
         def __init__(self, name):
             self.name = name
 
-        def __call__(self, arg, initial=None, key=None):
-            if       isinstance(arg, set       ): arg = _CountFilter(arg, key=key)
-            elif     isinstance(arg, into      ): arg = into_consumer(arg.consumer)
-            elif not isinstance(arg, _Component): arg = _Fold(arg, initial=initial)
-            # TODO: issue warning/error if initial is not None
-            # TODO: set as implicit count filter?
-            return _Return(self.name, arg)
+        def __call__(self, *args, **kwds):
+            return _Return(self.name, *args, **kwds)
 
         def coroutine_and_outputs(self):
             return _Return(self.name, into_consumer()).coroutine_and_outputs()
 
         @classmethod
         def no_name_given(cls, sink=into(list), *args, **kwds):
-            if isinstance(sink, into):
-                sink = into_consumer(sink.consumer)
             return cls('return')(sink, *args, **kwds)
 
 
