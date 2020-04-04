@@ -124,6 +124,12 @@ def test_fold_into_Count():
     assert pipe(out(into(Counter)))(data) == Counter(data)
 
 
+def test_fold_into_named_out():
+    from liquidata import pipe, out, into
+    data = 'abracadabra'
+    assert pipe(out.X(into(set)))(data).X == set(data)
+
+
 def test_return_value_from_branch():
     from liquidata import pipe, out
     data = range(3)
