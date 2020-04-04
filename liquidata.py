@@ -48,8 +48,6 @@ import copy
 
 # TODO: A [::] syntax for slice? Can we do better than `slice[start:stop:step]`? what about close_all?
 
-# TODO: pipe(source(s), f) == pipe(f)(s)
-
 # TODO: Give user choice whether sink or out is the default at end of pipe.
 #       - pipe(source(s), ...) ; pipe(...)(s)
 #       - pipe vs flow or some other name
@@ -75,6 +73,13 @@ import copy
 
 
 class pipe:
+
+    def __new__(cls, *components):
+        self = super().__new__(cls)
+        if isinstance(components[0], source):
+            self.__init__(*components[1:])
+            return self(components[0].it)
+        return self
 
     def __init__(self, *components):
         self._components = components
@@ -138,6 +143,20 @@ class pipe:
 ######################################################################
 #    Component types                                                 #
 ######################################################################
+
+class _Source(type):
+
+    def __rrshift__(cls, other):
+        return cls(other)
+
+    __lshift__ = __rrshift__
+
+
+class source(metaclass=_Source):
+
+    def __init__(self, iterable):
+        self.it = iterable
+
 
 class _Component:
     pass
