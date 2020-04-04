@@ -26,6 +26,12 @@ import copy
 
 # TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
+# TODO: think about whether `into` or `_Fold` should be the default `out`.
+
+# TODO: find constant-space implementation of into
+
+# TODO: implement _Fold in terms of into(reduce(...)), but only once into is constant-space
+
 # TODO: automatic reinitialization of pipe.fn() after exception or other close.
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
@@ -448,7 +454,6 @@ class _Fold(_Component):
                     accumulator, = (yield)
                 except StopIteration:
                     # TODO: message about not being able to run on an empty stream.
-                    # Try to link it to variable names in the network?
                     pass
             else:
                 accumulator = self._initial
