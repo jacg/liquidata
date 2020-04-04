@@ -249,6 +249,11 @@ class _Branch(_Component):
         return branch_loop, outputs
 
 
+class into:
+
+    def __init__(self, container):
+        self.container = container
+
 
 class _Return(_Component):
 
@@ -276,12 +281,12 @@ class _Return(_Component):
             return _Return(self.name, arg)
 
         def coroutine_and_outputs(self):
-            return _Return(self.name, into_list()).coroutine_and_outputs()
+            return _Return(self.name, into_container()).coroutine_and_outputs()
 
         @classmethod
-        def no_name_given(cls, sink=None, *args, **kwds):
-            if sink is None:
-                sink = into_list()
+        def no_name_given(cls, sink=into(list), *args, **kwds):
+            if isinstance(sink, into):
+                sink = into_container(sink.container)
             return cls('return')(sink, *args, **kwds)
 
 
@@ -429,9 +434,10 @@ class _Fold(_Component):
     # TODO: future-sinks should not appear at toplevel, as they must be wrapped
     # in an output. Detect and report error at conversion from implicit
 
-    def __init__(self, fn, initial=None):
+    def __init__(self, fn, initial=None, container=lambda x:x):
         self._fn = fn
         self._initial = initial
+        self._container = container
 
     def make_coroutine(self, future):
         binary_function = self._fn
@@ -450,7 +456,7 @@ class _Fold(_Component):
                 while True:
                     accumulator = binary_function(accumulator, *(yield))
             finally:
-                future.set_result(accumulator)
+                future.set_result(self._container(accumulator))
         return reduce_loop(future)
 
 
@@ -619,11 +625,11 @@ def until(predicate):
 def while_(predicate): return until(lambda x: not predicate(x))
 
 
-def into_list():
+def into_container(container=list):
     def append(the_list, element):
         the_list.append(element)
         return the_list
-    return _Fold(append, [])
+    return _Fold(append, [], container)
 
 
 def star(fn):
