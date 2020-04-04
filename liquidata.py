@@ -257,8 +257,8 @@ class _Branch(_Component):
 
 class into:
 
-    def __init__(self, container):
-        self.container = container
+    def __init__(self, consumer):
+        self.consumer = consumer
 
 
 class _Return(_Component):
@@ -287,12 +287,12 @@ class _Return(_Component):
             return _Return(self.name, arg)
 
         def coroutine_and_outputs(self):
-            return _Return(self.name, into_container()).coroutine_and_outputs()
+            return _Return(self.name, into_consumer()).coroutine_and_outputs()
 
         @classmethod
         def no_name_given(cls, sink=into(list), *args, **kwds):
             if isinstance(sink, into):
-                sink = into_container(sink.container)
+                sink = into_consumer(sink.consumer)
             return cls('return')(sink, *args, **kwds)
 
 
@@ -440,10 +440,10 @@ class _Fold(_Component):
     # TODO: future-sinks should not appear at toplevel, as they must be wrapped
     # in an output. Detect and report error at conversion from implicit
 
-    def __init__(self, fn, initial=None, container=lambda x:x):
+    def __init__(self, fn, initial=None, consumer=lambda x:x):
         self._fn = fn
         self._initial = initial
-        self._container = container
+        self._consumer = consumer
 
     def make_coroutine(self, future):
         binary_function = self._fn
@@ -461,7 +461,7 @@ class _Fold(_Component):
                 while True:
                     accumulator = binary_function(accumulator, *(yield))
             finally:
-                future.set_result(self._container(accumulator))
+                future.set_result(self._consumer(accumulator))
         return fold_loop(future)
 
 
@@ -630,11 +630,11 @@ def until(predicate):
 def while_(predicate): return until(lambda x: not predicate(x))
 
 
-def into_container(container=list):
+def into_consumer(consumer=list):
     def append(the_list, element):
         the_list.append(element)
         return the_list
-    return _Fold(append, [], container)
+    return _Fold(append, [], consumer)
 
 
 def star(fn):
