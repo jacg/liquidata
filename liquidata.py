@@ -48,8 +48,6 @@ import copy
 
 # TODO: A [::] syntax for slice? Can we do better than `slice[start:stop:step]`? what about close_all?
 
-# TODO: pipe(source(s), f) == pipe(f)(s)
-
 # TODO: Give user choice whether sink or out is the default at end of pipe.
 #       - pipe(source(s), ...) ; pipe(...)(s)
 #       - pipe vs flow or some other name
