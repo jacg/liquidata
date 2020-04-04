@@ -393,7 +393,41 @@ class _Item(_MultipleNames):
     __rmul__ = __mul__
 
 
-class _NAME(_MultipleNames):
+class _NameMeta(type):
+
+    def __new__(cls, name, bases, bindings):
+
+        class XXXX:
+
+            def __init__(self, *names):
+                self.names = names
+
+            def __getattr__(self, name):
+                return type(self)(*self.names, name)
+
+            def __str__(self):
+                return '.'.join((self.__class__.__name__,) + self.names)
+                return f'{self.__class__.__name__}{self.names}'
+
+            __repr__ = __str__
+
+        return type.__new__(cls, name, (XXXX,)+bases, bindings)
+
+    def __getattr__(cls, name):
+        print(name)
+        it = super().__call__(name)
+        print(it)
+        return it
+
+    def __call__(cls, *args, **kwds):
+        return super().__call__().no_name_given(*args, **kwds)
+
+    def coroutine_and_outputs(cls):
+        return cls.no_name_given().coroutine_and_outputs()
+
+
+#class _NAME(_MultipleNames):
+class name(metaclass = _NameMeta):
 
     def __call__(self, *items):
         if len(self.names) != 1:
@@ -421,7 +455,7 @@ on   = _Name(_On)
 put  = _Name(_Put)
 get  = _Get()
 item = _Name(_Item)
-name = _Name(_NAME)
+#name = _Name(_NAME)
 
 
 class _Fold(_Component):
