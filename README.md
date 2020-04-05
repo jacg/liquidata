@@ -1,5 +1,24 @@
 [![Build Status](https://travis-ci.org/jacg/liquidata.svg?branch=master)](https://travis-ci.org/jacg/liquidata)
 
+<!-- ANCHOR: what_is_this -->
+
+# What is this?
+
+`liquidata` is a Python Embedded Domain Specific Language (EDSL) which aims to encourage and facilitate
+
++ increasing the signal-to-noise ratio in source code
+
++ avoiding using strings to represent symbols in the API
+
++ code reuse through composition of reusable and orthogonal components
+
++ dataflow programming
+
++ function composition
+
++ lazy processing.
+
+<!-- ANCHOR_END: what_is_this -->
 
 # Why would I want this?
 
