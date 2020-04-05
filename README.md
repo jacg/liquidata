@@ -75,4 +75,4 @@ keyword_frequency_pipe = pipe(
     OUT(INTO(Counter)))
 ```
 
-then you might enjoy the tutorial.
+then you might enjoy the [tutorial](https://jacg.github.io/liquidata/Tutorial.html).

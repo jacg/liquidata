@@ -23,7 +23,7 @@ subsequences from this prototype
 {{#include ../../../tutorial_test.py:liquidata_full}}
 ```
 
-then you might enjoy the tutorial.
+then you might enjoy the [tutorial](https://jacg.github.io/liquidata/Tutorial.html).
 
 ## Running these samples
 
@@ -43,7 +43,3 @@ To run the latter two versions you will additionally need to download
 
 (The liquidata components were uppercased in order to highlight them in the
 example.)
-
-
-
-# Tutorial
