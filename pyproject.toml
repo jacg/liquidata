@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dataflow"
+name = "liquidata"
 version = "0.1.0"
 description = ""
 authors = ["Jacek Generowicz <github@my-post-office.net>"]
