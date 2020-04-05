@@ -31,11 +31,11 @@ def test_final():
     # ANCHOR_END: liquidata_full
 
     # ANCHOR: liquidata_abstracted_full
-    all_files         = (os.walk, JOIN)
-    pick_python_files = (NAME.path.dirs.files, GET.files * (JOIN, { use(str.endswith, '.py') }) >> PUT.filename)
-    file_contents     = (GET.path.filename * os.path.join, open, JOIN)
-    ignore_comments   = (use(str.split, '#', maxsplit=1), GET[0])
-    find_keywords     = (str.split, JOIN, { iskeyword })
+    all_files         = os.walk, JOIN, NAME.path.dirs.files
+    pick_python_files = GET.files * (JOIN, { use(str.endswith, '.py') }) >> PUT.filename
+    file_contents     = GET.path.filename * os.path.join, open, JOIN
+    ignore_comments   = use(str.split, '#', maxsplit=1), GET[0]
+    find_keywords     = str.split, JOIN, { iskeyword }
 
     keyword_frequency_pipe = pipe(
         all_files,
