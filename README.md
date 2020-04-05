@@ -76,3 +76,17 @@ keyword_frequency_pipe = pipe(
 ```
 
 then you might enjoy the [tutorial](https://jacg.github.io/liquidata/Tutorial.html).
+
+# Installation
+
+<!-- ANCHOR: installation -->
+
+Currently there are two options:
+
+1. Pip: `pip install liquidata`.
+
+2. Just grab the source. For now, the implementation lives in a single,
+   dependency-free
+   [file](https://github.com/jacg/liquidata/raw/master/liquidata.py).
+
+<!-- ANCHOR_END: installation -->
