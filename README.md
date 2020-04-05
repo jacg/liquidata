@@ -1,1 +1,1 @@
-[![Build Status](https://travis-ci.org/jacg/dataflow.svg?branch=master)](https://travis-ci.org/jacg/dataflow)
+[![Build Status](https://travis-ci.org/jacg/liquidata.svg?branch=master)](https://travis-ci.org/jacg/liquidata)
