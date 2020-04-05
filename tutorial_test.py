@@ -35,14 +35,14 @@ def test_final():
     pick_python_files = GET.files * (JOIN, { use(str.endswith, '.py') }) >> PUT.filename
     file_contents     = GET.path.filename * os.path.join, open, JOIN
     ignore_comments   = use(str.split, '#', maxsplit=1), GET[0]
-    find_keywords     = str.split, JOIN, { iskeyword }
+    pick_keywords     = str.split, JOIN, { iskeyword }
 
     keyword_frequency_pipe = pipe(
         all_files,
         pick_python_files,
         file_contents,
         ignore_comments,
-        find_keywords,
+        pick_keywords,
         OUT(INTO(Counter)))
     # ANCHOR_END: liquidata_abstracted_full
 
