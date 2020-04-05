@@ -26,6 +26,12 @@ import copy
 
 # TODO: test for new exception types: SinkMissing, NeedAtLeastOneCoroutine
 
+# TODO: think about whether `into` or `_Fold` should be the default `out`.
+
+# TODO: find constant-space implementation of into
+
+# TODO: implement _Fold in terms of into(reduce(...)), but only once into is constant-space
+
 # TODO: automatic reinitialization of pipe.fn() after exception or other close.
 
 # TODO: return namedtuple rather than namespace? Would allow unpacking.
@@ -249,11 +255,22 @@ class _Branch(_Component):
         return branch_loop, outputs
 
 
+class into:
+
+    def __init__(self, consumer):
+        self.consumer = consumer
+
 
 class _Return(_Component):
 
-    def __init__(self, name, sink=None):
+    def __init__(self, name, sink=None, initial=None, key=None):
         self._name = name
+
+        if       isinstance(sink, set       ): sink = _CountFilter(sink, key=key)
+        elif     isinstance(sink, into      ): sink = into_consumer(sink.consumer)
+        elif not isinstance(sink, _Component): sink = _Fold(sink, initial=initial)
+        # TODO: issue warning/error if initial is not None
+        # TODO: set as implicit count filter?
         self._sink = sink
 
     def coroutine_and_outputs(self):
@@ -266,22 +283,14 @@ class _Return(_Component):
         def __init__(self, name):
             self.name = name
 
-        def __call__(self, arg, initial=None, key=None):
-            if isinstance(arg, set):
-                arg = _CountFilter(arg, key=key)
-            if not isinstance(arg, _Component):
-                # TODO: issue warning/error if initial is not None
-                arg = _Fold(arg, initial=initial)
-            # TODO: set as implicit count filter?
-            return _Return(self.name, arg)
+        def __call__(self, *args, **kwds):
+            return _Return(self.name, *args, **kwds)
 
         def coroutine_and_outputs(self):
-            return _Return(self.name, into_list()).coroutine_and_outputs()
+            return _Return(self.name, into_consumer()).coroutine_and_outputs()
 
         @classmethod
-        def no_name_given(cls, sink=None, *args, **kwds):
-            if sink is None:
-                sink = into_list()
+        def no_name_given(cls, sink=into(list), *args, **kwds):
             return cls('return')(sink, *args, **kwds)
 
 
@@ -429,20 +438,20 @@ class _Fold(_Component):
     # TODO: future-sinks should not appear at toplevel, as they must be wrapped
     # in an output. Detect and report error at conversion from implicit
 
-    def __init__(self, fn, initial=None):
+    def __init__(self, fn, initial=None, consumer=lambda x:x):
         self._fn = fn
         self._initial = initial
+        self._consumer = consumer
 
     def make_coroutine(self, future):
         binary_function = self._fn
         @coroutine
-        def reduce_loop(future):
+        def fold_loop(future):
             if self._initial is None:
                 try:
                     accumulator, = (yield)
                 except StopIteration:
                     # TODO: message about not being able to run on an empty stream.
-                    # Try to link it to variable names in the network?
                     pass
             else:
                 accumulator = self._initial
@@ -450,8 +459,8 @@ class _Fold(_Component):
                 while True:
                     accumulator = binary_function(accumulator, *(yield))
             finally:
-                future.set_result(accumulator)
-        return reduce_loop(future)
+                future.set_result(self._consumer(accumulator))
+        return fold_loop(future)
 
 
 class Slice(_Component):
@@ -619,11 +628,11 @@ def until(predicate):
 def while_(predicate): return until(lambda x: not predicate(x))
 
 
-def into_list():
+def into_consumer(consumer=list):
     def append(the_list, element):
         the_list.append(element)
         return the_list
-    return _Fold(append, [])
+    return _Fold(append, [], consumer)
 
 
 def star(fn):
