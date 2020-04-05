@@ -10,6 +10,8 @@ import copy
 
 
 
+# TODO: Think carefully about what `use` should be. Test it.
+
 # TODO: pipe.fn(RETURN_STRATEGY)  Exception or tuple
 
 # TODO: make `star` (and consequently `*`) work reliably for all components
@@ -647,6 +649,14 @@ def _star(fn):
     def star(args):
         return fn(*args)
     return star
+
+# TODO: this was quickly added for use in the tutorial. It requires careful
+#       thought about how general it can be and what the cleanest interface is.
+#       It is still untested!
+def use(fn, *args, **kwds):
+    def use(arg1):
+        return fn(arg1, *args, **kwds)
+    return use
 
 ######################################################################
 
