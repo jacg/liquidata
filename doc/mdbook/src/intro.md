@@ -1,3 +1,6 @@
+{{#include ../../../README.md:what_is_this}}
+
+
 # Why would I want this?
 
 If you think that the signal is drowned out by the noise in code written like
