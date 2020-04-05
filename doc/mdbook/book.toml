@@ -1,0 +1,9 @@
+[book]
+authors = ["Jacek Generowicz"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Liquidata"
+
+[output.html]
+default-theme = "ayu"
