@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "liquidata"
-version = "0.1.0"
+version = "0.1.2"
 description = "EDSL for data pipelines in Python"
 authors = ["Jacek Generowicz <github@my-post-office.net>"]
 license = "MIT"
