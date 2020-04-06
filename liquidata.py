@@ -12,8 +12,6 @@ import copy
 
 # TODO: Think carefully about what `use` should be. Test it.
 
-# TODO: pipe.fn(RETURN_STRATEGY)  Exception or tuple
-
 # TODO: make `star` (and consequently `*`) work reliably for all components
 
 # TODO: named branches: out.X([...])
