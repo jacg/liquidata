@@ -117,3 +117,8 @@ pipe(
     namespace.
 
 + The result returned by the pipeline is a namespace containing 5 names.
+
+
+## Synchnonized branches, compound flow and name management
+
+TODO
