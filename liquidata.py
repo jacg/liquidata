@@ -63,8 +63,6 @@ import copy
 # TODO: `get` and `item` distinguish between namespaces and dict; put assumes
 #       namespaces. Give `put` a sibling? Make put detect automatically?
 
-# TODO: utility for turning atomic stream into namespace
-
 # TODO: operator module containing curried operators. Names uppercase or with
 #       trailing underscore: standard: `gt`; ours: `GT` or `gt_`
 
