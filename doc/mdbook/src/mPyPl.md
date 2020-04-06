@@ -49,7 +49,8 @@ Observations:
 
 + `liquidata` avoids the use of strings as symbols.
 
-+ `mPyPl` provides a specific `get_files` utility; this is outside of the scope
++ `mPyPl` provides a specific `get_files` utility; `liquidata` can work with any
+  iterable source of files, but providing such sources is outside of the scope
   of `liquidata`'s goals.
 
 + `mp.as_field('filename')` is equivalent to `name.filename`
