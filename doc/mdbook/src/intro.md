@@ -34,8 +34,9 @@ imports:
 {{#include ../../../tutorial_test.py:common_imports}}
 ```
 
-To run the latter two versions you will additionally need to download
-[`liquidata.py`](https://github.com/jacg/dataflow/raw/master/liquidata.py), and import thus:
+To run the latter two versions you will additionally need to [get
+`liquidata`](./installation.md), and import thus:
+
 
 ```python
 {{#include ../../../tutorial_test.py:liquidata_imports}}
