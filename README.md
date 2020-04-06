@@ -22,7 +22,7 @@
 
 # Why would I want this?
 
-If you think that the signal is drowned out by the noise in code written like
+If you feel that the signal is drowned out by the noise in code written like
 this
 
 ```python
@@ -39,7 +39,8 @@ def keyword_frequency_loop(directories):
                             counter[name] += 1
     return counter
 ```
-while the intent is clearer when it is presented like this
+
+and that the intent is clearer in code presented like this
 
 ```python
 all_files         = os.walk, JOIN, NAME.path.dirs.files
@@ -58,7 +59,7 @@ keyword_frequency_pipe = pipe(
 ```
 
 then you might find `liquidata` interesting. Furthermore, if you think that
-abstraction should be as easy as getting the previous version by extracting
+abstraction should be as easy as getting the above version by extracting
 subsequences from this prototype
 
 ```python
@@ -75,7 +76,7 @@ keyword_frequency_pipe = pipe(
     OUT(INTO(Counter)))
 ```
 
-then you might enjoy the [tutorial](https://jacg.github.io/liquidata/Tutorial.html).
+then you might want to peruse the [documentation](https://jacg.github.io/liquidata).
 
 # Installation
 
