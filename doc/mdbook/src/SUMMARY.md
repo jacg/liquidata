@@ -9,3 +9,5 @@
 - [Whirlwind tour of basic features](./whirlwind.md)
 
 - [Tutorial](./Tutorial.md)
+
+- [Architecture](./Architecture.md)
