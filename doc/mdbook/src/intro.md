@@ -3,21 +3,22 @@
 
 # Why would I want this?
 
-If you feel that the signal is drowned out by the noise in code written like
-this
+{{#include ../../../README.md:why_would_I_want_this_prelude}}
 
 ```python
 {{#include ../../../tutorial_test.py:pure_python_full}}
 ```
-and that the intent is clearer in code presented like this
+then `liquidata` is probably not for you.
+
+But if the last example leaves you wanting to extract the core meaning from the
+noise, and you feel that this
 
 ```python
 {{#include ../../../tutorial_test.py:liquidata_abstracted_full}}
 ```
 
-then you might find `liquidata` interesting. Furthermore, if you think that
-abstraction should be as easy as getting the above version by extracting
-subsequences from this prototype
+is a step in the right direction, and if you feel that abstraction should be as
+easy as getting the above version by extracting subsequences from this prototype
 
 ```python
 {{#include ../../../tutorial_test.py:liquidata_full}}

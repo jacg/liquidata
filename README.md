@@ -22,8 +22,33 @@
 
 # Why would I want this?
 
+<!-- ANCHOR: why_would_I_want_this_prelude -->
+
 If you feel that the signal is drowned out by the noise in code written like
 this
+
+```python
+for name in filenames:
+    file_ = open(name):
+        for line in file_:
+            for word in line.split():
+                print(word)
+```
+and that the intent is clearer in code presented like this
+
+```python
+pipe(source << filenames, open, join, str.split, join, sink(print))
+```
+then you might find `liquidata` interesting.
+
+## Still with me?
+
+That was a trivial example. Let's have a look at something a little more
+involved.
+
+If you are perfectly happy reading and writing code like this
+
+<!-- ANCHOR_END: why_would_I_want_this_prelude -->
 
 ```python
 def keyword_frequency_loop(directories):
@@ -40,7 +65,10 @@ def keyword_frequency_loop(directories):
     return counter
 ```
 
-and that the intent is clearer in code presented like this
+then `liquidata` is probably not for you.
+
+But if the last example leaves you wanting to extract the core meaning from the
+noise, and you feel that this
 
 ```python
 all_files         = os.walk, JOIN, NAME.path.dirs.files
@@ -57,10 +85,8 @@ keyword_frequency_pipe = pipe(
     find_keywords,
     OUT(INTO(Counter)))
 ```
-
-then you might find `liquidata` interesting. Furthermore, if you think that
-abstraction should be as easy as getting the above version by extracting
-subsequences from this prototype
+is a step in the right direction, and if you feel that abstraction should be as
+easy as getting the above version by extracting subsequences from this prototype
 
 ```python
 keyword_frequency_pipe = pipe(
