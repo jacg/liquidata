@@ -22,7 +22,68 @@
 
 # Why would I want this?
 
-<!-- ANCHOR: why_would_I_want_this_prelude -->
+<!-- ANCHOR: network -->
+
+## Dataflow networks
+
+It can be helpful to think of your computations as flows through a network or
+graph of components. For example
+
+```
+candidates
+    |
+quick_screen
+    |
+expensive_screen -------.
+    |                    \
+can dance ?           can sing ?
+    |                     |
+dance test A          sing test A
+    |                     |
+dance test B          sing test B
+    |                     |
+dance test C              |
+    |                     |
+sum scores            sum scores
+    |                     |
+score above 210 ?     score above 140 ?
+    |                     |
+output dancers        output singers
+```
+
+The aim of `liquidata` is to allow you to express the idea laid out in the graph
+above, in code that reflects the structure of the graph. A `liquidata`
+implementation of the graph might look something like this:
+
+```python
+select_candidates = pipe(
+    { quick_screening },
+    { expensive_screening },
+    [ { can_sing },
+      sing_test_A,
+      sing_test_B,
+      sum_scores.a.b,
+      { score_above(140) },
+      out.singers
+    ],
+    { can_dance },
+    dance_test_A,
+    dance_test_B,
+    dance_test_C,
+    sum_scores.a.b.c,
+    { score_above(210) },
+    out.dancers)
+
+selected = select_candidates(candidates)
+
+# Do something with the results
+send_to_singer_committee(selected.singers)
+send_to_dancer_committee(selected.dancers)
+```
+
+<!-- ANCHOR: composition_prelude -->
+
+## Function composition
 
 If you feel that the signal is drowned out by the noise in code written like
 this
@@ -48,7 +109,7 @@ involved.
 
 If you are perfectly happy reading and writing code like this
 
-<!-- ANCHOR_END: why_would_I_want_this_prelude -->
+<!-- ANCHOR_END: composition_prelude -->
 
 ```python
 def keyword_frequency_loop(directories):
