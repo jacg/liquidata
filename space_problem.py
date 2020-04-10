@@ -2,6 +2,25 @@
 # treating `min`, `max` and `sum` as black boxes.
 
 def testit(implementation, N):
+    from time import sleep
+    def slowrange(t,N):
+        for x in range(N):
+            sleep(t)
+            yield x
+    def slowmin(T):
+        from sys import maxsize
+        lo = maxsize
+        def slowmin(iterable):
+            nonlocal lo
+            for item in iterable:
+                sleep(T)
+                if item < lo:
+                    lo = item
+            return lo
+        return slowmin
+
+    #assert implementation(range(N), max, sum, slowmin(0.001)) == (N-1, N*(N-1)//2, 0)
+    #assert implementation(slowrange(0.001,N), min, max, sum) == (0, N-1, N*(N-1)//2)
     assert implementation(range(N), min, max, sum) == (0, N-1, N*(N-1)//2)
 
 # Discussion
@@ -23,14 +42,15 @@ print(source_summary(range(N), sum))
 
 # Here's a version which does it in a single traversal ...
 
-def source_summaries(source, *summaries):
+def source_summaries_TEE(source, *summaries):
     from itertools import tee
+    #return tuple(summary(source) for (source, summary) in zip(tee(source, len(summaries)), summaries))
     return tuple(map(source_summary, tee(source, len(summaries)),
                                      summaries))
 
 from time import time
 start = time()
-testit(source_summaries, N)
+testit(source_summaries_TEE, N)
 stop = time()
 print(f'OK: {N} in {stop - start}')
 # ... but the space usage goes up from `O(1)` to `O(N)`.
@@ -48,6 +68,9 @@ class Link:
 
     def __init__(self, queue):
         self.queue = queue
+        self.maxsize = 0
+        self.count = 0
+        self.maxwhen = 0
 
     def __iter__(self):
         return self
@@ -59,18 +82,24 @@ class Link:
         return item
 
     def put(self, item):
+        self.count += 1
         self.queue.put(item)
+        size = self.queue.qsize()
+        if size > self.maxsize:
+            self.maxsize, self.maxwhen = size, self.count
 
     def stop(self):
         self.queue.put(FINISHED)
+        print(f'Queue space: {self.maxsize} ({self.maxsize / self.count} N)  after {self.maxwhen / self.count * 100:6.2f} % items')
+        #print(f'Maximum queue size {self.maxsize} after {self.maxwhen} out of {self.count} ({self.maxwhen / self.count * 100:5.2f} %)')
 
     def consumer_not_listening_any_more(self):
         self.__class__ = ClosedLink
 
-class ClosedLink:
+class ClosedLink(Link):
 
     def put(self, _): pass
-    def stop(self)  : pass
+    #def stop(self)  : pass
 
 class FINISHED: pass
 
@@ -81,7 +110,6 @@ def make_thread(link, consumer, future):
 
 def on_thread(link, consumer, future):
     future.set_result(consumer(link))
-    print(f'{consumer.__name__} DETACHING')
     link.consumer_not_listening_any_more()
 
 def source_summaries_PREEMPTIVE_THREAD(source, *consumers):
@@ -107,9 +135,6 @@ def source_summaries_PREEMPTIVE_THREAD(source, *consumers):
 
     return tuple(f.result() for f in futures)
 
-N = 10 ** 7
-#print(source_summaries_PREEMPTIVE_THREAD(range(N), min, max, sum))
-
 def time(thunk):
     from time import time
     start = time()
@@ -117,22 +142,38 @@ def time(thunk):
     stop  = time()
     return stop - start
 
+######################################################################
+def source_summaries_FOLD(source, *consumers):
+
+    from sys import maxsize
+    from operator import add
+
+    fn   = { min: min,     max:  max    , sum: add}
+    init = { min: maxsize, max: -maxsize, sum: 0}
+
+    accumulator =  list(map(init.get, consumers))
+    fn          = tuple(map(fn  .get, consumers))
+
+    for item in source:
+        for i in range(len(consumers)):
+            accumulator[i] = fn[i](accumulator[i], item)
+    return tuple(accumulator)
+######################################################################
+
 N = 10 ** 7
-t = time(lambda: testit(source_summaries, N))
-print(f'old: {N} in {t:5.1f} s')
+t = time(lambda: testit(source_summaries_TEE, N))
+print(f'tee   : {N} in {t:5.1f} s')
 
-t = time(lambda: testit(source_summaries_PREEMPTIVE_THREAD, N))
-print(f'new: {N} in {t:5.1f} s')
+# t = time(lambda: testit(source_summaries_PREEMPTIVE_THREAD, N))
+# print(f'thread: {N} in {t:5.1f} s')
 
+t = time(lambda: testit(source_summaries_FOLD, N))
+print(f'fold  : {N} in {t:5.1f} s')
 
-from collections import Counter
-known_consumers = [tuple, list, set, dict, sorted, min, max, sum, ','.join, Counter, enumerate, lambda x: map(lambda x:x+1, x)]
-
-from random import choices
 
 
 def testitR(implementation, N):
-    consumers = known_consumers #choices(known_consumers, k=3)
+    consumers = known_consumers
     assert implementation(range(N), *consumers) == tuple(c(range(N)) for c in consumers)
 
 def testit(implementation, N):
@@ -152,6 +193,9 @@ def exceeds_10(iterable):
             return True
     return False
 
-known_consumers = [sum, min, max, tuple, list, set, Counter, Bobs_classify, Janes_criterion]
+
+from collections import Counter
+known_consumers = [tuple, list, set, dict, sorted, min, max, sum, ','.join, Counter, enumerate, lambda x: map(lambda x:x+1, x)]
+known_consumers = [exceeds_10, sum, min, max, tuple, list, set, Counter, Bobs_classify, exceeds_10]
 testitR(source_summaries_PREEMPTIVE_THREAD, 1000)
 print('OK')
