@@ -38,11 +38,11 @@ expensive_screen -------.
     |                    \
 can dance ?           can sing ?
     |                     |
-dance test A          sing test A
+hop test              pitch test
     |                     |
-dance test B          sing test B
+skip test             rhythm test
     |                     |
-dance test C              |
+jump test                 |
     |                     |
 sum scores            sum scores
     |                     |
@@ -60,17 +60,17 @@ select_candidates = pipe(
     { quick_screening },
     { expensive_screening },
     [ { can_sing },
-      sing_test_A,
-      sing_test_B,
-      sum_scores.a.b,
+      test_pitch,
+      test_rhythm,
+      sum_scores.pitch.rhythm,
       { score_above(140) },
       out.singers
     ],
     { can_dance },
-    dance_test_A,
-    dance_test_B,
-    dance_test_C,
-    sum_scores.a.b.c,
+    test_hop,
+    test_skip,
+    test_jump,
+    sum_scores.hop.skip.jump,
     { score_above(210) },
     out.dancers)
 
