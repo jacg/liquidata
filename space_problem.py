@@ -3,10 +3,14 @@
 
 def testit(implementation, N):
     from time import sleep
-    def slowrange(t,N):
-        for x in range(N):
-            sleep(t)
-            yield x
+
+    def slowrange(t):
+        def slowrange(N):
+            for x in range(N):
+                sleep(t)
+                yield x
+        return slowrange
+
     def slowmin(T):
         from sys import maxsize
         lo = maxsize
@@ -19,8 +23,10 @@ def testit(implementation, N):
             return lo
         return slowmin
 
-    #assert implementation(range(N), max, sum, slowmin(0.001)) == (N-1, N*(N-1)//2, 0)
-    #assert implementation(slowrange(0.001,N), min, max, sum) == (0, N-1, N*(N-1)//2)
+    delay = 0.00000000001
+
+    #assert implementation(range(N), max, sum, slowmin(delay)) == (N-1, N*(N-1)//2, 0)
+    #assert implementation(slowrange(delay)(N), min, max, sum) == (0, N-1, N*(N-1)//2)
     assert implementation(range(N), min, max, sum) == (0, N-1, N*(N-1)//2)
 
 # Discussion
@@ -48,6 +54,33 @@ def source_summaries_TEE(source, *summaries):
     return tuple(map(source_summary, tee(source, len(summaries)),
                                      summaries))
 
+class safeteeobject(object):
+    """tee object wrapped to make it thread-safe"""
+    def __init__(self, teeobj, lock):
+        self.teeobj = teeobj
+        self.lock = lock
+    def __iter__(self):
+        return self
+    def __next__(self):
+        with self.lock:
+            return next(self.teeobj)
+    def __copy__(self):
+        return safeteeobject(self.teeobj.__copy__(), self.lock)
+
+def safetee(iterable, n=2):
+    """tuple of n independent thread-safe iterators"""
+    from threading import Lock
+    from itertools import tee
+    lock = Lock()
+    return tuple(safeteeobject(teeobj, lock) for teeobj in tee(iterable, n))
+
+def source_summaries_SAFE_TEE(source, *summaries):
+    from itertools import tee
+    #return tuple(summary(source) for (source, summary) in zip(safetee(source, len(summaries)), summaries))
+    return tuple(map(source_summary, safetee(source, len(summaries)),
+                                     summaries))
+
+
 from time import time
 start = time()
 testit(source_summaries_TEE, N)
@@ -64,75 +97,27 @@ print(f'OK: {N} in {stop - start}')
 # and all that may be written in the future. The implementation must treat them
 # as black boxes.
 
-class Link:
-
-    def __init__(self, queue):
-        self.queue = queue
-        self.maxsize = 0
-        self.count = 0
-        self.maxwhen = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        item = self.queue.get()
-        if item is FINISHED:
-            raise StopIteration
-        return item
-
-    def put(self, item):
-        self.count += 1
-        self.queue.put(item)
-        size = self.queue.qsize()
-        if size > self.maxsize:
-            self.maxsize, self.maxwhen = size, self.count
-
-    def stop(self):
-        self.queue.put(FINISHED)
-        print(f'Queue space: {self.maxsize} ({self.maxsize / self.count} N)  after {self.maxwhen / self.count * 100:6.2f} % items')
-        #print(f'Maximum queue size {self.maxsize} after {self.maxwhen} out of {self.count} ({self.maxwhen / self.count * 100:5.2f} %)')
-
-    def consumer_not_listening_any_more(self):
-        self.__class__ = ClosedLink
-
-class ClosedLink(Link):
-
-    def put(self, _): pass
-    #def stop(self)  : pass
-
-class FINISHED: pass
-
 
 def make_thread(link, consumer, future):
     from threading import Thread
     return Thread(target = lambda: on_thread(link, consumer, future))
 
-def on_thread(link, consumer, future):
-    future.set_result(consumer(link))
-    link.consumer_not_listening_any_more()
+def on_thread(source_tee, consumer, future):
+    future.set_result(consumer(source_tee))
 
-def source_summaries_PREEMPTIVE_THREAD(source, *consumers):
-    from queue     import SimpleQueue as Queue
+def source_summaries_TEE_ON_THREAD(source, *consumers):
     from asyncio   import Future
+    from itertools import tee
 
-    links   = tuple(Link(Queue()) for _ in consumers)
-    futures = tuple(     Future() for _ in consumers)
-    threads = tuple(map(make_thread, links, consumers, futures))
+    futures = tuple(Future() for _ in consumers)
+    sources = tee(source, len(consumers))
+    sources = safetee(source, len(consumers))
+    threads = tuple(map(make_thread, sources, consumers, futures))
 
-    for thread in threads:
-        thread.start()
+    for thread in threads: thread.start()
+    for thread in threads: thread.join()
 
-    for item in source:
-        for link in links:
-            link.put(item)
-
-    for link in links:
-        link.stop()
-
-    for t in threads:
-        t.join()
-
+    return tuple(map(Future.result, futures))
     return tuple(f.result() for f in futures)
 
 def time(thunk):
@@ -160,15 +145,19 @@ def source_summaries_FOLD(source, *consumers):
     return tuple(accumulator)
 ######################################################################
 
-N = 10 ** 7
+N = 10 ** 5
+
+t = time(lambda: testit(source_summaries_TEE_ON_THREAD, N))
+print(f'teeTHR: {N} in {t:5.1f} s')
+
 t = time(lambda: testit(source_summaries_TEE, N))
 print(f'tee   : {N} in {t:5.1f} s')
 
 # t = time(lambda: testit(source_summaries_PREEMPTIVE_THREAD, N))
 # print(f'thread: {N} in {t:5.1f} s')
 
-t = time(lambda: testit(source_summaries_FOLD, N))
-print(f'fold  : {N} in {t:5.1f} s')
+# t = time(lambda: testit(source_summaries_FOLD, N))
+# print(f'fold  : {N} in {t:5.1f} s')
 
 
 
@@ -194,8 +183,8 @@ def exceeds_10(iterable):
     return False
 
 
-from collections import Counter
-known_consumers = [tuple, list, set, dict, sorted, min, max, sum, ','.join, Counter, enumerate, lambda x: map(lambda x:x+1, x)]
-known_consumers = [exceeds_10, sum, min, max, tuple, list, set, Counter, Bobs_classify, exceeds_10]
-testitR(source_summaries_PREEMPTIVE_THREAD, 1000)
-print('OK')
+# from collections import Counter
+# known_consumers = [tuple, list, set, dict, sorted, min, max, sum, ','.join, Counter, enumerate, lambda x: map(lambda x:x+1, x)]
+# known_consumers = [exceeds_10, sum, min, max, tuple, list, set, Counter, Bobs_classify, exceeds_10]
+# testitR(source_summaries_PREEMPTIVE_THREAD, 1000)
+# print('OK')
