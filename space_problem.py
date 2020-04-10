@@ -64,6 +64,13 @@ class Link:
     def stop(self):
         self.queue.put(FINISHED)
 
+    def consumer_not_listening_any_more(self):
+        self.__class__ = ClosedLink
+
+class ClosedLink:
+
+    def put(self, _): pass
+    def stop(self)  : pass
 
 class FINISHED: pass
 
@@ -74,6 +81,8 @@ def make_thread(link, consumer, future):
 
 def on_thread(link, consumer, future):
     future.set_result(consumer(link))
+    print(f'{consumer.__name__} DETACHING')
+    link.consumer_not_listening_any_more()
 
 def source_summaries_PREEMPTIVE_THREAD(source, *consumers):
     from queue     import SimpleQueue as Queue
