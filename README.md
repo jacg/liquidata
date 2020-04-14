@@ -80,6 +80,7 @@ selected = select_candidates(candidates)
 send_to_singer_committee(selected.singers)
 send_to_dancer_committee(selected.dancers)
 ```
+<!-- ANCHOR_END: network -->
 
 <!-- ANCHOR: composition_prelude -->
 
