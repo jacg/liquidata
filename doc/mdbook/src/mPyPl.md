@@ -49,7 +49,8 @@ Observations:
 
 + `liquidata` avoids the use of strings as symbols.
 
-+ `mPyPl` provides a specific `get_files` utility; this is outside of the scope
++ `mPyPl` provides a specific `get_files` utility; `liquidata` can work with any
+  iterable source of files, but providing such sources is outside of the scope
   of `liquidata`'s goals.
 
 + `mp.as_field('filename')` is equivalent to `name.filename`
@@ -95,5 +96,11 @@ Observations:
   get.result
   ```
 
-+ `mp.as_list` collects the results in a list. The equivalent is missing from
-  the `liquidata` version, because it's the default.
++ `mp.as_list` collects the results in a list. The equivalent (which would be
+  written `out(into(list))`) is missing from the `liquidata` version, because
+  it's the default.
+
++ `out(into(...))` is far more general than `mp.as_list`, as it will work with
+  *any* callable that consumes iterables, such as `set`, `tuple`, `min`, `max`,
+  `sum`, `sorted`, `collections.Counter`, ... including any and all that will be
+  written in the future.

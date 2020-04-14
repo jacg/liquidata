@@ -3,39 +3,48 @@
 
 # Why would I want this?
 
-If you think that the signal is drowned out by the noise in code written like
-this
+{{#include ../../../README.md:network}}
+
+{{#include ../../../README.md:composition_prelude}}
 
 ```python
 {{#include ../../../tutorial_test.py:pure_python_full}}
 ```
-while the intent is clearer when it is presented like this
+then `liquidata` is probably not for you.
+
+But if the last example leaves you wanting to extract the core meaning from the
+noise, and you feel that this
 
 ```python
 {{#include ../../../tutorial_test.py:liquidata_abstracted_full}}
 ```
 
-then you might find `liquidata` interesting. Furthermore, if you think that
-abstraction should be as easy as getting the previous version by extracting
-subsequences from this prototype
+is a step in the right direction, and if you feel that abstraction should be as
+easy as getting the above version by extracting subsequences from this prototype
 
 ```python
 {{#include ../../../tutorial_test.py:liquidata_full}}
 ```
 
-then you might enjoy the tutorial.
+then you might want to read on.
 
 ## Running these samples
 
-If you want to run the first (plain Python) version, you will need these
-imports:
++ `select_candidates` is an outline of the solution, which omits details. As
+  such, it is not executable.
+
++ `keyword_frequency_loop` and both versions of `keyword_frequency_pipe` are
+  both complete executable examples.
+
+To run `keyword_frequency_loop`, you will need these imports:
 
 ```python
 {{#include ../../../tutorial_test.py:common_imports}}
 ```
 
-To run the latter two versions you will additionally need to download
-[`liquidata.py`](https://github.com/jacg/dataflow/raw/master/liquidata.py), and import thus:
+To run (either version of) `keyword_frequency_pipe` you will additionally need
+to [get `liquidata`](./installation.md), and import thus:
+
 
 ```python
 {{#include ../../../tutorial_test.py:liquidata_imports}}
@@ -43,7 +52,3 @@ To run the latter two versions you will additionally need to download
 
 (The liquidata components were uppercased in order to highlight them in the
 example.)
-
-
-
-# Tutorial

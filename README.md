@@ -22,8 +22,95 @@
 
 # Why would I want this?
 
-If you think that the signal is drowned out by the noise in code written like
+<!-- ANCHOR: network -->
+
+## Dataflow networks
+
+It can be helpful to think of your computations as flows through a network or
+graph of components. For example
+
+```
+candidates
+    |
+quick_screen
+    |
+expensive_screen -------.
+    |                    \
+can dance ?           can sing ?
+    |                     |
+hop test              pitch test
+    |                     |
+skip test             rhythm test
+    |                     |
+jump test                 |
+    |                     |
+sum scores            sum scores
+    |                     |
+score above 210 ?     score above 140 ?
+    |                     |
+output dancers        output singers
+```
+
+The aim of `liquidata` is to allow you to express the idea laid out in the graph
+above, in code that reflects the structure of the graph. A `liquidata`
+implementation of the graph might look something like this:
+
+```python
+select_candidates = pipe(
+    { quick_screening },
+    { expensive_screening },
+    [ { can_sing },
+      test_pitch,
+      test_rhythm,
+      sum_scores.pitch.rhythm,
+      { score_above(140) },
+      out.singers
+    ],
+    { can_dance },
+    test_hop,
+    test_skip,
+    test_jump,
+    sum_scores.hop.skip.jump,
+    { score_above(210) },
+    out.dancers)
+
+selected = select_candidates(candidates)
+
+# Do something with the results
+send_to_singer_committee(selected.singers)
+send_to_dancer_committee(selected.dancers)
+```
+<!-- ANCHOR_END: network -->
+
+<!-- ANCHOR: composition_prelude -->
+
+## Function composition
+
+If you feel that the signal is drowned out by the noise in code written like
 this
+
+```python
+for name in filenames:
+    file_ = open(name):
+        for line in file_:
+            for word in line.split():
+                print(word)
+```
+and that the intent is clearer in code presented like this
+
+```python
+pipe(source << filenames, open, join, str.split, join, sink(print))
+```
+then you might find `liquidata` interesting.
+
+## Still with me?
+
+That was a trivial example. Let's have a look at something a little more
+involved.
+
+If you are perfectly happy reading and writing code like this
+
+<!-- ANCHOR_END: composition_prelude -->
 
 ```python
 def keyword_frequency_loop(directories):
@@ -39,7 +126,11 @@ def keyword_frequency_loop(directories):
                             counter[name] += 1
     return counter
 ```
-while the intent is clearer when it is presented like this
+
+then `liquidata` is probably not for you.
+
+But if the last example leaves you wanting to extract the core meaning from the
+noise, and you feel that this
 
 ```python
 all_files         = os.walk, JOIN, NAME.path.dirs.files
@@ -56,10 +147,8 @@ keyword_frequency_pipe = pipe(
     find_keywords,
     OUT(INTO(Counter)))
 ```
-
-then you might find `liquidata` interesting. Furthermore, if you think that
-abstraction should be as easy as getting the previous version by extracting
-subsequences from this prototype
+is a step in the right direction, and if you feel that abstraction should be as
+easy as getting the above version by extracting subsequences from this prototype
 
 ```python
 keyword_frequency_pipe = pipe(
@@ -75,4 +164,18 @@ keyword_frequency_pipe = pipe(
     OUT(INTO(Counter)))
 ```
 
-then you might enjoy the tutorial.
+then you might want to peruse the [documentation](https://jacg.github.io/liquidata).
+
+# Installation
+
+<!-- ANCHOR: installation -->
+
+Currently there are two options:
+
+1. Pip: `pip install liquidata`.
+
+2. Just grab the source. For now, the implementation lives in a single,
+   dependency-free
+   [file](https://github.com/jacg/liquidata/raw/master/liquidata.py).
+
+<!-- ANCHOR_END: installation -->

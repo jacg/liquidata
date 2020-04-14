@@ -1,8 +1,4 @@
-
-# TODO: abstraction
 # TODO: progress report
-
-
 
 def test_final():
 
