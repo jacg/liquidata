@@ -1,0 +1,314 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js ayu">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Architecture - Liquidata</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "ayu";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> Instalation</a></li><li class="chapter-item expanded "><a href="mPyPl.html"><strong aria-hidden="true">2.</strong> Comparison to mPyPl</a></li><li class="chapter-item expanded "><a href="whirlwind.html"><strong aria-hidden="true">3.</strong> Whirlwind tour of basic features</a></li><li class="chapter-item expanded "><a href="Tutorial.html"><strong aria-hidden="true">4.</strong> Tutorial</a></li><li class="chapter-item expanded "><a href="Architecture.html" class="active"><strong aria-hidden="true">5.</strong> Architecture</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu (default)</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Liquidata</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#why-do-we-have-the-current-architecture" id="why-do-we-have-the-current-architecture">Why do we have the current architecture?</a></h1>
+<p>The current implementation uses coroutines to push data through the pipeline.</p>
+<p>This was motivated by the context in which the ancestor of <code>liquidata</code> was written, where a single input stream was required be split into multiple independent output streams fed into separate sinks.</p>
+<p>Let's take a step back and ask some questions about this choice: Do we need to push? Do we need coroutines? Why? When? What are the consequences? What alternatives are there?</p>
+<h1><a class="header" href="#function-composition" id="function-composition">Function composition</a></h1>
+<p>Let's consider a very simple pipeline, consisting of a linear sequence of maps:</p>
+<pre><code class="language-python">pipe(f, g, h)
+</code></pre>
+<p>This could be implemented using any of</p>
+<ul>
+<li>coroutines</li>
+<li>generators</li>
+<li>asyncio</li>
+<li>function composition</li>
+</ul>
+<p>Function composition is the simplest, so why bother with the others?</p>
+<h1><a class="header" href="#changing-stream-length" id="changing-stream-length">Changing stream length</a></h1>
+<p>Let's throw in a filter or a join:</p>
+<pre><code class="language-python">pipe(f, { p }, g, h)
+pipe(f, join, g, h)
+</code></pre>
+<p>Function composition no longer cuts the mustard, because there is no longer a 1-to-1 correspendence between items in the input and output streams: something is needed to shrink or expand the stream.</p>
+<h1><a class="header" href="#stream-bifurcation" id="stream-bifurcation">Stream bifurcation</a></h1>
+<p>A different complication, branches:</p>
+<pre><code class="language-python">pipe(f, [x, y], g, h)
+</code></pre>
+<p>It's difficult to see how function composition and generators could deal with this.</p>
+<h1><a class="header" href="#joining-streams" id="joining-streams">Joining streams</a></h1>
+<p>That last pipe describes a graph that looks something like this:</p>
+<pre><code>             x -- y
+           /
+source -- f
+           \
+             g -- h
+</code></pre>
+<p>How about</p>
+<pre><code>sourceA -- a
+            \
+             g --- h
+            /
+sourceB -- b
+</code></pre>
+<p>Generators can deal with this easily:</p>
+<pre><code class="language-python">map(h, map(g, map(a, sourceA)
+              map(b, sourceB)))
+</code></pre>
+<p>but it's not obvious how this would work for function composition or coroutines.</p>
+<h2><a class="header" href="#liquidata-syntax-for-multiple-sources" id="liquidata-syntax-for-multiple-sources"><code>liquidata</code> syntax for multiple sources</a></h2>
+<p>What would the <code>liquidata</code> syntax for this look like?</p>
+<p>Ideally we'd have another kind of bracket (we've exhausted the possibilities
+that Python offers: <code>()</code>, <code>[]</code>, <code>{}</code>). Let's imagine that <code>&lt;&gt;</code> are valid
+syntactic brackets, then we could have:</p>
+<pre><code>pipe(b, &lt;sourceA, a&gt;, g, h)  # join two sources
+pipe(b, [a, out.A],   g, h)  # branch out into two sinks
+</code></pre>
+<p>Working with syntax available in Python, how about:</p>
+<pre><code class="language-python">pipe(b, source(sourceA, a), g, h)
+</code></pre>
+<p>Recall that the following are already synonymous in <code>liquidata</code></p>
+<pre><code class="language-python">pipe(f)(data)
+pipe(source &lt;&lt; data, f)
+pipe(data &gt;&gt; source, f)
+pipe(source(data), f)
+</code></pre>
+<p>so the following could work</p>
+<pre><code class="language-python">pipe(source &lt;&lt; sourceB, b, (source &lt;&lt; sourceA , a), g, h)
+</code></pre>
+<p><code>liquidata</code> used to have a input-variable syntax (called slots) in its earlier
+prototype. If something like it were resurrected, we could write something along
+the lines of</p>
+<pre><code class="language-python">fn = pipe(source &lt;&lt; slot.B, b, (source &lt;&lt; slot.A, a), g, h)
+fn(A=sourceA, B=sourceB)
+</code></pre>
+<h2><a class="header" href="#synchronization" id="synchronization">Synchronization</a></h2>
+<p>In <code>liquidata</code> <code>[]</code>-branches are called <em>independent</em>, because there is
+absolutely no synchronization between them (in contrast with named branches
+which are based on namespaces flowing through the pipe and managed with <code>name</code>,
+<code>get</code> and <code>put</code>). Once the stream has split, the branches can change the length
+of the stream without the others knowing or caring about it.</p>
+<p>We would need to think about the synchronization consequences for multiple
+independent input streams. I guess that the answer is: it's up to the user to
+make sure something sensible happens. Essentially, the user has the same
+freedoms and responsibilities as when joining multiple sources in
+classically-written generator networks:</p>
+<pre><code class="language-python">map(h, map(g, map(&lt;filter or join&gt;, sourceA)
+              map(b,                sourceB)))
+</code></pre>
+<h1><a class="header" href="#close_all" id="close_all"><code>close_all</code></a></h1>
+<p>Consider the following in current <code>liquidata</code></p>
+<pre><code class="language-python">pipe(source &lt;&lt; itertools.count(), take(3))
+pipe(source &lt;&lt; itertools.count(), take(3, close_all=True))
+</code></pre>
+<p>Because of the pull-architecture, the first never returns. In a pull
+architecture the issue doesn't arise.</p>
+<h1><a class="header" href="#so-what" id="so-what">So what?</a></h1>
+<p>I would like to remove the universal reliance on coroutines, with two main goals</p>
+<ul>
+<li>
+<p>Enabling things that were impossible before.</p>
+</li>
+<li>
+<p>Simplifying portions of the code which don't need coroutines.</p>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="Tutorial.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="Tutorial.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

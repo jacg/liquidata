@@ -1,0 +1,367 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js ayu">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Introduction - Liquidata</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "ayu";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html" class="active">Introduction</a></li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> Instalation</a></li><li class="chapter-item expanded "><a href="mPyPl.html"><strong aria-hidden="true">2.</strong> Comparison to mPyPl</a></li><li class="chapter-item expanded "><a href="whirlwind.html"><strong aria-hidden="true">3.</strong> Whirlwind tour of basic features</a></li><li class="chapter-item expanded "><a href="Tutorial.html"><strong aria-hidden="true">4.</strong> Tutorial</a></li><li class="chapter-item expanded "><a href="Architecture.html"><strong aria-hidden="true">5.</strong> Architecture</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu (default)</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Liquidata</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#what-is-this" id="what-is-this">What is this?</a></h1>
+<p><code>liquidata</code> is a Python Embedded Domain Specific Language (EDSL) which aims to encourage and facilitate</p>
+<ul>
+<li>
+<p>increasing the signal-to-noise ratio in source code</p>
+</li>
+<li>
+<p>avoiding using strings to represent symbols in the API</p>
+</li>
+<li>
+<p>code reuse through composition of reusable and orthogonal components</p>
+</li>
+<li>
+<p>dataflow programming</p>
+</li>
+<li>
+<p>function composition</p>
+</li>
+<li>
+<p>lazy processing.</p>
+</li>
+</ul>
+<h1><a class="header" href="#why-would-i-want-this" id="why-would-i-want-this">Why would I want this?</a></h1>
+<h2><a class="header" href="#dataflow-networks" id="dataflow-networks">Dataflow networks</a></h2>
+<p>It can be helpful to think of your computations as flows through a network or
+graph of components. For example</p>
+<pre><code>candidates
+    |
+quick_screen
+    |
+expensive_screen -------.
+    |                    \
+can dance ?           can sing ?
+    |                     |
+hop test              pitch test
+    |                     |
+skip test             rhythm test
+    |                     |
+jump test                 |
+    |                     |
+sum scores            sum scores
+    |                     |
+score above 210 ?     score above 140 ?
+    |                     |
+output dancers        output singers
+</code></pre>
+<p>The aim of <code>liquidata</code> is to allow you to express the idea laid out in the graph
+above, in code that reflects the structure of the graph. A <code>liquidata</code>
+implementation of the graph might look something like this:</p>
+<pre><code class="language-python">select_candidates = pipe(
+    { quick_screening },
+    { expensive_screening },
+    [ { can_sing },
+      test_pitch,
+      test_rhythm,
+      sum_scores.pitch.rhythm,
+      { score_above(140) },
+      out.singers
+    ],
+    { can_dance },
+    test_hop,
+    test_skip,
+    test_jump,
+    sum_scores.hop.skip.jump,
+    { score_above(210) },
+    out.dancers)
+
+selected = select_candidates(candidates)
+
+# Do something with the results
+send_to_singer_committee(selected.singers)
+send_to_dancer_committee(selected.dancers)
+</code></pre>
+<h2><a class="header" href="#function-composition" id="function-composition">Function composition</a></h2>
+<p>If you feel that the signal is drowned out by the noise in code written like
+this</p>
+<pre><code class="language-python">for name in filenames:
+    file_ = open(name):
+        for line in file_:
+            for word in line.split():
+                print(word)
+</code></pre>
+<p>and that the intent is clearer in code presented like this</p>
+<pre><code class="language-python">pipe(source &lt;&lt; filenames, open, join, str.split, join, sink(print))
+</code></pre>
+<p>then you might find <code>liquidata</code> interesting.</p>
+<h2><a class="header" href="#still-with-me" id="still-with-me">Still with me?</a></h2>
+<p>That was a trivial example. Let's have a look at something a little more
+involved.</p>
+<p>If you are perfectly happy reading and writing code like this</p>
+<pre><code class="language-python">    def keyword_frequency_loop(directories):
+        counter = Counter()
+        for directory in directories:
+            for (path, dirs, files) in os.walk(directory):
+                for filename in files:
+                    if not filename.endswith('.py'):
+                        continue
+                    for line in open(os.path.join(path, filename)):
+                        for name in line.split('#', maxsplit=1)[0].split():
+                            if iskeyword(name):
+                                counter[name] += 1
+        return counter
+</code></pre>
+<p>then <code>liquidata</code> is probably not for you.</p>
+<p>But if the last example leaves you wanting to extract the core meaning from the
+noise, and you feel that this</p>
+<pre><code class="language-python">    all_files         = os.walk, JOIN, NAME.path.dirs.files
+    pick_python_files = GET.files * (JOIN, { use(str.endswith, '.py') }) &gt;&gt; PUT.filename
+    file_contents     = GET.path.filename * os.path.join, open, JOIN
+    ignore_comments   = use(str.split, '#', maxsplit=1), GET[0]
+    pick_keywords     = str.split, JOIN, { iskeyword }
+
+    keyword_frequency_pipe = pipe(
+        all_files,
+        pick_python_files,
+        file_contents,
+        ignore_comments,
+        pick_keywords,
+        OUT(INTO(Counter)))
+</code></pre>
+<p>is a step in the right direction, and if you feel that abstraction should be as
+easy as getting the above version by extracting subsequences from this prototype</p>
+<pre><code class="language-python">    keyword_frequency_pipe = pipe(
+        os.walk, JOIN,
+        NAME.path.dirs.files,
+        GET.files * (JOIN, { use(str.endswith, '.py') }) &gt;&gt; PUT.filename,
+        GET.path.filename * os.path.join,
+        open, JOIN,
+        use(str.split, '#', maxsplit=1),
+        GET[0],
+        str.split, JOIN,
+        { iskeyword },
+        OUT(INTO(Counter)))
+</code></pre>
+<p>then you might want to read on.</p>
+<h2><a class="header" href="#running-these-samples" id="running-these-samples">Running these samples</a></h2>
+<ul>
+<li>
+<p><code>select_candidates</code> is an outline of the solution, which omits details. As
+such, it is not executable.</p>
+</li>
+<li>
+<p><code>keyword_frequency_loop</code> and both versions of <code>keyword_frequency_pipe</code> are
+both complete executable examples.</p>
+</li>
+</ul>
+<p>To run <code>keyword_frequency_loop</code>, you will need these imports:</p>
+<pre><code class="language-python">    import os
+    from keyword     import iskeyword
+    from collections import Counter
+</code></pre>
+<p>To run (either version of) <code>keyword_frequency_pipe</code> you will additionally need
+to <a href="./installation.html">get <code>liquidata</code></a>, and import thus:</p>
+<pre><code class="language-python">    from liquidata import pipe, name as NAME, get as GET, put as PUT, join as JOIN, out as OUT, into as INTO, use
+</code></pre>
+<p>(The liquidata components were uppercased in order to highlight them in the
+example.)</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+                            <a rel="next" href="installation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+                    <a rel="next" href="installation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

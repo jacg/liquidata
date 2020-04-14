@@ -1,0 +1,1720 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js ayu">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Liquidata</title>
+        
+        <meta name="robots" content="noindex" />
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "ayu";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> Instalation</a></li><li class="chapter-item expanded "><a href="mPyPl.html"><strong aria-hidden="true">2.</strong> Comparison to mPyPl</a></li><li class="chapter-item expanded "><a href="whirlwind.html"><strong aria-hidden="true">3.</strong> Whirlwind tour of basic features</a></li><li class="chapter-item expanded "><a href="Tutorial.html"><strong aria-hidden="true">4.</strong> Tutorial</a></li><li class="chapter-item expanded "><a href="Architecture.html"><strong aria-hidden="true">5.</strong> Architecture</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu (default)</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Liquidata</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#what-is-this" id="what-is-this">What is this?</a></h1>
+<p><code>liquidata</code> is a Python Embedded Domain Specific Language (EDSL) which aims to encourage and facilitate</p>
+<ul>
+<li>
+<p>increasing the signal-to-noise ratio in source code</p>
+</li>
+<li>
+<p>avoiding using strings to represent symbols in the API</p>
+</li>
+<li>
+<p>code reuse through composition of reusable and orthogonal components</p>
+</li>
+<li>
+<p>dataflow programming</p>
+</li>
+<li>
+<p>function composition</p>
+</li>
+<li>
+<p>lazy processing.</p>
+</li>
+</ul>
+<h1><a class="header" href="#why-would-i-want-this" id="why-would-i-want-this">Why would I want this?</a></h1>
+<h2><a class="header" href="#dataflow-networks" id="dataflow-networks">Dataflow networks</a></h2>
+<p>It can be helpful to think of your computations as flows through a network or
+graph of components. For example</p>
+<pre><code>candidates
+    |
+quick_screen
+    |
+expensive_screen -------.
+    |                    \
+can dance ?           can sing ?
+    |                     |
+hop test              pitch test
+    |                     |
+skip test             rhythm test
+    |                     |
+jump test                 |
+    |                     |
+sum scores            sum scores
+    |                     |
+score above 210 ?     score above 140 ?
+    |                     |
+output dancers        output singers
+</code></pre>
+<p>The aim of <code>liquidata</code> is to allow you to express the idea laid out in the graph
+above, in code that reflects the structure of the graph. A <code>liquidata</code>
+implementation of the graph might look something like this:</p>
+<pre><code class="language-python">select_candidates = pipe(
+    { quick_screening },
+    { expensive_screening },
+    [ { can_sing },
+      test_pitch,
+      test_rhythm,
+      sum_scores.pitch.rhythm,
+      { score_above(140) },
+      out.singers
+    ],
+    { can_dance },
+    test_hop,
+    test_skip,
+    test_jump,
+    sum_scores.hop.skip.jump,
+    { score_above(210) },
+    out.dancers)
+
+selected = select_candidates(candidates)
+
+# Do something with the results
+send_to_singer_committee(selected.singers)
+send_to_dancer_committee(selected.dancers)
+</code></pre>
+<h2><a class="header" href="#function-composition" id="function-composition">Function composition</a></h2>
+<p>If you feel that the signal is drowned out by the noise in code written like
+this</p>
+<pre><code class="language-python">for name in filenames:
+    file_ = open(name):
+        for line in file_:
+            for word in line.split():
+                print(word)
+</code></pre>
+<p>and that the intent is clearer in code presented like this</p>
+<pre><code class="language-python">pipe(source &lt;&lt; filenames, open, join, str.split, join, sink(print))
+</code></pre>
+<p>then you might find <code>liquidata</code> interesting.</p>
+<h2><a class="header" href="#still-with-me" id="still-with-me">Still with me?</a></h2>
+<p>That was a trivial example. Let's have a look at something a little more
+involved.</p>
+<p>If you are perfectly happy reading and writing code like this</p>
+<pre><code class="language-python">    def keyword_frequency_loop(directories):
+        counter = Counter()
+        for directory in directories:
+            for (path, dirs, files) in os.walk(directory):
+                for filename in files:
+                    if not filename.endswith('.py'):
+                        continue
+                    for line in open(os.path.join(path, filename)):
+                        for name in line.split('#', maxsplit=1)[0].split():
+                            if iskeyword(name):
+                                counter[name] += 1
+        return counter
+</code></pre>
+<p>then <code>liquidata</code> is probably not for you.</p>
+<p>But if the last example leaves you wanting to extract the core meaning from the
+noise, and you feel that this</p>
+<pre><code class="language-python">    all_files         = os.walk, JOIN, NAME.path.dirs.files
+    pick_python_files = GET.files * (JOIN, { use(str.endswith, '.py') }) &gt;&gt; PUT.filename
+    file_contents     = GET.path.filename * os.path.join, open, JOIN
+    ignore_comments   = use(str.split, '#', maxsplit=1), GET[0]
+    pick_keywords     = str.split, JOIN, { iskeyword }
+
+    keyword_frequency_pipe = pipe(
+        all_files,
+        pick_python_files,
+        file_contents,
+        ignore_comments,
+        pick_keywords,
+        OUT(INTO(Counter)))
+</code></pre>
+<p>is a step in the right direction, and if you feel that abstraction should be as
+easy as getting the above version by extracting subsequences from this prototype</p>
+<pre><code class="language-python">    keyword_frequency_pipe = pipe(
+        os.walk, JOIN,
+        NAME.path.dirs.files,
+        GET.files * (JOIN, { use(str.endswith, '.py') }) &gt;&gt; PUT.filename,
+        GET.path.filename * os.path.join,
+        open, JOIN,
+        use(str.split, '#', maxsplit=1),
+        GET[0],
+        str.split, JOIN,
+        { iskeyword },
+        OUT(INTO(Counter)))
+</code></pre>
+<p>then you might want to read on.</p>
+<h2><a class="header" href="#running-these-samples" id="running-these-samples">Running these samples</a></h2>
+<ul>
+<li>
+<p><code>select_candidates</code> is an outline of the solution, which omits details. As
+such, it is not executable.</p>
+</li>
+<li>
+<p><code>keyword_frequency_loop</code> and both versions of <code>keyword_frequency_pipe</code> are
+both complete executable examples.</p>
+</li>
+</ul>
+<p>To run <code>keyword_frequency_loop</code>, you will need these imports:</p>
+<pre><code class="language-python">    import os
+    from keyword     import iskeyword
+    from collections import Counter
+</code></pre>
+<p>To run (either version of) <code>keyword_frequency_pipe</code> you will additionally need
+to <a href="./installation.html">get <code>liquidata</code></a>, and import thus:</p>
+<pre><code class="language-python">    from liquidata import pipe, name as NAME, get as GET, put as PUT, join as JOIN, out as OUT, into as INTO, use
+</code></pre>
+<p>(The liquidata components were uppercased in order to highlight them in the
+example.)</p>
+<h1><a class="header" href="#instalation" id="instalation">Instalation</a></h1>
+<p>Currently there are two options:</p>
+<ol>
+<li>
+<p>Pip: <code>pip install liquidata</code>.</p>
+</li>
+<li>
+<p>Just grab the source. For now, the implementation lives in a single,
+dependency-free
+<a href="https://github.com/jacg/liquidata/raw/master/liquidata.py">file</a>.</p>
+</li>
+</ol>
+<h1><a class="header" href="#comparison-to-mpypl" id="comparison-to-mpypl">Comparison to mPyPl</a></h1>
+<p><a href="http://soshnikov.com/mPyPl/"><code>mPyPl</code></a> is a project with certain similarities to
+<code>liquidata</code>.</p>
+<p>A major architectural difference is that <code>mPyPl</code> uses generators to <em>pull</em> data
+through the pipeline, while <code>liquidata</code> uses coroutines to <em>push</em> the data
+through the pipeline. This is because <code>liquidata</code> was designed to allow easy
+bifurcation of flows into independent unsynchronized branches. (<code>liquidata</code> will
+probably also support pull-pipelines in the future.) Both <code>mPyPl</code> and
+<code>liquidata</code> support synchronized, named branches by sending compound objects
+with named components through the flow. <code>mPyPl</code>'s and <code>liquidata</code>'s approach to
+managing these names is markedly different.</p>
+<p>Here we compare and contrast the APIs provided by the two packages.</p>
+<p>This example appears in the <a href="http://soshnikov.com/mPyPl/">quickstart</a> for <code>mPyPl</code>:</p>
+<pre><code class="language-python">import mPyPl as mp
+
+images = (
+  mp.get_files('images',ext='.jpg')
+  | mp.as_field('filename')
+  | mp.apply('filename','image', lambda x: imread(x))
+  | mp.apply('filename','date', get_date)
+  | mp.apply(['image','date'],'result',lambda x: imprint(x[0],x[1]))
+  | mp.select_field('result')
+  | mp.as_list)
+</code></pre>
+<p>Here is its translation into <code>liquidata</code></p>
+<pre><code class="language-python">from liquidata import pipe, source, name, get, put
+
+images = pipe(
+  get_files(...) &gt;&gt; source,  name.filename,
+  imread   * get.filename &gt;&gt; put.image,
+  get_date * get.filename &gt;&gt; put.date,
+  imprint  * get.image.date)
+</code></pre>
+<p>Observations:</p>
+<ul>
+<li>
+<p><code>liquidata</code> highlights the high-level information about what happens in the
+pipeline: <code>get_files</code>, <code>imread</code>, <code>get_date</code>, <code>imprint</code>. In contrast, <code>mPyPl</code>
+buries it in the noise.</p>
+</li>
+<li>
+<p><code>liquidata</code> avoids the use of strings as symbols.</p>
+</li>
+<li>
+<p><code>mPyPl</code> provides a specific <code>get_files</code> utility; <code>liquidata</code> can work with any
+iterable source of files, but providing such sources is outside of the scope
+of <code>liquidata</code>'s goals.</p>
+</li>
+<li>
+<p><code>mp.as_field('filename')</code> is equivalent to <code>name.filename</code></p>
+</li>
+<li>
+<p><code>mp.apply</code> serves three purposes:</p>
+<ul>
+<li>mapping a function over the stream data</li>
+<li>selecting arguments from the compound flow items</li>
+<li>placing the result back in the compound flow items</li>
+</ul>
+<p>In contrast <code>liquidata</code> separates these concerns</p>
+<ul>
+<li>mapping is done by default: no need to ask for it</li>
+<li><code>get</code> selects arguments</li>
+<li><code>put</code> places results</li>
+</ul>
+</li>
+<li>
+<p><code>mp.apply(['image', 'date'], 'result', lambda x: imprint(x[0],x[1]))</code></p>
+<ul>
+<li>creates an argument tuple containing <code>image</code> and <code>date</code></li>
+<li>uses a <code>lambda</code> to unpack the argument tuple into the call to <code>imprint</code></li>
+<li>puts the result back in the compound flow under the name <code>result</code></li>
+</ul>
+<p>In contrast, in <code>imprint * get.image.date</code></p>
+<ul>
+<li><code>get.image.date</code> creates an argument tuple</li>
+<li><code>*</code> unpacks the augment tuple into the call to <code>imprint</code></li>
+<li>The lack of <code>put</code> causes the result to continue downstream on its own: the
+other items in the compound flow are no longer needed!</li>
+</ul>
+</li>
+<li>
+<p><code>mp.select_field('result')</code> translates to <code>get.result</code> in <code>liquidata</code>. It
+extracts the interesting item from the compound flow. In the <code>liquidata</code>
+version this step is not needed, because it was done implicitly in the
+previous step: by avoiding the use of <code>&gt;&gt; put.result</code>, the result continued
+down the pipe on its own, rather than being placed in the compound object
+along with everything else. That is to say</p>
+<pre><code class="language-python">imprint * get.image.date
+</code></pre>
+<p>is equivalent to</p>
+<pre><code class="language-python">imprint * get.image.date &gt;&gt; put.result,
+get.result
+</code></pre>
+</li>
+<li>
+<p><code>mp.as_list</code> collects the results in a list. The equivalent (which would be
+written <code>out(into(list))</code>) is missing from the <code>liquidata</code> version, because
+it's the default.</p>
+</li>
+<li>
+<p><code>out(into(...))</code> is far more general than <code>mp.as_list</code>, as it will work with
+<em>any</em> callable that consumes iterables, such as <code>set</code>, <code>tuple</code>, <code>min</code>, <code>max</code>,
+<code>sum</code>, <code>sorted</code>, <code>collections.Counter</code>, ... including any and all that will be
+written in the future.</p>
+</li>
+</ul>
+<h1><a class="header" href="#whirlwind-tour-of-basic-features" id="whirlwind-tour-of-basic-features">Whirlwind tour of basic features</a></h1>
+<pre><code class="language-python">from liquidata import pipe, sink
+
+fn = pipe(
+    [ sink(print) ],
+    { str.isalpha },
+    str.upper)
+
+fn(dir())
+</code></pre>
+<ul>
+<li>
+<p><code>pipe</code> accepts an arbitrary number of pipe components.</p>
+</li>
+<li>
+<p><code>pipe</code> returns a function (callable).</p>
+</li>
+<li>
+<p>The function created by <code>pipe</code> accepts an iterable argument, and pushes its
+elements through the pipeline.</p>
+</li>
+<li>
+<p>Square brackets (<code>[ ]</code>) create <em>independent branches</em>: the same data are sent
+both into the branch and downstream.</p>
+</li>
+<li>
+<p><code>sink</code> feeds items into a (presumably) side-effectful function (<code>print</code> in
+this example), and prevents them from going any further downstream.</p>
+</li>
+<li>
+<p>Braces (<code>{ }</code>) are filters: they should contain a predicate (a function whose
+return value is interpreted as a boolean; <code>str.isalpha</code>, in this example), and
+will prevent any items which don't satisfy the predicate, from progressing
+further down the pipe.</p>
+</li>
+<li>
+<p>Unadorned functions are mappings: they accept incoming items, and the values
+they return are sent downstream.</p>
+</li>
+<li>
+<p>Any items that reach the end of a pipe are, by default, collected into a list
+and returned.</p>
+</li>
+</ul>
+<p>Consequently, in the above example:</p>
+<ul>
+<li>
+<p>The names in the global scope (<code>dir()</code>) are fed into the pipeline, one by one.</p>
+</li>
+<li>
+<p>Each incoming item is printed out.</p>
+</li>
+<li>
+<p>Items containing non-alphabetic characters are filtered out.</p>
+</li>
+<li>
+<p>All remaining items are uppercased ...</p>
+</li>
+<li>
+<p>... and returned in a list.</p>
+</li>
+</ul>
+<pre><code class="language-python">from operator import add
+from liquidata import source, pipe, out, arg
+
+pipe(
+    source &lt;&lt; dir(),
+    [ out.incoming ],
+    { str.isalpha },
+    { arg &gt; 5 : len },
+    [ str.upper, out.big ],
+    [ len, [ out.ADD(add) ], out.SUM(into(sum)) ],
+    str.lower,
+    out.small)
+</code></pre>
+<ul>
+<li>
+<p>Rather than using <code>pipe</code> to create a reusable function, we feed data into the
+pipeline directly, by including the source in the pipeline. The following
+three variations have the same meaning:</p>
+<ul>
+<li><code>source &lt;&lt; dir()</code></li>
+<li><code>dir() &gt;&gt; source</code></li>
+<li><code>source(dir())</code></li>
+</ul>
+</li>
+<li>
+<p>Rather than using a side-effect (<code>print</code>) to inspect what is passing through
+the pipe at various points, in this example we used <em>named outputs</em>. <code>out</code> is
+a sink which collects values so that they can be returned from the pipe.</p>
+<ul>
+<li>
+<p>The presence of multiple <code>out</code>s in the graph, causes the pipeline to return
+a namespace, rather than a single result.</p>
+</li>
+<li>
+<p>If a pipe (or branch; branches are just pipes) does not explicitly end in a
+<code>sink</code> or <code>out</code>, then it is implicitly capped with an anonymous <code>out</code>.</p>
+</li>
+<li>
+<p><code>out.incoming</code> will collect all items into a list, and arrange for the list
+to be bound to the name <code>incoming</code> in the namespace that is returned by the
+pipe as a whole.</p>
+</li>
+<li>
+<p><code>out.ADD(add)</code> uses a binary function (<code>add</code>) to fold or reduce all the
+values it receives into a single one, which will be placed in the returned
+namespace under the specified name, <code>ADD</code>.</p>
+</li>
+<li>
+<p><code>out.SUM(into(sum))</code> feeds the items it receives into a callable which
+consumes iterables (in this case <code>sum</code>, but keep in mind that there are very
+many ready-made options here: <code>set</code>, <code>min</code>/<code>max</code>, <code>collections.Counter</code>, <code>', '.join</code>, etc.). The result will bound in the returned namespace under the
+name <code>SUM</code>.</p>
+</li>
+<li>
+<p><code>arg</code> provides a concise syntax for very simple anonymous functions: ones
+consisting of the application of an operator and a constant to the
+function's argument. In this example, we have <code>arg &gt; 5</code>. This is equivalent
+to <code>lambda arg: arg &gt; 5</code>.</p>
+</li>
+<li>
+<p>Braces containing colons are <em>key-filters</em>. In this example, <code>{ arg &gt; 5 : len }</code>. The predicate appears before the colon, but, rather than being
+applied to the item in the pipe, it is applied to the result the key
+function (specified after the colon) returns when given the item.</p>
+<p>If the verdict is positive, the <em>original</em> item (rather than the value
+returned by the key function) progresses downstream.</p>
+<p>In this example, strings are coming through the pipe, and strings continue
+past the filter, but only those whose <code>len</code> is greater than <code>5</code>.</p>
+</li>
+<li>
+<p>Branches can be nested: <code>[ len, [ out.ADD(add) ], out.SUM(into(sum)) ]</code>.</p>
+</li>
+<li>
+<p>The list of items reaching the end of the main pipe, unlike in the first
+example, is not anonymous: it is bound to the name <code>small</code> in the returned
+namespace.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>The result returned by the pipeline is a namespace containing 5 names.</p>
+</li>
+</ul>
+<h2><a class="header" href="#synchnonized-branches-compound-flow-and-name-management" id="synchnonized-branches-compound-flow-and-name-management">Synchnonized branches, compound flow and name management</a></h2>
+<p>TODO</p>
+<h1><a class="header" href="#tutorial" id="tutorial">Tutorial</a></h1>
+<p>In this tutorial we'll gradually build up the code that appears in the
+introduction, and explore some other features along the way.</p>
+<p>The following code will traverse your entire filesystem, and print information
+about every directory and the files in it. Be ready to interrupt it!</p>
+<h2><a class="header" href="#a-very-simple-pipe" id="a-very-simple-pipe">A very simple pipe</a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, sink
+
+pipe(source &lt;&lt; os.walk('/'), sink(print))
+</code></pre>
+<ul>
+<li>
+<p>We created a pipe which uses the iterable <code>os.walk('/')</code> as its source. The
+following 3 variations are synonymous:</p>
+<ul>
+<li><code>source &lt;&lt; iterable</code></li>
+<li><code>iterable &gt;&gt; source</code></li>
+<li><code>source(iterable)</code></li>
+</ul>
+</li>
+<li>
+<p>The items in the source are sent down the pipeline</p>
+</li>
+<li>
+<p>In this case the pipeline is very short, it contains only a single sink. <code>sink</code>:</p>
+<ul>
+<li>feeds any items it receives into the (presumably side-effecting) function it
+contains</li>
+<li>stops the items from propagating further downstream</li>
+</ul>
+</li>
+<li>
+<p><code>os.walk('/')</code> traverses the entire filesystem: information about <em>each</em>
+directory in the filesystem is send down the pipe and printed out. Your screen
+is flooded with information.</p>
+</li>
+</ul>
+<p>Let's try to remove the need to interrupt the pipeline manually.</p>
+<h2><a class="header" href="#limiting-the-number-of-items" id="limiting-the-number-of-items">Limiting the number of items</a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, take, sink
+
+pipe(source &lt;&lt; os.walk('/'), take(3), sink(print))
+</code></pre>
+<ul>
+<li>
+<p>We have introduced a new component into the pipe: <code>take(3)</code>. Its purpose is to
+limit the number of items flowing through the pipe.</p>
+</li>
+<li>
+<p>Only the first three items coming out of the source are printed to the screen.</p>
+</li>
+<li>
+<p>But the pipeline does not terminate, because the entire source is being pushed
+through the pipe. <code>take</code> only limits how many of them get through.</p>
+</li>
+<li>
+<p>If you do not interrupt this, it will eventually terminate after the source is
+exhausted (your whole filesystem has been traversed).</p>
+</li>
+</ul>
+<h2><a class="header" href="#push-vs-pull" id="push-vs-pull">Push vs pull</a></h2>
+<ul>
+<li>
+<p><code>liquidata</code> pushes the data through the pipeline using coroutines. A perfectly
+valid alternative choice would be to pull the data through the pipe using
+generators.</p>
+</li>
+<li>
+<p>Pushing makes it easy to split the stream into separate, independent branches
+leading to distinct sinks (or outputs); pulling makes it easier to join
+independent sources (or inputs). The former made more sense in the context in
+which <code>liquidata</code> was originally needed.</p>
+</li>
+<li>
+<p><code>liquidata</code> will support pulling in the future.</p>
+</li>
+<li>
+<p>If the data were being pulled, the previous example would terminate as soon as
+the first 3 items from the source had been processed.</p>
+</li>
+<li>
+<p>In a pull-architecture, <code>take</code> has to send an '<em>I am closed, you won't get any
+more data from me</em>' message downstream. Consequently, downstream will stop
+asking for more. In a push-architecture, <code>take</code> has two choices:</p>
+<ul>
+<li>
+<p>Keep rejecting all subsequent items it receives, until upstream stops
+sending data.</p>
+</li>
+<li>
+<p>Send a '<em>please stop sending data</em>' message upstream. In this case, any
+other branches on the network will also immediately stop receiving any data.
+This is not always desirable.</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2><a class="header" href="#early-termination-of-push" id="early-termination-of-push">Early termination of push</a></h2>
+<p>We can instruct <code>take</code> to close down the whole network, as soon as it has let
+through all the items it needs, by passing in <code>close_all=True</code>:</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, take, sink
+
+pipe(source &lt;&lt; os.walk('/'), take(3, close_all=True), sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The first three items are printed to the screen, and the pipeline terminates immediately.</p>
+</li>
+<li>
+<p>All <code>liquidata</code> components with the ability to reject all subsequent items,
+should have a <code>close_all</code> option.</p>
+</li>
+</ul>
+<h2><a class="header" href="#synchronized-branches-and-compound-flow" id="synchronized-branches-and-compound-flow">Synchronized branches and compound flow</a></h2>
+<p>The items generated by <code>os.walk</code> are 3-tuples, containing:</p>
+<ul>
+<li>A filesystem path</li>
+<li>A list of directories found on that path</li>
+<li>A list of files found on that path</li>
+</ul>
+<p>Let's give these components names within our pipeline</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, take, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>name.path.dirs.files</code>.</p>
+</li>
+<li>
+<p>It specifies three names: <code>path</code>, <code>dirs</code> and <code>files</code>.</p>
+</li>
+<li>
+<p>Therefore it expects to receive an iterable containing three items (in this
+case, the 3-tuple coming out of <code>os.walk</code>)</p>
+</li>
+<li>
+<p>It creates a namespace containing those three names, bound to the
+corresponding items in the tuple.</p>
+</li>
+<li>
+<p>The resulting namespace continues down the pipe.</p>
+</li>
+<li>
+<p>The components of such namespaces can be thought of as parallel, synchronized,
+named branches.</p>
+</li>
+<li>
+<p><code>liquidata</code> also supports unsynchronized branches. We'll meet these later.</p>
+</li>
+<li>
+<p><code>name.single_name</code> wraps the <em>whole</em> item it receives in a namespace. By
+contrast, <code>name.more.than.one</code> <em>unpacks</em> the item it receives and wraps its
+components in a namespace.</p>
+</li>
+</ul>
+<h2><a class="header" href="#picking-components-from-compound-flow" id="picking-components-from-compound-flow">Picking components from compound flow</a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>get.files</code>. It</p>
+<ul>
+<li>expects a compound item (Namespace) from upstream</li>
+<li>selects the specified component (<code>files</code>, in this example)</li>
+<li>sends it downstream.</li>
+</ul>
+</li>
+<li>
+<p>Consequently, this program prints three lists:</p>
+<ul>
+<li>one for each of the first three directories visited by <code>os.walk('/')</code></li>
+<li>each containing the names of the files in that directory</li>
+</ul>
+</li>
+</ul>
+<h2><a class="header" href="#join" id="join"><code>join</code></a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    take(3, close_all=True),
+    join,
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>join</code>.</p>
+</li>
+<li>
+<p>It expects iterables and sends their items downstream, one by one.</p>
+</li>
+<li>
+<p>Consequently, this program prints the names of the files found in the first 3
+directories visited by <code>os.walk('/')</code>.</p>
+</li>
+<li>
+<p>This is exactly the same information as in the previous example, except that,
+rather than being grouped in 3 lists, the names appear in one long chain.</p>
+</li>
+</ul>
+<p>Try swapping the <code>take</code> and the <code>join</code> components:</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    join,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>This time only 3 names are printed</p>
+</li>
+<li>
+<p>Previously, all the names corresponding to the first three directories were
+printed.</p>
+</li>
+<li>
+<p><code>join</code> plays a role similar to inner loops.</p>
+</li>
+<li>
+<p><code>flat(fn)</code> is an alternative spelling of <code>fn, join</code></p>
+</li>
+</ul>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    flat(get.files),
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p><code>flat(get.files)</code> replaced <code>get.files, join</code> from the previous example.</p>
+</li>
+<li>
+<p>The behaviour doesn't change.</p>
+</li>
+</ul>
+<h2><a class="header" href="#filters" id="filters">filters</a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    join,
+    { lambda x: x.endswith('.py') },
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>{ lambda x: x.endswith('.py') }</code></p>
+</li>
+<li>
+<p>Braces (<code>{ }</code>) create filters, with the contained function being used as the
+predicate.</p>
+</li>
+<li>
+<p>In this example, we only let through filenames which end in <code>.py</code>.</p>
+</li>
+<li>
+<p>We close the pipeline after seeing the first three of those.</p>
+</li>
+</ul>
+<h2><a class="header" href="#reducing-lambda-noise-use" id="reducing-lambda-noise-use">reducing <code>lambda</code> noise: <code>use</code></a></h2>
+<p>The purpose of <code>lambda</code> in the last example, is to bind the second argument of a
+function (in this example, <code>str.endswith(&lt;string&gt;, &lt;ending&gt;)</code>), while leaving
+the first argument unbound. This situation arises rather frequently, and
+<code>lambda</code> often adds a lot of syntactic noise.</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, use, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    join,
+    { use(str.endswith, '.py') },
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>use(str.endswith, '.py')</code> which replaces <code>lambda x: x.endswith('.py')</code>.</p>
+</li>
+<li>
+<p>The following two lines are synonymous:</p>
+<pre><code class="language-python">lambda x: fn(x, A2)
+      use(fn,   A2)
+</code></pre>
+</li>
+<li>
+<p>More generally:</p>
+<pre><code class="language-python">lambda x: fn(x, A2, A3, K1=v1, K2=v2)
+      use(fn,   A2, A3, K1=v1, K2=v2)
+</code></pre>
+</li>
+<li>
+<p>In other words:</p>
+<pre><code class="language-python">lambda x: fn(x, *args, **kwds)
+      use(fn,   *args, **kwds)
+</code></pre>
+</li>
+</ul>
+<h2><a class="header" href="#key-filters" id="key-filters">key-filters</a></h2>
+<p>Imagine we were interested in filenames whose length is greater than 5.</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    join,
+    { lambda x: x &lt; 5 : len },
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>{ lambda x: x &lt; 5 : len }</code>.</p>
+</li>
+<li>
+<p>The important new feature within that component is <code>: len</code>.</p>
+</li>
+<li>
+<p>We have already seen the use of braces (<code>{ predicate }</code>) as filters.</p>
+</li>
+<li>
+<p>This is a key-filter: <code>{ predicate : key }</code>.</p>
+</li>
+<li>
+<p>The predicate does not look at the item itself, but at <code>key(item)</code>.</p>
+</li>
+<li>
+<p>If the predicate is satisfied, the item itself (rather than <code>key(item)</code>)
+continues downstream.</p>
+</li>
+</ul>
+<h2><a class="header" href="#reducing-lambda-noise-arg" id="reducing-lambda-noise-arg">reducing <code>lambda</code> noise: <code>arg</code></a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, arg, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    join,
+    { arg &lt; 5 : len },
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>arg &lt; 5</code> which replaces <code>lambda x: x &lt; 5</code></p>
+</li>
+<li>
+<p><code>arg</code> is a means of creating anonymous functions by binding one operand of an
+operator. It works for most Python operators.</p>
+</li>
+<li>
+<p><code>from liquidata import arg as _</code> might be tempting ... but is it wise?</p>
+</li>
+</ul>
+<h2><a class="header" href="#adding-new-synchronized-branches-put" id="adding-new-synchronized-branches-put">Adding new synchronized branches: <code>put</code></a></h2>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, put, get, take, join, arg, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    (lambda ns: len(ns.files)) &gt;&gt; put.Nfiles,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new component is <code>(lambda ns: len(ns.files)) &gt;&gt; put.Nfiles</code></p>
+<ul>
+<li>
+<p><code>lambda ns: len(ns.files)</code> accepts a namespace, and returns the length of
+one of the values in the namespace.</p>
+</li>
+<li>
+<p><code>&gt;&gt; put.Nfiles</code> adds the returned value as a new entry in the namespace,
+under the name <code>Nfiles</code>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Before this point, there were three synchronized branches in the stream (<code>path</code>, <code>dirs</code>, <code>files</code>). After
+this point there are four (the aforementioned three, and <code>Nfiles</code>).</p>
+</li>
+</ul>
+<h2><a class="header" href="#get-" id="get-"><code>get *</code></a></h2>
+<p>The last example can be written more conveniently with <code>get *</code></p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, put, take, join, arg, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files * len &gt;&gt; put.Nfiles,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<p><code>get.files * len</code> replaced <code>(lambda ns: len(ns.files))</code></p>
+<p>The following three variants are synonymous</p>
+<pre><code class="language-python">(lambda ns: len(   ns.files)) &gt;&gt; put.Nfiles
+            len * get.files   &gt;&gt; put.Nfiles
+get.files * len               &gt;&gt; put.Nfiles
+</code></pre>
+<ul>
+<li>
+<p><code>get</code> without the <code>*</code> is essentially a shorthand for <code>operator.attrgetter</code>:</p>
+<pre><code class="language-python">attrgetter('a')
+get        .a
+</code></pre>
+<p>are synonymous, as are</p>
+<pre><code class="language-python">attrgetter('a', 'b', 'c')
+get        .a   .b   .c
+</code></pre>
+</li>
+<li>
+<p><code>get</code> can also play the role of <code>operator.itemgetter</code>:</p>
+<pre><code class="language-python">itemgetter(key_or_index)
+get       [key_or_index]
+</code></pre>
+<p>are synonymous.</p>
+<p>Unfortunately, Python's <code>__getitem__</code> syntax throws a spanner in the works,
+because it cannot distinguish between</p>
+<pre><code class="language-python">obj[ a, b ]
+obj[(a, b)]
+</code></pre>
+<p>so</p>
+<pre><code class="language-python">       get[ a,b ]
+itemgetter( a,b ) # would like this
+itemgetter((a,b)) # but get this
+</code></pre>
+</li>
+<li>
+<p>When combined with <code>*</code>, <code>get</code> not only extracts values from a compound object,
+but also <em>unpacks</em> them into a function call, much like the <code>*</code> in Python's
+standard <code>fn(*args)</code> syntax.</p>
+<p>It is worth noting the following similarities and differences between <code>get ... ,</code> and <code>get ... *</code>:</p>
+<pre><code class="language-python">get.a , fn  # fn(ns.a)
+get.a * fn  # same as above
+</code></pre>
+<pre><code class="language-python">get.a.b , fn  # fn((ns.a, ns.b))
+get.a.b * fn  # fn( ns.a, ns.b )
+</code></pre>
+<p>The comma does <em>not</em> unpack the tuple: the whole tuple is passed as a <em>single</em>
+argument to <code>fn</code>. In contrast, the star unpacks the tuple and <code>fn</code> receives
+its contents as separate arguments.</p>
+</li>
+<li>
+<p><code>get *</code> also has an important interaction with <code>put</code>. Consider</p>
+<pre><code class="language-python">get.a * fn &gt;&gt; put.b  # ns.b = (fn(ns.a))
+get.a , fn &gt;&gt; put.b  # Error!
+</code></pre>
+<p>The first case is parsed as <code>(get.a * fn) &gt;&gt; put.b</code>. Consequently <code>put</code>
+attempts to inject <code>b</code> into the item received by <code>(get.a * fn)</code>: that item
+must be a namespace, if <code>get.a</code> is to work. The <code>b</code> will be placed in that
+namespace.</p>
+<p>The second case is parsed as <code>get.a, (fn &gt;&gt; put.b)</code>. Consequently <code>put</code>
+attempts to inject <code>b</code> into the item received by <code>fn</code>, which has already been
+unpacked by <code>get.a</code>, and will therefore NOT be a namespace.</p>
+</li>
+</ul>
+<p>Armed with this knowledge, let's return to the code we were developing.</p>
+<h2><a class="header" href="#putting-get--and--put-to-work" id="putting-get--and--put-to-work">Putting <code>get *</code> and <code>&gt;&gt; put</code> to work</a></h2>
+<p>Recall that:</p>
+<ul>
+<li>
+<p>We have a compound flow containing three synchronized branches: <code>path</code>, <code>dirs</code>
+and <code>files</code>.</p>
+</li>
+<li>
+<p>Alternatively we can say that the items flowing through the pipe are
+namespaces, each containing the names <code>path</code>, <code>dirs</code> and <code>files</code>.</p>
+</li>
+<li>
+<p><code>path</code> is a single value; <code>files</code> is a list.</p>
+</li>
+<li>
+<p>We have managed to create a stream of (unqualified) filenames which end in
+<code>.py</code>.</p>
+</li>
+</ul>
+<p>The code looked like this:</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, take, join, use, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files,
+    join,
+    { use(str.endswith, '.py') },
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>We would like to look at the contents of the <code>.py</code> files.</p>
+</li>
+<li>
+<p>In order to open the files, we will need to know their fully qualified names.</p>
+</li>
+<li>
+<p><code>os.path.join(path, filename)</code> can create these for us, as long as we can feed
+it a path and a filename.</p>
+</li>
+<li>
+<p>Before <code>get.files</code> the stream contained the <code>path</code> we need, but the filename
+was not obviously accessible. After <code>get.files, join</code>, the stream contains
+only filenames: <code>path</code> is no longer available.</p>
+</li>
+<li>
+<p>The solution is to <em>add</em> the filenames to the compound stream, rather than
+replacing it. This can be done with <code>put</code>.</p>
+</li>
+</ul>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, put, take, join, use, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The first change to the code is</p>
+<pre><code class="language-python">get.files ,  join, { use(str.endswith, '.py') }                    # old
+get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename   # new
+</code></pre>
+<p>The old version:</p>
+<ul>
+<li>picks <code>files</code> out of the namespace</li>
+<li>throws away the namespace</li>
+<li>turns a stream of lists of filenames into a stream of individual filenames</li>
+<li>discards non-<code>.py</code> filenames</li>
+</ul>
+<p>The new version:</p>
+<ul>
+<li>feeds <code>files</code> into a sub-pipe</li>
+<li>the sub-pipe:
+<ul>
+<li>turns a stream of lists of filenames into a stream of individual filenames</li>
+<li>discards non-<code>.py</code> filenames</li>
+</ul>
+</li>
+<li>for <em>each</em> <code>.py</code> file coming out of the sub-pipe:
+<ul>
+<li>adds the filename to the namespace</li>
+<li>sends the augmented namespace downstream</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>The second change is the addition of <code>get.path.filename</code>, which extracts the
+two values that interest us from the namespace.</p>
+</li>
+</ul>
+<p>Consequently, the code prints out the first three <code>.py</code> filenames, in a tuple
+together with the paths to the directories that contain them.</p>
+<p>We can use <code>*</code> to unpack these tuples into separate arguments when calling <code>os.path.join</code>:</p>
+<pre><code class="language-python">import os
+from liquidata import pipe, source, name, get, put, take, join, use, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename * os.path.join,
+    take(3, close_all=True),
+    sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The new addition is <code> * os.path.join</code></p>
+</li>
+<li>
+<p>The code now prints the fully qualified names of the first three <code>.py</code> files.</p>
+</li>
+</ul>
+<h2><a class="header" href="#analysing-the-file-contents" id="analysing-the-file-contents">Analysing the file contents</a></h2>
+<pre><code class="language-python">import os
+from keyword import iskeyword
+from liquidata import pipe, source, name, get, put, take, join, use, sink
+
+pipe(
+    source &lt;&lt; os.walk('/'),
+    name.path.dirs.files,
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename * os.path.join,
+    open,
+    join,
+    use(str.split, '#', maxsplit=1),
+    get[0],
+    str.split,
+    join,
+    { iskeyword },
+    take(30, close_all=True),
+    sink(print))
+</code></pre>
+<p>There are quite a few new additions, but they should all be familiar by now:</p>
+<ul>
+<li>
+<p><code>open</code> (a Python builtin) turns each filename into an iterator over the lines
+in the file.</p>
+</li>
+<li>
+<p><code>join</code> turns the stream of file iterators into a continuous stream of lines in
+<em>all</em> the files.</p>
+</li>
+<li>
+<p><code>use(str.split, '#', maxsplit=1)</code> splits each line into <code>[&lt;code&gt;, &lt;comment&gt;]</code>
+pairs.</p>
+</li>
+<li>
+<p><code>get[0]</code> picks the code, and throws away the comment.</p>
+</li>
+<li>
+<p><code>str.split</code> turns the code on any line into a sequence of tokens. [This
+tokenizer is much too naive for real uses, but it will do for the purposes of
+our example.]</p>
+</li>
+<li>
+<p><code>join</code> gives a continuous stream of tokens on all lines in all files.</p>
+</li>
+<li>
+<p><code>{ iskeyword }</code> filters out non-keywords.</p>
+</li>
+<li>
+<p>Changing <code>take</code>'s first argument from <code>3</code> to <code>30</code> allows us to see a bit more
+output.</p>
+</li>
+</ul>
+<h2><a class="header" href="#reusable-pipes" id="reusable-pipes">Reusable pipes</a></h2>
+<p>Our pipe starts with <code>source &lt;&lt; ...</code>. This means that data are pushed through
+the pipe as soon as it is defined. It is possible to define a pipe for reuse,
+decoupling it from the data that will flow through it.</p>
+<pre><code class="language-python">import os
+from keyword import iskeyword
+from liquidata import pipe, source, name, get, put, take, join, use, sink
+
+fn = pipe(
+    name.path.dirs.files,
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename * os.path.join,
+    open,
+    join,
+    use(str.split, '#', maxsplit=1),
+    get[0],
+    str.split,
+    join,
+    { iskeyword },
+    take(30, close_all=True),
+    sink(print))
+
+fn(os.walk('/'))
+</code></pre>
+<ul>
+<li>
+<p><code>source</code> has been removed from the pipe</p>
+</li>
+<li>
+<p><code>pipe</code> now returns a function</p>
+</li>
+<li>
+<p>That function accepts an iterable argument, and pushes it through the pipe.</p>
+</li>
+<li>
+<p>The function can be called multiple times, with different inputs.</p>
+</li>
+</ul>
+<h2><a class="header" href="#pipe-functions" id="pipe-functions">Pipe functions</a></h2>
+<p>TODO pipe(...)</p>
+<h2><a class="header" href="#composable-pipes" id="composable-pipes">Composable pipes</a></h2>
+<p>Pipes are pipe components themselves:</p>
+<pre><code class="language-python">import os
+from keyword import iskeyword
+from liquidata import pipe, source, name, get, put, take, join, use, sink
+
+hard_work = (
+    name.path.dirs.files,
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename * os.path.join,
+    open,
+    join,
+    use(str.split, '#', maxsplit=1),
+    get[0],
+    str.split,
+    join,
+    { iskeyword })
+
+fn = pipe(hard_work, take(5, close_all=True), sink(print))
+fn(os.walk('/'))
+
+pipe(source &lt;&lt; os.walk('/'), hard_work, take(8, close_all=True), sink(print))
+</code></pre>
+<ul>
+<li>
+<p>The bulk of our pipe was extracted into a tuple called <code>hard_work</code>.</p>
+</li>
+<li>
+<p><code>hard_work</code> was used as a component in different pipes</p>
+</li>
+</ul>
+<h2><a class="header" href="#side-effects-vs-results" id="side-effects-vs-results">Side-effects vs. results</a></h2>
+<p>So far, we have been printing out the values that reach the end of the pipe with <code>sink(print)</code>.</p>
+<ul>
+<li>
+<p><code>sink</code> stops items from proceeding downstream. So it makes no sense for <code>sink</code>
+to appear anywhere other than the end of a pipe.</p>
+</li>
+<li>
+<p><code>sink</code> passes all items that reach it from upstream, to the function it
+contains (<code>print</code> in all our examples so far). The idea is that the function
+should perform some side-effect with the values it receives.</p>
+</li>
+</ul>
+<p>Let's try removing the sink:</p>
+<pre><code class="language-python">pipe(source &lt;&lt; os.walk('/'), hard_work, take(8, close_all=True))
+</code></pre>
+<p>Any items reaching the end of the pipe, are collected into a list, which is
+returned as the result of the pipe.</p>
+<h2><a class="header" href="#different-strategies-for-collecting-results" id="different-strategies-for-collecting-results">Different strategies for collecting results</a></h2>
+<pre><code class="language-python">from operator import add
+
+pipe(source &lt;&lt; range(10), out(min))        #    0
+pipe(source &lt;&lt; range(10), out(max))        #    9
+pipe(source &lt;&lt; range(10), out(add))        #   45
+pipe(source &lt;&lt; range(10), out(add, 1000))  # 1045
+</code></pre>
+<ul>
+<li>
+<p>The default behaviour of collecting all items that reach the end of the pipe
+into a list, can be overridden with <code>out</code>.</p>
+</li>
+<li>
+<p><code>out</code> accepts a binary function, which will be used to <em>fold</em> or <em>reduce</em> the
+items into a single value.</p>
+</li>
+<li>
+<p><code>out</code> accepts an optional default or initial value, just like
+<code>functools.reduce</code>.</p>
+</li>
+</ul>
+<p>Alternatively:</p>
+<pre><code class="language-python">pipe(source &lt;&lt; range(5), out(into(set)))     # {0, 1, 2, 3, 4}
+pipe(source &lt;&lt; range(5), out(into(sorted)))  # [0, 1, 2, 3, 4]
+pipe(source &lt;&lt; range(5), out(into(min)))     #  0
+pipe(source &lt;&lt; range(5), out(into(max)))     #              4
+</code></pre>
+<ul>
+<li>
+<p><code>out(into(...))</code> accepts a consumer of iterables.</p>
+</li>
+<li>
+<p>Therefore, the default behaviour is equivalent to <code>out(into(list))</code>.</p>
+</li>
+</ul>
+<h2><a class="header" href="#named-outputs" id="named-outputs">Named outputs</a></h2>
+<pre><code class="language-python">pipe(source &lt;&lt; range(5), out.X           ).X  # [0, 1, 2, 3, 4]
+pipe(source &lt;&lt; range(5), out.X     (add) ).X  # 10
+pipe(source &lt;&lt; range(5), out.X(into(max))).X  # 4
+</code></pre>
+<ul>
+<li>
+<p><code>out</code>s can be associated with a name: <code>X</code> in these examples.</p>
+</li>
+<li>
+<p>Naming <code>out</code>s causes the pipeline to return its results wrapped it a
+namespace: note the <code>.X</code> after the pipeline.</p>
+</li>
+<li>
+<p>This isn't very useful unless there are multiple <code>out</code>s in a single network,
+and that won't make sense until we discover independent branches.</p>
+</li>
+</ul>
+<h2><a class="header" href="#independent-branches" id="independent-branches">Independent branches</a></h2>
+<pre><code class="language-python">result = pipe(source &lt;&lt; range(10), [ out.smallest(into(min)) ], out.biggest(into(max)))
+assert result.biggest  == 9
+assert result.smallest == 0
+</code></pre>
+<ul>
+<li>
+<p>Square brackets (<code>[  ]</code>) create <em>independent branches</em>.</p>
+</li>
+<li>
+<p>Independent branches are pipes which receive all items reaching their position
+in the pipeline, without affecting what is seen downstream.</p>
+</li>
+<li>
+<p>Independent branches, just like other pipes, can end in <code>sink</code>s or <code>out</code>s. By
+default, just like other pipes, they end in <code>out(into(list))</code>.</p>
+</li>
+<li>
+<p>Anonymous <code>out</code>s, are bound to the name <code>return</code> in the returned namespace. As
+<code>return</code> is a keyword, you will need to use <code>getattr</code> to access it. [This is
+likely to change in future versions.]</p>
+</li>
+<li>
+<p>If multiple <code>out</code>s in the same network have the same name, that name will be
+bound to a tuple of all the results with that name. [This is likely to change
+in future versions].</p>
+</li>
+<li>
+<p>This network returned two results, grouped together in namespace, and bound to
+the names <code>biggest</code> and <code>smallest</code></p>
+</li>
+</ul>
+<h2><a class="header" href="#multiple-directories-and-progress-reporting" id="multiple-directories-and-progress-reporting">Multiple directories, and progress reporting</a></h2>
+<p>Let's return to the code we're developing, and make a few more changes:</p>
+<pre><code class="language-python">import os
+from keyword import iskeyword
+from liquidata import pipe, name, get, put, take, join, use, sink
+
+fn = pipe(
+    [ sink(lambda d: print(f'Processing input directory {d}')) ],
+    os.walk,
+    join,
+    name.path.dirs.files,
+    [ get.path, sink(lambda d: print(f'Processing discovered directory {d}')) ],
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename * os.path.join,
+    [ sink(lambda f: print(f'Processing file {f}')) ],
+    open,
+    join,
+    use(str.split, '#', maxsplit=1),
+    get[0],
+    str.split,
+    join,
+    { iskeyword },
+    take(30, close_all=True),
+    sink(print))
+
+fn(['/bin', '/usr/bin])
+</code></pre>
+<p>Firstly, observe that</p>
+<ul>
+<li>
+<p><code>os.walk, join</code> has been spliced into the pipe (in positions 2 and 3).</p>
+</li>
+<li>
+<p><code>fn</code> now receives a list of directories, rather than <code>os.walk(&lt;single-directory&gt;)</code>.</p>
+</li>
+<li>
+<p>Each directory in the input list will be traversed by <code>os.walk</code>, and the
+results will be <code>join</code>ed together into a single stream.</p>
+</li>
+</ul>
+<p>Secondly, there are three othernew components:</p>
+<ul>
+<li><code>[           sink(lambda d: print(f'Processing directory {d}')) ]</code></li>
+<li><code>[ get.path, sink(lambda d: print(f'Processing discovered directory {d}')) ]</code></li>
+<li><code>[           sink(lambda f: print(f'Processing file {f}')) ]</code></li>
+</ul>
+<p>These are all independent branches, which report on what flows through the
+network at different points.</p>
+<p>Consequently, as python keywords are printed, we will be informed whenever</p>
+<ul>
+<li>
+<p>we start processing the next directory in the input list</p>
+</li>
+<li>
+<p><code>os.walk</code> enters a new directory</p>
+</li>
+<li>
+<p>we start processing a new <code>.py</code> file</p>
+</li>
+</ul>
+<h2><a class="header" href="#spy" id="spy"><code>spy</code></a></h2>
+<p>Spy hasn't been implemented yet in the current version of <code>liquidata</code>, but the
+following shortcuts should appear soon:</p>
+<pre><code class="language-python">[ sink(&lt;side-effect&gt;) ]
+   spy(&lt;side-effect&gt;)
+</code></pre>
+<pre><code class="language-python">[ out.X(&lt;binary-function&gt;) ]
+  spy.X(&lt;binary-function&gt;)
+</code></pre>
+<pre><code class="language-python">[ out.X(into(&lt;iterator-consumer&gt;)) ]
+  spy.X(into(&lt;iterator-consumer&gt;))
+</code></pre>
+<h2><a class="header" href="#frequency-analysis" id="frequency-analysis">Frequency analysis</a></h2>
+<p>We're almost there. Let's calculate how many times each keyword appears:</p>
+<pre><code class="language-python">import os
+from keyword     import iskeyword
+from collections import Counter
+from liquidata   import pipe, name, get, put, take, join, use
+
+fn = pipe(
+    os.walk,
+    join,
+    name.path.dirs.files,
+    get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename,
+    get.path.filename * os.path.join,
+    open,
+    join,
+    use(str.split, '#', maxsplit=1),
+    get[0],
+    str.split,
+    join,
+    { iskeyword },
+    out(into(Counter)))
+</code></pre>
+<ul>
+<li>
+<p>We removed</p>
+<ul>
+<li>The branches which printed the progress report</li>
+<li>The <code>take</code> which limited the data that flooded our screen</li>
+</ul>
+</li>
+<li>
+<p>We replaced the final <code>sink(print)</code> with <code>out(into(Counter))</code></p>
+</li>
+<li>
+<p><code>collections.Counter</code> (from Python's standard library) consumes an iterable
+(so it can be used with <code>into</code>) and associates each value with the number of
+times it was seen.</p>
+</li>
+</ul>
+<h2><a class="header" href="#abstraction" id="abstraction">Abstraction</a></h2>
+<p>As it stands, the code throws all the details into our face. Let's cut it up
+into smaller portions and give them suggestive names, to give a higher-level
+overview of what the code is doing:</p>
+<pre><code class="language-python">import os
+from keyword     import iskeyword
+from collections import Counter
+from liquidata   import pipe, name, get, put, join, use
+
+all_files         = os.walk, join, name.path.dirs.files,
+find_python_files = get.files * (join, { use(str.endswith, '.py') }) &gt;&gt; put.filename
+file_contents     = get.path.filename * os.path.join, open, join
+discard_comments  = use(str.split, '#', maxsplit=1), get[0]
+find_keywords     = str.split, join, { iskeyword }
+
+fn = pipe(
+    all_files,
+    find_python_files,
+    file_contents,
+    discard_comments,
+    find_keywords,
+    out(into(Counter)))
+</code></pre>
+<p>And we're done!</p>
+<h1><a class="header" href="#why-do-we-have-the-current-architecture" id="why-do-we-have-the-current-architecture">Why do we have the current architecture?</a></h1>
+<p>The current implementation uses coroutines to push data through the pipeline.</p>
+<p>This was motivated by the context in which the ancestor of <code>liquidata</code> was written, where a single input stream was required be split into multiple independent output streams fed into separate sinks.</p>
+<p>Let's take a step back and ask some questions about this choice: Do we need to push? Do we need coroutines? Why? When? What are the consequences? What alternatives are there?</p>
+<h1><a class="header" href="#function-composition-1" id="function-composition-1">Function composition</a></h1>
+<p>Let's consider a very simple pipeline, consisting of a linear sequence of maps:</p>
+<pre><code class="language-python">pipe(f, g, h)
+</code></pre>
+<p>This could be implemented using any of</p>
+<ul>
+<li>coroutines</li>
+<li>generators</li>
+<li>asyncio</li>
+<li>function composition</li>
+</ul>
+<p>Function composition is the simplest, so why bother with the others?</p>
+<h1><a class="header" href="#changing-stream-length" id="changing-stream-length">Changing stream length</a></h1>
+<p>Let's throw in a filter or a join:</p>
+<pre><code class="language-python">pipe(f, { p }, g, h)
+pipe(f, join, g, h)
+</code></pre>
+<p>Function composition no longer cuts the mustard, because there is no longer a 1-to-1 correspendence between items in the input and output streams: something is needed to shrink or expand the stream.</p>
+<h1><a class="header" href="#stream-bifurcation" id="stream-bifurcation">Stream bifurcation</a></h1>
+<p>A different complication, branches:</p>
+<pre><code class="language-python">pipe(f, [x, y], g, h)
+</code></pre>
+<p>It's difficult to see how function composition and generators could deal with this.</p>
+<h1><a class="header" href="#joining-streams" id="joining-streams">Joining streams</a></h1>
+<p>That last pipe describes a graph that looks something like this:</p>
+<pre><code>             x -- y
+           /
+source -- f
+           \
+             g -- h
+</code></pre>
+<p>How about</p>
+<pre><code>sourceA -- a
+            \
+             g --- h
+            /
+sourceB -- b
+</code></pre>
+<p>Generators can deal with this easily:</p>
+<pre><code class="language-python">map(h, map(g, map(a, sourceA)
+              map(b, sourceB)))
+</code></pre>
+<p>but it's not obvious how this would work for function composition or coroutines.</p>
+<h2><a class="header" href="#liquidata-syntax-for-multiple-sources" id="liquidata-syntax-for-multiple-sources"><code>liquidata</code> syntax for multiple sources</a></h2>
+<p>What would the <code>liquidata</code> syntax for this look like?</p>
+<p>Ideally we'd have another kind of bracket (we've exhausted the possibilities
+that Python offers: <code>()</code>, <code>[]</code>, <code>{}</code>). Let's imagine that <code>&lt;&gt;</code> are valid
+syntactic brackets, then we could have:</p>
+<pre><code>pipe(b, &lt;sourceA, a&gt;, g, h)  # join two sources
+pipe(b, [a, out.A],   g, h)  # branch out into two sinks
+</code></pre>
+<p>Working with syntax available in Python, how about:</p>
+<pre><code class="language-python">pipe(b, source(sourceA, a), g, h)
+</code></pre>
+<p>Recall that the following are already synonymous in <code>liquidata</code></p>
+<pre><code class="language-python">pipe(f)(data)
+pipe(source &lt;&lt; data, f)
+pipe(data &gt;&gt; source, f)
+pipe(source(data), f)
+</code></pre>
+<p>so the following could work</p>
+<pre><code class="language-python">pipe(source &lt;&lt; sourceB, b, (source &lt;&lt; sourceA , a), g, h)
+</code></pre>
+<p><code>liquidata</code> used to have a input-variable syntax (called slots) in its earlier
+prototype. If something like it were resurrected, we could write something along
+the lines of</p>
+<pre><code class="language-python">fn = pipe(source &lt;&lt; slot.B, b, (source &lt;&lt; slot.A, a), g, h)
+fn(A=sourceA, B=sourceB)
+</code></pre>
+<h2><a class="header" href="#synchronization" id="synchronization">Synchronization</a></h2>
+<p>In <code>liquidata</code> <code>[]</code>-branches are called <em>independent</em>, because there is
+absolutely no synchronization between them (in contrast with named branches
+which are based on namespaces flowing through the pipe and managed with <code>name</code>,
+<code>get</code> and <code>put</code>). Once the stream has split, the branches can change the length
+of the stream without the others knowing or caring about it.</p>
+<p>We would need to think about the synchronization consequences for multiple
+independent input streams. I guess that the answer is: it's up to the user to
+make sure something sensible happens. Essentially, the user has the same
+freedoms and responsibilities as when joining multiple sources in
+classically-written generator networks:</p>
+<pre><code class="language-python">map(h, map(g, map(&lt;filter or join&gt;, sourceA)
+              map(b,                sourceB)))
+</code></pre>
+<h1><a class="header" href="#close_all" id="close_all"><code>close_all</code></a></h1>
+<p>Consider the following in current <code>liquidata</code></p>
+<pre><code class="language-python">pipe(source &lt;&lt; itertools.count(), take(3))
+pipe(source &lt;&lt; itertools.count(), take(3, close_all=True))
+</code></pre>
+<p>Because of the pull-architecture, the first never returns. In a pull
+architecture the issue doesn't arise.</p>
+<h1><a class="header" href="#so-what" id="so-what">So what?</a></h1>
+<p>I would like to remove the universal reliance on coroutines, with two main goals</p>
+<ul>
+<li>
+<p>Enabling things that were impossible before.</p>
+</li>
+<li>
+<p>Simplifying portions of the code which don't need coroutines.</p>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>
