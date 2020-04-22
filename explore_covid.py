@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-from liquidata import pipe
+from liquidata import pipe, source
 
 ######### Get Covid and world population data #######################
 
@@ -148,6 +148,7 @@ mixB               = select('Spain Switzerland Netherlands Sweden Poland')
 asia               = select('Japan Vietnam Burma Thailand Singapore Taiwan*', 'Korea, South')
 
 pipe(
+    source << [cases],
     asia,
     start('2020-02-10'),
     smooth(9, std=3),
@@ -163,5 +164,5 @@ pipe(
       gain        , plot(title='smoothed twice, gradient, smoothed, gain factor', ylim=(-0.5, 0.5)),
     ],
     #[gain         , plot(title='smoothed twice, gain factor', ylim=(0,0.5))],
-    show)([cases])
+    show)
 
