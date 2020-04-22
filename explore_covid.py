@@ -139,17 +139,17 @@ def show(_):
 
 ########## Usage Example ####################
 
-nordics            = select('Denmark Sweden Norway Finland Iceland')
-western_europe_big = select('Germany France Italy Spain', 'United Kingdom')
-eastern_europe     = select('Russia Poland Czechia Ukraine Belarus')
-benelux            = select('Belgium Netherlands Luxembourg')
-mixA               = select('Switzerland US Italy Singapore', 'Korea, South', 'United Kingdom')
-mixB               = select('Spain Switzerland Netherlands Sweden Poland Australia')
-asia               = select('Japan Vietnam Burma Thailand Singapore Taiwan*', 'Korea, South')
+nordics            = 'Denmark Sweden Norway Finland Iceland'
+western_europe_big = 'Germany France Italy Spain', 'United Kingdom'
+eastern_europe     = 'Russia Poland Czechia Ukraine Belarus'
+benelux            = 'Belgium Netherlands Luxembourg',
+mixA               = 'Switzerland US Italy Singapore', 'Korea, South', 'United Kingdom'
+mixB               = 'Spain Switzerland Netherlands Sweden Poland Australia'
+asia               = 'Japan Vietnam Burma Thailand Singapore Taiwan*', 'Korea, South'
 
 pipe(
     source << [cases],
-    asia,
+    select(*asia),
     start('2020-02-10'),
     smooth(9, std=3),
     [ norm(pop)   , plot(title='smoothed once, total, norm pop') ],
