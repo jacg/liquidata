@@ -145,9 +145,10 @@ eastern_europe     = select('Russia Poland Czechia Ukraine Belarus')
 benelux            = select('Belgium Netherlands Luxembourg')
 mixA               = select('Switzerland US Italy Singapore', 'Korea, South', 'United Kingdom')
 mixB               = select('Spain Switzerland Netherlands Sweden Poland')
+asia               = select('Japan Vietnam Burma Thailand Singapore Taiwan*', 'Korea, South')
 
 pipe(
-    mixA,
+    asia,
     start('2020-02-10'),
     smooth(9, std=3),
     [ norm(pop)   , plot(title='smoothed once, total, norm pop') ],
