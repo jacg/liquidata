@@ -144,7 +144,7 @@ western_europe_big = select('Germany France Italy Spain', 'United Kingdom')
 eastern_europe     = select('Russia Poland Czechia Ukraine Belarus')
 benelux            = select('Belgium Netherlands Luxembourg')
 mixA               = select('Switzerland US Italy Singapore', 'Korea, South', 'United Kingdom')
-mixB               = select('Spain Switzerland Netherlands Sweden Poland')
+mixB               = select('Spain Switzerland Netherlands Sweden Poland Australia')
 asia               = select('Japan Vietnam Burma Thailand Singapore Taiwan*', 'Korea, South')
 
 pipe(
