@@ -1,0 +1,17 @@
+To play with these examples, you probably don't need much beyond
+
++ A recentish Python (>= 3.6)
++ liquidata.py from this directory (can be installed with pip)
++ pandas
++ matplotlib
+
+and the dependencies of the last two.
+
+Then simply try `python explore_covid.py`.
+
+(The first time you do this, it will download UN population data into the
+working directory.)
+
+Use ipython or jupyter to make interactive experimentation easier.
+
+Fiddle around with the pipeline defined at the bottom of explore_covid.py.
