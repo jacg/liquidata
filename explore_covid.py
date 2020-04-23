@@ -104,16 +104,22 @@ def norm(strategy):
     return normalize
 
 
+def merge_country_regions(df, countries=None):
+    countries = countries or df.index.unique()
+    columns = []
+    for c in countries:
+        data = df.loc[c]
+        if len(data.shape) == 1: columns.append(data)
+        else                   : columns.append(data.sum().rename(c))
+    return pd.concat(columns, axis=1)
+
+
 def select(splittable, *rest):
     def select(df):
         countries = chain(splittable.split(), rest)
-        columns = []
-        for c in countries:
-            data = df.loc[c]
-            if len(data.shape) == 1: columns.append(data)
-            else                   : columns.append(data.sum().rename(c))
-        return pd.concat(columns, axis=1)
+        return merge_country_regions(df, countries)
     return select
+
 
 diff = pd.DataFrame.diff
 gain = pd.DataFrame.pct_change
