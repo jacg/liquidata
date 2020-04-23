@@ -144,8 +144,13 @@ western_europe_big = 'Germany France Italy Spain', 'United Kingdom'
 eastern_europe     = 'Russia Poland Czechia Ukraine Belarus'
 benelux            = 'Belgium Netherlands Luxembourg',
 mixA               = 'Switzerland US Italy Singapore', 'Korea, South', 'United Kingdom'
-mixB               = 'Spain Switzerland Netherlands Sweden Poland Australia'
+mixB               = 'Spain Switzerland Netherlands Sweden Poland Australia', 'New Zealand'
 asia               = 'Japan Vietnam Burma Thailand Singapore Taiwan*', 'Korea, South'
+balkans            = 'Croatia Serbia Albania Greece Switzerland', 'Bosnia and Herzegovina'
+xxx                = 'Switzerland Austria Hungary Romania Bulgaria Moldova',
+africaS            = 'Namibia Angola Botswana Zimbabwe Eswatini Mozambique', 'South Africa'
+amerSud            = 'Argentina Brazil Uruguay Paraguay Chile Ecuador Peru',
+these              = 'Switzerland Italy Netherlands Poland Australia', 'United Kingdom'
 
 pipe(
     source << [cases],
