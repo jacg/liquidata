@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-from liquidata import pipe, source
+from liquidata import pipe, source, name, get, put
 
 ######### Get Covid and world population data #######################
 
@@ -14,7 +14,8 @@ covid_base_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/mast
 def fetch_deaths():
     url = os.path.join(covid_base_url, "time_series_covid19_deaths_global.csv")
     print('Downloading deaths data ...')
-    df = pd.read_csv(url, index_col=1)
+    df = pd.read_csv(url, index_col=1).drop(columns='Province/State Lat Long'.split())
+    df.columns =  pd.to_datetime(df.columns)
     df.name = 'deaths'
     return df
 
@@ -145,9 +146,9 @@ def show(_):
 
 ########## Usage Example ####################
 
-nordics            = 'Denmark Sweden Norway Finland Iceland'
-western_europe_big = 'Germany France Italy Spain', 'United Kingdom'
-eastern_europe     = 'Russia Poland Czechia Ukraine Belarus'
+nordics            = 'Denmark Sweden Norway Finland Iceland',
+western_europe_big = 'Germany France Italy Spain', 'United Kingdom',
+eastern_europe     = 'Russia Poland Czechia Ukraine Belarus Slovakia Lithuania Latvia',
 benelux            = 'Belgium Netherlands Luxembourg',
 mixA               = 'Switzerland US Italy Singapore', 'Korea, South', 'United Kingdom'
 mixB               = 'Spain Switzerland Netherlands Sweden Poland Australia', 'New Zealand'
@@ -156,10 +157,77 @@ balkans            = 'Croatia Serbia Albania Greece Switzerland', 'Bosnia and He
 xxx                = 'Switzerland Austria Hungary Romania Bulgaria Moldova',
 africaS            = 'Namibia Angola Botswana Zimbabwe Eswatini Mozambique', 'South Africa'
 amerSud            = 'Argentina Brazil Uruguay Paraguay Chile Ecuador Peru',
-these              = 'Switzerland Italy Netherlands Poland Australia', 'United Kingdom'
+these              = 'Switzerland Italy Netherlands Poland Australia US Spain', 'United Kingdom', 'Korea, South'
+these              = 'Switzerland Spain Japan Netherlands Belgium Poland Australia US', 'United Kingdom', 'Korea, South', 'New Zealand'
+these              = 'Australia Poland Belarus Switzerland Spain US Germany', 'Korea, South'
+
+from operator import truediv as div
+
+x = pipe(
+    source << [cases],
+    select(*these),
+    start('2020-02-15'),
+    name.raw,
+    smooth(9, std=3) * get.raw   >> put.total,
+    norm(pop)        * get.total >> put.norm_pop,
+    (diff, smooth()) * get.total >> put.rate,
+    norm(pop)        * get.rate  >> put.rate_norm_pop,
+    norm(max)        * get.rate  >> put.rate_norm_max,
+    (gain, smooth()) * get.total >> put.gain,
+    (gain, smooth()) * get.rate  >> put.rate_gain,
+    (gain, smooth()) * get.gain  >> put.gain_gain,
+    (div , smooth()) * get.rate.total >> put.rate_over_total,
+    smooth()         * get.rate_over_total >> put.rate_over_total_grad,
+)[0]
+
+FIGSIZE = (15,10)
+
+
+#x.     norm_pop.plot(title=      'total / population')
+x.rate_norm_pop.plot(title='growth rate / population', figsize=(FIGSIZE)); plt.savefig('rate_normalized.svg')
+#x.rate_norm_max.plot(title='growth rate / maximum growth rate')
+x#.gain         .plot(title='growth factor', ylim=(0,0.2))
+#x.rate_over_total.plot(title='rate / total')
+
+
+plt.figure(figsize=FIGSIZE)
+plt.plot(x.norm_pop, x.rate_norm_pop)#, marker='.')
+plt.title("[rate / population] vs [total cases / population]")
+plt.legend(x.total.columns)
+plt.ylabel('infection rate / population')
+plt.xlabel('confirmed cases / population')
+plt.savefig('rate_vs_cases.svg')
+
+
+plt.figure(figsize=FIGSIZE)
+plt.plot(x.norm_pop, x.rate_norm_pop,)
+plt.title("[rate / population] vs [total cases / population] (log-log)")
+plt.xscale('log')
+plt.yscale('log')
+plt.xlim(left=10**-6)
+plt.ylim(bottom=5*10**-8)
+plt.legend(x.total.columns)
+plt.ylabel('infection rate / population')
+plt.xlabel('confirmed cases / population')
+plt.savefig('rate_vs_cases_log_log.svg')
+
+
+# plt.figure()
+# plt.plot(x.norm_pop, x.rate_norm_pop,)
+# #plt.xscale('log')
+# plt.yscale('log')
+# #plt.xlim(left=10**-6)
+# plt.ylim(bottom=10**-7)
+# plt.title("rate / population vs total cases / population (log-linear)")
+# plt.legend(x.total.columns)
+# plt.ylabel('infection rate / population')
+# plt.xlabel('confirmed cases / population')
+
+
+plt.show(block=False)
 
 pipe(
-    source << [cases],
+    #source << [cases],
     select(*these),
     start('2020-03-15'),
     smooth(9, std=3),
@@ -172,3 +240,67 @@ pipe(
       gain, smooth(),     plot(title='growth factor of growth factor', ylim=(-.2,.2)) ],
     show)
 
+
+
+# pipe(
+#     source << [cases],
+#     select(*these),
+#     start('2020-02-10'),
+#     smooth(9, std=3),
+#     [ norm(pop)   , plot(title='smoothed once, total, norm pop') ],
+#     smooth(4, std=2),
+#     [ gain        , plot(title='smoothed twice, gain factor', ylim=(0, 0.5)) ],
+#     [ diff,
+#       [ diff      , plot(title='smoothed twice, gradient gradient'),
+#         smooth()  , plot(title='smoothed twice, gradient gradient, smooth')],
+#       [ norm(max) , plot(title='smoothed twice, gradient, norm max') ],
+#       [ norm(pop) , plot(title='smoothed twice, gradient, norm pop') ],
+#       #[ gain      , plot(title='smoothed twice, gradient, gain factor', ylim=(-0.5, 0.5)) ],
+#       smooth(7, std=2),
+#       gain        , plot(title='smoothed twice, gradient, smoothed, gain factor', ylim=(-0.5, 0.5)),
+#     ],
+#     #[gain         , plot(title='smoothed twice, gain factor', ylim=(0,0.5))],
+#     show)
+
+
+# pipe(
+#     source << [cases],
+#     select(*amerSud),
+#     start('2020-02-10'),
+#     smooth(9, std=3), [ norm(pop)   , plot(title='smoothed once, total, norm pop') ],
+#     smooth(4, std=2), [ gain        , plot(title='smoothed twice, gain factor', ylim=(0, 0.5)) ],
+#     [ diff, [ diff      , plot(title='smoothed twice, gradient gradient'), ],
+#             [ norm(max) , plot(title='smoothed twice, gradient, norm max') ],
+#             [ norm(pop) , plot(title='smoothed twice, gradient, norm pop') ],
+#             smooth(7, std=2),
+#             gain,
+#             plot(title='smoothed twice, gradient, smoothed, gain factor', ylim=(-0.5, 0.5)),
+#     ],
+#     show)
+
+
+# source
+#   |
+# select
+#   |
+# date
+#   |
+# smooth ------- norm(pop) -- plot
+#   |
+# smooth ------- gain ------- plot
+#   |
+#   |------ diff -- diff ---- plot
+#   |        |
+#   |        |-- norm(max) -- plot
+#   |        |
+#   |        |-- norm(pop) -- plot
+#   |        |
+#   |     smooth -- gain ---- plot
+# show
+
+
+def find(substring):
+    JHnames = set(cases.index)
+    UNnames = set(pop.index)
+    return (set(name for name in JHnames if substring in name),
+            set(name for name in UNnames if substring in name))
